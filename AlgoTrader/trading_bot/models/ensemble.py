@@ -10,8 +10,7 @@ import numpy as np
 import joblib
 from pathlib import Path
 from loguru import logger
-from scipy.optimize import minimize
-from config.settings import ENSEMBLE_WEIGHTS, SIGNAL_THRESHOLD, MODEL_DIR
+from config.settings import ENSEMBLE_WEIGHTS, SIGNAL_THRESHOLD, SIGNAL_THRESHOLDS, MODEL_DIR
 
 
 def _stack_probas(lgbm_p, xgb_p, lstm_p):
@@ -30,39 +29,77 @@ def weighted_ensemble(lgbm_p, xgb_p, lstm_p, weights=None):
     return w[0] * lgbm_p + w[1] * xgb_p + w[2] * lstm_p
 
 
-def optimise_weights(lgbm_p, xgb_p, lstm_p, y_true):
+def optimise_weights(p1, p2, p3, y_true):
     """
-    Find ensemble weights that maximise validation accuracy
-    using constrained optimisation (weights sum to 1, all >= 0).
+    Find ensemble weights that maximise validation accuracy.
+
+    Uses a two-stage approach:
+      Stage 1 — Coarse grid search across all weight combos (step=0.05)
+                Works even on flat loss surfaces where gradient methods fail
+      Stage 2 — Fine grid search around the best coarse solution (step=0.01)
+
+    This replaces the previous SLSQP approach which always returned
+    [0.333, 0.333, 0.333] because the loss surface is too flat for
+    gradient-based optimisation when models have similar accuracy.
     """
-    lgbm_p, xgb_p, lstm_p = _stack_probas(lgbm_p, xgb_p, lstm_p)
-    y_true = y_true[-len(lgbm_p):]
+    p1, p2, p3 = _stack_probas(p1, p2, p3)
+    y_true = np.array(y_true[-len(p1):])
 
-    def neg_accuracy(w):
-        blended = w[0]*lgbm_p + w[1]*xgb_p + w[2]*lstm_p
-        preds   = blended.argmax(axis=1)
-        return -(preds == y_true).mean()
+    def accuracy(w):
+        blended = w[0]*p1 + w[1]*p2 + w[2]*p3
+        return (blended.argmax(axis=1) == y_true).mean()
 
-    constraints = {"type": "eq", "fun": lambda w: w.sum() - 1}
-    bounds = [(0.05, 0.90)] * 3
-    result = minimize(neg_accuracy, x0=[1/3, 1/3, 1/3],
-                      bounds=bounds, constraints=constraints, method="SLSQP")
-    best_w = result.x
-    best_acc = -result.fun
-    logger.success(f"Optimised weights: LGBM={best_w[0]:.3f} XGB={best_w[1]:.3f} LSTM={best_w[2]:.3f} | acc={best_acc:.4f}")
-    return best_w.tolist()
+    # Stage 1: coarse grid (step=0.05) — ~231 combinations
+    best_acc = -1
+    best_w   = [1/3, 1/3, 1/3]
+    step = 0.05
+    steps = np.arange(0, 1 + step, step)
+
+    for w0 in steps:
+        for w1 in steps:
+            w2 = 1.0 - w0 - w1
+            if w2 < 0 or w2 > 1:
+                continue
+            w = [w0, w1, w2]
+            acc = accuracy(w)
+            if acc > best_acc:
+                best_acc = acc
+                best_w   = w
+
+    # Stage 2: fine grid around best solution (step=0.01, ±0.1 window)
+    fine_step = 0.01
+    for dw0 in np.arange(-0.10, 0.11, fine_step):
+        for dw1 in np.arange(-0.10, 0.11, fine_step):
+            w0 = np.clip(best_w[0] + dw0, 0, 1)
+            w1 = np.clip(best_w[1] + dw1, 0, 1)
+            w2 = 1.0 - w0 - w1
+            if w2 < 0 or w2 > 1:
+                continue
+            w   = [w0, w1, w2]
+            acc = accuracy(w)
+            if acc > best_acc:
+                best_acc = acc
+                best_w   = w
+
+    # Normalise to sum exactly to 1
+    total  = sum(best_w)
+    best_w = [w / total for w in best_w]
+
+    logger.success(
+        f"Optimised weights: TFT={best_w[0]:.3f} CNN={best_w[1]:.3f} "
+        f"LSTM={best_w[2]:.3f} | acc={best_acc:.4f}"
+    )
+    return best_w
 
 
-def generate_signals(blended_proba, threshold=SIGNAL_THRESHOLD):
+def generate_signals(blended_proba, threshold=SIGNAL_THRESHOLD, symbol=None):
     """
     Convert ensemble probabilities to trading signals.
-
-    Returns a dict with keys:
-      signal   : 'BUY', 'SELL', or 'HOLD'
-      confidence: float 0–1
-      up_prob  : float
-      down_prob: float
+    Returns a dict with keys: signal, confidence, up_prob, down_prob.
     """
+    # Use per-symbol threshold if available
+    if symbol is not None:
+        threshold = SIGNAL_THRESHOLDS.get(symbol, threshold)
     up_prob   = blended_proba[:, 2]
     down_prob = blended_proba[:, 0]
 

@@ -1,0 +1,12 @@
+{
+  "symbol": "LINK/USD",
+  "final_equity": 9665.933769354348,
+  "total_return": -0.033406623064565245,
+  "n_trades": 17,
+  "n_longs": 0,
+  "n_shorts": 17,
+  "win_rate": 0.35294117647058826,
+  "sharpe_ratio": -0.14380177650334364,
+  "max_drawdown": -0.21101375011024995,
+  "profit_factor": 0.9507516060141378
+}

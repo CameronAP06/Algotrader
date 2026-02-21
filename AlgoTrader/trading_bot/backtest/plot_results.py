@@ -69,3 +69,4 @@ def plot_all(symbols: list, save: bool = True):
         plt.savefig(out, dpi=150, bbox_inches="tight")
         print(f"Chart saved -> {out}")
     plt.show()
+    plt.close()

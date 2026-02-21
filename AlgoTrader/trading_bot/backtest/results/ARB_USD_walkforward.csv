@@ -1,0 +1,2 @@
+fold,train_start,test_start,test_end,accuracy,total_return,sharpe_ratio,max_drawdown,win_rate,n_trades,weights
+1,0,20148,22776,0.3942161339421613,0.0,0.0,0.0,0,0,"[0.3333333333333333, 0.3333333333333333, 0.3333333333333333]"

@@ -1,0 +1,12 @@
+{
+  "symbol": "ADA/USD",
+  "final_equity": 9922.984299302867,
+  "total_return": -0.007701570069713307,
+  "n_trades": 6,
+  "n_longs": 5,
+  "n_shorts": 1,
+  "win_rate": 0.3333333333333333,
+  "sharpe_ratio": -0.04779711924699532,
+  "max_drawdown": -0.07825359490814189,
+  "profit_factor": 1.0338954830082547
+}

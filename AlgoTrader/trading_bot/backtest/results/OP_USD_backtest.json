@@ -1,0 +1,12 @@
+{
+  "symbol": "OP/USD",
+  "final_equity": 9161.548436470723,
+  "total_return": -0.08384515635292773,
+  "n_trades": 24,
+  "n_longs": 24,
+  "n_shorts": 0,
+  "win_rate": 0.3333333333333333,
+  "sharpe_ratio": -0.40851304471015415,
+  "max_drawdown": -0.18250550982961428,
+  "profit_factor": 0.8757896139708834
+}

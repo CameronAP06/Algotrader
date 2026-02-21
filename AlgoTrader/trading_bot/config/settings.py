@@ -5,13 +5,17 @@ Edit these values to customise behaviour.
 
 # ── Exchange ──────────────────────────────────────────────────────────────────
 EXCHANGE_ID = "kraken"
-TRADING_PAIRS = ["BTC/USD", "ETH/USD", "SOL/USD", "XRP/USD"]
+TRADING_PAIRS = [
+    "BTC/USD", "ETH/USD", "XRP/USD", "SOL/USD", "AVAX/USD",
+    "LINK/USD", "MATIC/USD", "INJ/USD", "ARB/USD", "OP/USD",
+    "RUNE/USD", "DOGE/USD", "ADA/USD"
+]
 TIMEFRAME = "1h"
 HISTORY_DAYS = 1825
 
 # ── Feature Engineering ───────────────────────────────────────────────────────
 FEATURE_WINDOW_SIZES = [7, 14, 21, 50, 200]
-PREDICTION_HORIZON = 1
+PREDICTION_HORIZON = 8   # 8h ahead — less noise than 1h or 4h
 LABEL_THRESHOLD = 0.002
 
 # ── Model Training ────────────────────────────────────────────────────────────
@@ -51,9 +55,20 @@ ENSEMBLE_WEIGHTS = {"lgbm": 0.40, "xgb": 0.35, "lstm": 0.25}
 
 # ── Backtesting ───────────────────────────────────────────────────────────────
 INITIAL_CAPITAL  = 10_000
-TRADING_FEE      = 0.0026
+TRADING_FEE      = 0.001   # Binance standard spot fee
 SLIPPAGE         = 0.001
-SIGNAL_THRESHOLD = 0.38
+SIGNAL_THRESHOLD = 0.38   # Default threshold
+
+# Per-symbol overrides — lower for symbols with compressed probability distributions
+SIGNAL_THRESHOLDS = {
+    "INJ/USD":  0.34,
+    "LINK/USD": 0.35,
+    "DOGE/USD": 0.35,
+    "OP/USD":   0.35,
+    "ARB/USD":  0.35,
+    "SOL/USD":  0.36,
+    "AVAX/USD": 0.36,
+}
 MAX_POSITION_PCT = 0.95
 
 # ── Risk Management ───────────────────────────────────────────────────────────
@@ -61,6 +76,11 @@ STOP_LOSS_PCT      = 0.03
 TAKE_PROFIT_PCT    = 0.06
 MAX_DAILY_DRAWDOWN = 0.05
 MAX_OPEN_TRADES    = 3
+
+# ── Anti-Overfitting ──────────────────────────────────────────────────────────
+USE_REGIME_FILTER   = True    # Lever 4: regime detection
+REGIME_WINDOW       = 50      # Bars to measure trend strength
+REGIME_ADX_THRESHOLD = 25     # ADX above this = trending regime
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 DATA_DIR    = "data/raw"

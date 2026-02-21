@@ -1,0 +1,12 @@
+{
+  "symbol": "ARB/USD",
+  "final_equity": 8892.953385221164,
+  "total_return": -0.11070466147788356,
+  "n_trades": 9,
+  "n_longs": 8,
+  "n_shorts": 1,
+  "win_rate": 0.2222222222222222,
+  "sharpe_ratio": -1.0531461709037746,
+  "max_drawdown": -0.14504316484216798,
+  "profit_factor": 0.49181737658689223
+}

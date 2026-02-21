@@ -1,0 +1,12 @@
+{
+  "symbol": "AVAX/USD",
+  "final_equity": 8447.847794559306,
+  "total_return": -0.15521522054406942,
+  "n_trades": 41,
+  "n_longs": 19,
+  "n_shorts": 22,
+  "win_rate": 0.36585365853658536,
+  "sharpe_ratio": -0.8946277823674286,
+  "max_drawdown": -0.31472304216435487,
+  "profit_factor": 0.8984289559397796
+}

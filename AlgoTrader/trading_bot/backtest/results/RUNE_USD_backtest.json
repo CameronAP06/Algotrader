@@ -1,0 +1,12 @@
+{
+  "symbol": "RUNE/USD",
+  "final_equity": 3158.914699371885,
+  "total_return": -0.6841085300628115,
+  "n_trades": 70,
+  "n_longs": 60,
+  "n_shorts": 10,
+  "win_rate": 0.2,
+  "sharpe_ratio": -3.4093262057350895,
+  "max_drawdown": -0.7149666439324558,
+  "profit_factor": 0.37242568421457367
+}

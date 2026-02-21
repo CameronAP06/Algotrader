@@ -1,0 +1,12 @@
+{
+  "symbol": "MATIC/USD",
+  "final_equity": 10148.299484300553,
+  "total_return": 0.014829948430055265,
+  "n_trades": 2,
+  "n_longs": 2,
+  "n_shorts": 0,
+  "win_rate": 0.5,
+  "sharpe_ratio": 0.3326021678646482,
+  "max_drawdown": -0.06322655088005802,
+  "profit_factor": 1.5966821808295515
+}

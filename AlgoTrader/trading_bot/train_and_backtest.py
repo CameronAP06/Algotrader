@@ -29,14 +29,18 @@ import numpy as np
 
 from config.settings import TRADING_PAIRS, LOG_DIR
 from data.kraken_fetcher import fetch_all_pairs
+from data.binance_extras import load_or_fetch_extras
+from data.alt_data import fetch_all_alt_data, merge_alt_data
 from data.feature_engineer import build_features, get_feature_columns
 from utils.splitter import time_split, save_scaler
+from utils.walk_forward import walk_forward_validate, save_wf_results
 from models import catboost_model, cnn_model, lstm_model
 from models.ensemble import (
     weighted_ensemble, optimise_weights,
     generate_signals, save_weights
 )
 from backtest.engine import BacktestEngine
+from backtest.filters import apply_filters, filter_summary
 from backtest.plot_results import plot_all
 
 
@@ -48,7 +52,7 @@ logger.add(f"{LOG_DIR}/train_{{time}}.log", rotation="10 MB", level="INFO")
 
 # ─── Per-Symbol Pipeline ────────────────────────────────────────────────────
 
-def run_pipeline(symbol: str, raw_df: pd.DataFrame) -> dict:
+def run_pipeline(symbol: str, raw_df: pd.DataFrame, alt_df: pd.DataFrame) -> dict:
     """Full pipeline for one trading pair."""
     logger.info(f"\n{'='*60}\nProcessing: {symbol}\n{'='*60}")
 
@@ -86,7 +90,7 @@ def run_pipeline(symbol: str, raw_df: pd.DataFrame) -> dict:
     lstm_test_p = lstm_model.predict_proba(lstm,  X_test)
 
     blended = weighted_ensemble(cat_test_p, cnn_test_p, lstm_test_p, best_weights)
-    signals = generate_signals(blended)
+    signals = generate_signals(blended, symbol=symbol)
 
     # 7. Evaluate Signal Quality
     preds      = blended.argmax(axis=1)
@@ -109,13 +113,15 @@ def main():
     parser = argparse.ArgumentParser(description="Train and backtest ML trading bot")
     parser.add_argument("--refresh", action="store_true",  help="Force re-download data")
     parser.add_argument("--symbol",  type=str, default=None, help="Run single symbol (e.g. BTC/USD)")
-    parser.add_argument("--no-plot", action="store_true",  help="Skip chart output")
+    parser.add_argument("--no-plot",      action="store_true", help="Skip chart output")
+    parser.add_argument("--walkforward",   action="store_true", help="Run walk-forward validation instead of single backtest")
     args = parser.parse_args()
 
     symbols = [args.symbol] if args.symbol else TRADING_PAIRS
 
     # Fetch data
     raw_data = fetch_all_pairs(force_refresh=args.refresh)
+    alt_data  = fetch_all_alt_data(force_refresh=args.refresh)
     all_metrics = []
 
     for symbol in symbols:
@@ -123,7 +129,7 @@ def main():
             logger.warning(f"No data for {symbol}, skipping")
             continue
         try:
-            metrics = run_pipeline(symbol, raw_data[symbol])
+            metrics = run_pipeline(symbol, raw_data[symbol], alt_data)
             all_metrics.append(metrics)
         except Exception as e:
             logger.error(f"Pipeline failed for {symbol}: {e}")
@@ -147,6 +153,24 @@ def main():
                 f"{int(m['n_trades']):>7}"
             )
         print("="*70)
+
+    if args.walkforward:
+        print("\n" + "="*70)
+        print("WALK-FORWARD VALIDATION MODE")
+        print("="*70)
+        alt_data = fetch_all_alt_data(force_refresh=args.refresh)
+        for symbol in symbols:
+            if symbol not in raw_data:
+                continue
+            try:
+                enriched = load_or_fetch_extras(raw_data[symbol], symbol)
+                enriched = merge_alt_data(enriched, alt_data)
+                wf_results = walk_forward_validate(enriched, symbol)
+                if not wf_results.empty:
+                    save_wf_results(wf_results, symbol)
+            except Exception as e:
+                logger.error(f"Walk-forward failed for {symbol}: {e}")
+                import traceback; traceback.print_exc()
 
     if not args.no_plot and all_metrics:
         plot_all(symbols)

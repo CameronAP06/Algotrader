@@ -1,0 +1,12 @@
+{
+  "symbol": "DOGE/USD",
+  "final_equity": 11687.116271923738,
+  "total_return": 0.16871162719237381,
+  "n_trades": 92,
+  "n_longs": 10,
+  "n_shorts": 82,
+  "win_rate": 0.41304347826086957,
+  "sharpe_ratio": 0.6733977393373568,
+  "max_drawdown": -0.3754718965938012,
+  "profit_factor": 1.146723675062272
+}

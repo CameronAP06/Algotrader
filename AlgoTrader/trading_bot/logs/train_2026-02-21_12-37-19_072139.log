@@ -1,0 +1,157 @@
+2026-02-21 12:37:19.091 | INFO     | data.kraken_fetcher:get_exchange:31 - Connected to Binance
+2026-02-21 12:37:19.091 | INFO     | data.kraken_fetcher:fetch_ohlcv:42 - Fetching BTC/USDT [1h] — 1825 days of history...
+2026-02-21 12:37:40.321 | SUCCESS  | data.kraken_fetcher:fetch_ohlcv:81 - BTC/USD: 43787 candles (2021-02-22 -> 2026-02-21)
+2026-02-21 12:37:40.615 | INFO     | data.kraken_fetcher:save_data:90 - Saved -> data\raw\BTC_USD_1h.csv
+2026-02-21 12:37:40.615 | INFO     | data.kraken_fetcher:fetch_ohlcv:42 - Fetching ETH/USDT [1h] — 1825 days of history...
+2026-02-21 12:37:58.982 | SUCCESS  | data.kraken_fetcher:fetch_ohlcv:81 - ETH/USD: 43787 candles (2021-02-22 -> 2026-02-21)
+2026-02-21 12:37:59.270 | INFO     | data.kraken_fetcher:save_data:90 - Saved -> data\raw\ETH_USD_1h.csv
+2026-02-21 12:37:59.270 | INFO     | data.kraken_fetcher:fetch_ohlcv:42 - Fetching SOL/USDT [1h] — 1825 days of history...
+2026-02-21 12:38:16.856 | SUCCESS  | data.kraken_fetcher:fetch_ohlcv:81 - SOL/USD: 43787 candles (2021-02-22 -> 2026-02-21)
+2026-02-21 12:38:17.123 | INFO     | data.kraken_fetcher:save_data:90 - Saved -> data\raw\SOL_USD_1h.csv
+2026-02-21 12:38:17.130 | INFO     | data.kraken_fetcher:fetch_ohlcv:42 - Fetching XRP/USDT [1h] — 1825 days of history...
+2026-02-21 12:38:33.229 | SUCCESS  | data.kraken_fetcher:fetch_ohlcv:81 - XRP/USD: 43787 candles (2021-02-22 -> 2026-02-21)
+2026-02-21 12:38:33.510 | INFO     | data.kraken_fetcher:save_data:90 - Saved -> data\raw\XRP_USD_1h.csv
+2026-02-21 12:38:33.510 | SUCCESS  | data.kraken_fetcher:fetch_all_pairs:124 - Loaded 4/4 pairs
+2026-02-21 12:38:33.548 | INFO     | __main__:run_pipeline:55 - 
+============================================================
+Processing: BTC/USD
+============================================================
+2026-02-21 12:38:33.548 | INFO     | data.binance_extras:fetch_funding_rates:44 - Fetching funding rates for BTC/USD...
+2026-02-21 12:38:37.372 | SUCCESS  | data.binance_extras:fetch_funding_rates:75 - BTC/USD: 5475 funding rate records
+2026-02-21 12:38:37.385 | INFO     | data.binance_extras:merge_funding_rates:138 - BTC/USD: Funding rates merged — avg=0.000087
+2026-02-21 12:38:37.385 | INFO     | data.feature_engineer:build_features:166 - Building features for BTC/USD (43787 rows)
+2026-02-21 12:38:37.522 | INFO     | data.feature_engineer:build_features:187 - Dropped 204 NaN/inf rows → 43583 usable rows
+2026-02-21 12:38:37.524 | INFO     | data.feature_engineer:build_features:190 - Label distribution: DOWN=11798 NEUTRAL=19490 UP=12295
+2026-02-21 12:38:37.525 | INFO     | __main__:run_pipeline:63 - Features: 74 columns
+2026-02-21 12:38:37.565 | INFO     | utils.splitter:time_split:37 - Split: train=30508 | val=6537 | test=6538
+2026-02-21 12:38:37.565 | INFO     | utils.splitter:save_scaler:48 - Saved scaler -> models\saved\BTC_USD_scaler.pkl
+2026-02-21 12:38:37.565 | INFO     | models.catboost_model:train:34 - Training CatBoost for BTC/USD...
+2026-02-21 12:38:38.966 | SUCCESS  | models.catboost_model:train:42 - CatBoost val accuracy: 0.3353
+2026-02-21 12:38:38.968 | INFO     | models.catboost_model:save:50 - Saved CatBoost -> models\saved\BTC_USD_catboost.cbm
+2026-02-21 12:38:39.987 | INFO     | models.cnn_model:train:116 - Training 1D CNN for BTC/USD on cpu — 30484 train samples
+2026-02-21 12:38:48.356 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=1.0180 | val_acc=0.3146
+2026-02-21 12:40:14.996 | INFO     | models.cnn_model:train:145 -   Epoch  10 | val_loss=1.0174 | val_acc=0.3511
+2026-02-21 12:41:07.555 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 16
+2026-02-21 12:41:07.555 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 1.0035
+2026-02-21 12:41:07.555 | INFO     | models.cnn_model:save:173 - Saved 1D CNN -> models\saved\BTC_USD_cnn.pt
+2026-02-21 12:41:07.569 | INFO     | models.lstm_model:train:91 - Training LSTM for BTC/USD on cpu — 30484 train samples
+2026-02-21 12:41:09.631 | INFO     | models.lstm_model:train:122 -   Epoch   0 | val_loss=1.0221 | val_acc=0.2801
+2026-02-21 12:41:32.097 | INFO     | models.lstm_model:train:122 -   Epoch  10 | val_loss=1.0251 | val_acc=0.3783
+2026-02-21 12:41:44.409 | INFO     | models.lstm_model:train:131 - Early stopping at epoch 16
+2026-02-21 12:41:44.409 | SUCCESS  | models.lstm_model:train:135 - LSTM best val_loss: 1.0087
+2026-02-21 12:41:44.412 | INFO     | models.lstm_model:save:151 - Saved LSTM -> models\saved\BTC_USD_lstm.pt
+2026-02-21 12:41:50.345 | SUCCESS  | models.ensemble:optimise_weights:52 - Optimised weights: LGBM=0.333 XGB=0.333 LSTM=0.333 | acc=0.3306
+2026-02-21 12:41:50.348 | INFO     | models.ensemble:save_weights:101 - Saved ensemble weights -> models\saved\BTC_USD_ensemble_weights.pkl
+2026-02-21 12:41:56.382 | INFO     | models.ensemble:generate_signals:82 - Signal distribution (threshold=0.38): BUY=418 (6.4%)  SELL=1569 (24.0%)  HOLD=4551 (69.6%)
+2026-02-21 12:41:56.382 | INFO     | __main__:run_pipeline:100 - Test accuracy: 0.3191
+2026-02-21 12:41:56.460 | INFO     | backtest.filters:apply_filters:102 - Filters removed 1207/1987 signals — trend=0 vol=225 volume=982 funding=0
+2026-02-21 12:41:56.460 | INFO     | backtest.filters:filter_summary:122 - Signal filter: BUY 418→106 | SELL 1569→674
+2026-02-21 12:41:56.474 | INFO     | backtest.engine:_compute_metrics:200 - BTC/USD Results: Return=-50.54% | Sharpe=-2.71 | MaxDD=-54.73% | WinRate=44.86% | Trades=107 (L:47 S:60)
+2026-02-21 12:41:56.486 | INFO     | backtest.engine:save_results:218 - Results saved -> backtest\results\BTC_USD_backtest.json
+2026-02-21 12:41:56.490 | INFO     | __main__:run_pipeline:55 - 
+============================================================
+Processing: ETH/USD
+============================================================
+2026-02-21 12:41:56.490 | INFO     | data.binance_extras:fetch_funding_rates:44 - Fetching funding rates for ETH/USD...
+2026-02-21 12:42:00.417 | SUCCESS  | data.binance_extras:fetch_funding_rates:75 - ETH/USD: 5475 funding rate records
+2026-02-21 12:42:00.424 | INFO     | data.binance_extras:merge_funding_rates:138 - ETH/USD: Funding rates merged — avg=0.000088
+2026-02-21 12:42:00.424 | INFO     | data.feature_engineer:build_features:166 - Building features for ETH/USD (43787 rows)
+2026-02-21 12:42:00.580 | INFO     | data.feature_engineer:build_features:187 - Dropped 204 NaN/inf rows → 43583 usable rows
+2026-02-21 12:42:00.581 | INFO     | data.feature_engineer:build_features:190 - Label distribution: DOWN=13783 NEUTRAL=15438 UP=14362
+2026-02-21 12:42:00.581 | INFO     | __main__:run_pipeline:63 - Features: 74 columns
+2026-02-21 12:42:00.627 | INFO     | utils.splitter:time_split:37 - Split: train=30508 | val=6537 | test=6538
+2026-02-21 12:42:00.629 | INFO     | utils.splitter:save_scaler:48 - Saved scaler -> models\saved\ETH_USD_scaler.pkl
+2026-02-21 12:42:00.632 | INFO     | models.catboost_model:train:34 - Training CatBoost for ETH/USD...
+2026-02-21 12:42:01.482 | SUCCESS  | models.catboost_model:train:42 - CatBoost val accuracy: 0.3681
+2026-02-21 12:42:01.486 | INFO     | models.catboost_model:save:50 - Saved CatBoost -> models\saved\ETH_USD_catboost.cbm
+2026-02-21 12:42:01.496 | INFO     | models.cnn_model:train:116 - Training 1D CNN for ETH/USD on cpu — 30484 train samples
+2026-02-21 12:42:10.476 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.9592 | val_acc=0.3585
+2026-02-21 12:44:02.178 | INFO     | models.cnn_model:train:145 -   Epoch  10 | val_loss=0.9527 | val_acc=0.3667
+2026-02-21 12:44:22.587 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 12
+2026-02-21 12:44:22.602 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.9468
+2026-02-21 12:44:22.607 | INFO     | models.cnn_model:save:173 - Saved 1D CNN -> models\saved\ETH_USD_cnn.pt
+2026-02-21 12:44:22.611 | INFO     | models.lstm_model:train:91 - Training LSTM for ETH/USD on cpu — 30484 train samples
+2026-02-21 12:44:24.799 | INFO     | models.lstm_model:train:122 -   Epoch   0 | val_loss=0.9510 | val_acc=0.3686
+2026-02-21 12:44:40.032 | INFO     | models.lstm_model:train:131 - Early stopping at epoch 7
+2026-02-21 12:44:40.032 | SUCCESS  | models.lstm_model:train:135 - LSTM best val_loss: 0.9510
+2026-02-21 12:44:40.036 | INFO     | models.lstm_model:save:151 - Saved LSTM -> models\saved\ETH_USD_lstm.pt
+2026-02-21 12:44:46.440 | SUCCESS  | models.ensemble:optimise_weights:52 - Optimised weights: LGBM=0.333 XGB=0.333 LSTM=0.333 | acc=0.3717
+2026-02-21 12:44:46.444 | INFO     | models.ensemble:save_weights:101 - Saved ensemble weights -> models\saved\ETH_USD_ensemble_weights.pkl
+2026-02-21 12:44:52.817 | INFO     | models.ensemble:generate_signals:82 - Signal distribution (threshold=0.38): BUY=565 (8.6%)  SELL=1186 (18.1%)  HOLD=4787 (73.2%)
+2026-02-21 12:44:52.817 | INFO     | __main__:run_pipeline:100 - Test accuracy: 0.3334
+2026-02-21 12:44:52.884 | INFO     | backtest.filters:apply_filters:102 - Filters removed 1272/1751 signals — trend=0 vol=600 volume=672 funding=0
+2026-02-21 12:44:52.884 | INFO     | backtest.filters:filter_summary:122 - Signal filter: BUY 565→142 | SELL 1186→337
+2026-02-21 12:44:52.892 | INFO     | backtest.engine:_compute_metrics:200 - ETH/USD Results: Return=-42.53% | Sharpe=-1.51 | MaxDD=-46.64% | WinRate=43.88% | Trades=98 (L:40 S:58)
+2026-02-21 12:44:52.908 | INFO     | backtest.engine:save_results:218 - Results saved -> backtest\results\ETH_USD_backtest.json
+2026-02-21 12:44:52.915 | INFO     | __main__:run_pipeline:55 - 
+============================================================
+Processing: SOL/USD
+============================================================
+2026-02-21 12:44:52.916 | INFO     | data.binance_extras:fetch_funding_rates:44 - Fetching funding rates for SOL/USD...
+2026-02-21 12:44:57.060 | SUCCESS  | data.binance_extras:fetch_funding_rates:75 - SOL/USD: 5550 funding rate records
+2026-02-21 12:44:57.073 | INFO     | data.binance_extras:merge_funding_rates:138 - SOL/USD: Funding rates merged — avg=0.000039
+2026-02-21 12:44:57.073 | INFO     | data.feature_engineer:build_features:166 - Building features for SOL/USD (43787 rows)
+2026-02-21 12:44:57.241 | INFO     | data.feature_engineer:build_features:187 - Dropped 204 NaN/inf rows → 43583 usable rows
+2026-02-21 12:44:57.243 | INFO     | data.feature_engineer:build_features:190 - Label distribution: DOWN=17036 NEUTRAL=9449 UP=17098
+2026-02-21 12:44:57.243 | INFO     | __main__:run_pipeline:63 - Features: 74 columns
+2026-02-21 12:44:57.289 | INFO     | utils.splitter:time_split:37 - Split: train=30508 | val=6537 | test=6538
+2026-02-21 12:44:57.294 | INFO     | utils.splitter:save_scaler:48 - Saved scaler -> models\saved\SOL_USD_scaler.pkl
+2026-02-21 12:44:57.294 | INFO     | models.catboost_model:train:34 - Training CatBoost for SOL/USD...
+2026-02-21 12:44:58.663 | SUCCESS  | models.catboost_model:train:42 - CatBoost val accuracy: 0.4086
+2026-02-21 12:44:58.666 | INFO     | models.catboost_model:save:50 - Saved CatBoost -> models\saved\SOL_USD_catboost.cbm
+2026-02-21 12:44:58.679 | INFO     | models.cnn_model:train:116 - Training 1D CNN for SOL/USD on cpu — 30484 train samples
+2026-02-21 12:45:08.842 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.8992 | val_acc=0.4007
+2026-02-21 12:46:52.223 | INFO     | models.cnn_model:train:145 -   Epoch  10 | val_loss=0.9019 | val_acc=0.3817
+2026-02-21 12:47:02.645 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 11
+2026-02-21 12:47:02.645 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.8935
+2026-02-21 12:47:02.651 | INFO     | models.cnn_model:save:173 - Saved 1D CNN -> models\saved\SOL_USD_cnn.pt
+2026-02-21 12:47:02.655 | INFO     | models.lstm_model:train:91 - Training LSTM for SOL/USD on cpu — 30484 train samples
+2026-02-21 12:47:04.796 | INFO     | models.lstm_model:train:122 -   Epoch   0 | val_loss=0.8960 | val_acc=0.3857
+2026-02-21 12:47:26.437 | INFO     | models.lstm_model:train:122 -   Epoch  10 | val_loss=0.9011 | val_acc=0.3904
+2026-02-21 12:47:30.940 | INFO     | models.lstm_model:train:131 - Early stopping at epoch 12
+2026-02-21 12:47:30.942 | SUCCESS  | models.lstm_model:train:135 - LSTM best val_loss: 0.8957
+2026-02-21 12:47:30.946 | INFO     | models.lstm_model:save:151 - Saved LSTM -> models\saved\SOL_USD_lstm.pt
+2026-02-21 12:47:37.250 | SUCCESS  | models.ensemble:optimise_weights:52 - Optimised weights: LGBM=0.333 XGB=0.333 LSTM=0.333 | acc=0.4061
+2026-02-21 12:47:37.250 | INFO     | models.ensemble:save_weights:101 - Saved ensemble weights -> models\saved\SOL_USD_ensemble_weights.pkl
+2026-02-21 12:47:43.604 | INFO     | models.ensemble:generate_signals:82 - Signal distribution (threshold=0.38): BUY=5 (0.1%)  SELL=0 (0.0%)  HOLD=6533 (99.9%)
+2026-02-21 12:47:43.604 | INFO     | __main__:run_pipeline:100 - Test accuracy: 0.3656
+2026-02-21 12:47:43.610 | INFO     | backtest.filters:apply_filters:102 - Filters removed 4/5 signals — trend=0 vol=2 volume=2 funding=0
+2026-02-21 12:47:43.612 | INFO     | backtest.filters:filter_summary:122 - Signal filter: BUY 5→1 | SELL 0→0
+2026-02-21 12:47:43.619 | INFO     | backtest.engine:_compute_metrics:200 - SOL/USD Results: Return=-3.42% | Sharpe=-0.70 | MaxDD=-7.61% | WinRate=0.00% | Trades=1 (L:1 S:0)
+2026-02-21 12:47:43.631 | INFO     | backtest.engine:save_results:218 - Results saved -> backtest\results\SOL_USD_backtest.json
+2026-02-21 12:47:43.639 | INFO     | __main__:run_pipeline:55 - 
+============================================================
+Processing: XRP/USD
+============================================================
+2026-02-21 12:47:43.640 | INFO     | data.binance_extras:fetch_funding_rates:44 - Fetching funding rates for XRP/USD...
+2026-02-21 12:47:47.571 | SUCCESS  | data.binance_extras:fetch_funding_rates:75 - XRP/USD: 5475 funding rate records
+2026-02-21 12:47:47.582 | INFO     | data.binance_extras:merge_funding_rates:138 - XRP/USD: Funding rates merged — avg=0.000102
+2026-02-21 12:47:47.584 | INFO     | data.feature_engineer:build_features:166 - Building features for XRP/USD (43787 rows)
+2026-02-21 12:47:47.731 | INFO     | data.feature_engineer:build_features:187 - Dropped 204 NaN/inf rows → 43583 usable rows
+2026-02-21 12:47:47.733 | INFO     | data.feature_engineer:build_features:190 - Label distribution: DOWN=15126 NEUTRAL=12767 UP=15690
+2026-02-21 12:47:47.733 | INFO     | __main__:run_pipeline:63 - Features: 74 columns
+2026-02-21 12:47:47.781 | INFO     | utils.splitter:time_split:37 - Split: train=30508 | val=6537 | test=6538
+2026-02-21 12:47:47.785 | INFO     | utils.splitter:save_scaler:48 - Saved scaler -> models\saved\XRP_USD_scaler.pkl
+2026-02-21 12:47:47.785 | INFO     | models.catboost_model:train:34 - Training CatBoost for XRP/USD...
+2026-02-21 12:47:48.715 | SUCCESS  | models.catboost_model:train:42 - CatBoost val accuracy: 0.3991
+2026-02-21 12:47:48.717 | INFO     | models.catboost_model:save:50 - Saved CatBoost -> models\saved\XRP_USD_catboost.cbm
+2026-02-21 12:47:48.725 | INFO     | models.cnn_model:train:116 - Training 1D CNN for XRP/USD on cpu — 30484 train samples
+2026-02-21 12:48:01.968 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.9430 | val_acc=0.3762
+2026-02-21 12:50:37.278 | INFO     | models.cnn_model:train:145 -   Epoch  10 | val_loss=0.9169 | val_acc=0.3828
+2026-02-21 12:51:12.209 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 14
+2026-02-21 12:51:12.209 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.9107
+2026-02-21 12:51:12.217 | INFO     | models.cnn_model:save:173 - Saved 1D CNN -> models\saved\XRP_USD_cnn.pt
+2026-02-21 12:51:12.224 | INFO     | models.lstm_model:train:91 - Training LSTM for XRP/USD on cpu — 30484 train samples
+2026-02-21 12:51:14.469 | INFO     | models.lstm_model:train:122 -   Epoch   0 | val_loss=0.9145 | val_acc=0.3791
+2026-02-21 12:51:34.841 | INFO     | models.lstm_model:train:122 -   Epoch  10 | val_loss=0.9304 | val_acc=0.3838
+2026-02-21 12:51:34.841 | INFO     | models.lstm_model:train:131 - Early stopping at epoch 10
+2026-02-21 12:51:34.841 | SUCCESS  | models.lstm_model:train:135 - LSTM best val_loss: 0.9137
+2026-02-21 12:51:34.841 | INFO     | models.lstm_model:save:151 - Saved LSTM -> models\saved\XRP_USD_lstm.pt
+2026-02-21 12:51:40.937 | SUCCESS  | models.ensemble:optimise_weights:52 - Optimised weights: LGBM=0.333 XGB=0.333 LSTM=0.333 | acc=0.4008
+2026-02-21 12:51:40.937 | INFO     | models.ensemble:save_weights:101 - Saved ensemble weights -> models\saved\XRP_USD_ensemble_weights.pkl
+2026-02-21 12:51:47.216 | INFO     | models.ensemble:generate_signals:82 - Signal distribution (threshold=0.38): BUY=5 (0.1%)  SELL=38 (0.6%)  HOLD=6495 (99.3%)
+2026-02-21 12:51:47.216 | INFO     | __main__:run_pipeline:100 - Test accuracy: 0.3573
+2026-02-21 12:51:47.225 | INFO     | backtest.filters:apply_filters:102 - Filters removed 33/43 signals — trend=0 vol=33 volume=0 funding=0
+2026-02-21 12:51:47.225 | INFO     | backtest.filters:filter_summary:122 - Signal filter: BUY 5→5 | SELL 38→5
+2026-02-21 12:51:47.234 | INFO     | backtest.engine:_compute_metrics:200 - XRP/USD Results: Return=-3.94% | Sharpe=-0.51 | MaxDD=-10.17% | WinRate=33.33% | Trades=6 (L:3 S:3)
+2026-02-21 12:51:47.245 | INFO     | backtest.engine:save_results:218 - Results saved -> backtest\results\XRP_USD_backtest.json

@@ -1,0 +1,12 @@
+{
+  "symbol": "INJ/USD",
+  "final_equity": 8628.215085472708,
+  "total_return": -0.1371784914527292,
+  "n_trades": 30,
+  "n_longs": 12,
+  "n_shorts": 18,
+  "win_rate": 0.3333333333333333,
+  "sharpe_ratio": -0.6223464219190127,
+  "max_drawdown": -0.20335815538308757,
+  "profit_factor": 0.796605511611899
+}

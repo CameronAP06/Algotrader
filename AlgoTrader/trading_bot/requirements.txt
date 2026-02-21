@@ -3,6 +3,7 @@ ccxt==4.3.32
 pandas==2.3.2
 numpy>=2.2.6
 requests==2.31.0
+pytrends==4.9.2
 
 # Technical Indicators
 pandas-ta==0.4.71b0
@@ -10,12 +11,12 @@ ta==0.11.0
 
 # ML Models
 lightgbm==4.3.0
-scikit-learn==1.4.2
+scikit-learn==1.6.1
 xgboost==2.0.3
 catboost==1.2.10
 
 # Deep Learning (LSTM)
-torch==2.5.1
+torch
 
 # Backtesting
 vectorbt==0.28.4

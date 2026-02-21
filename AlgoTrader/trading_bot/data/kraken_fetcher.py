@@ -17,8 +17,17 @@ from config.settings import TRADING_PAIRS, TIMEFRAME, HISTORY_DAYS, DATA_DIR
 SYMBOL_MAP = {
     "BTC/USD":  "BTC/USDT",
     "ETH/USD":  "ETH/USDT",
-    "SOL/USD":  "SOL/USDT",
     "XRP/USD":  "XRP/USDT",
+    "SOL/USD":  "SOL/USDT",
+    "AVAX/USD":  "AVAX/USDT",
+    "LINK/USD":  "LINK/USDT",
+    "MATIC/USD":  "MATIC/USDT",
+    "INJ/USD":  "INJ/USDT",
+    "ARB/USD":  "ARB/USDT",
+    "OP/USD":   "OP/USDT",
+    "RUNE/USD":  "RUNE/USDT",
+    "DOGE/USD":  "DOGE/USDT",
+    "ADA/USD":  "ADA/USDT",
 }
 
 
