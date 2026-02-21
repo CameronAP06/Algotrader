@@ -1,0 +1,12 @@
+{
+  "symbol": "BTC/USD",
+  "final_equity": 1383.2339885103918,
+  "total_return": -0.8616766011489608,
+  "n_trades": 260,
+  "n_longs": 134,
+  "n_shorts": 126,
+  "win_rate": 0.38076923076923075,
+  "sharpe_ratio": -7.236907483617701,
+  "max_drawdown": -0.8672670878277412,
+  "profit_factor": 0.458714045704634
+}
