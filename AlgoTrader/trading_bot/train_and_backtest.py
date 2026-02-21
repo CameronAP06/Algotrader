@@ -7,7 +7,7 @@ MAIN ENTRY POINT — Phase 1
 Steps:
   1. Fetch historical OHLCV data from Kraken (no API key needed)
   2. Engineer 80+ features
-  3. Train TFT + 1D CNN + LSTM ensemble
+  3. Train CatBoost + 1D CNN + LSTM ensemble
   4. Optimise ensemble weights on validation set
   5. Generate trading signals on test set
   6. Run backtest with realistic fees and risk management
@@ -31,7 +31,7 @@ from config.settings import TRADING_PAIRS, LOG_DIR
 from data.kraken_fetcher import fetch_all_pairs
 from data.feature_engineer import build_features, get_feature_columns
 from utils.splitter import time_split, save_scaler
-from models import tft_model, cnn_model, lstm_model
+from models import catboost_model, cnn_model, lstm_model
 from models.ensemble import (
     weighted_ensemble, optimise_weights,
     generate_signals, save_weights
@@ -62,8 +62,8 @@ def run_pipeline(symbol: str, raw_df: pd.DataFrame) -> dict:
     save_scaler(scaler, symbol)
 
     # 3. Train Individual Models
-    tft = tft_model.train(X_train, y_train, X_val, y_val, symbol)
-    tft_model.save(tft, symbol)
+    cat = catboost_model.train(X_train, y_train, X_val, y_val, symbol)
+    catboost_model.save(cat, symbol)
 
     cnn = cnn_model.train(X_train, y_train, X_val, y_val, symbol)
     cnn_model.save(cnn, symbol)
@@ -72,20 +72,20 @@ def run_pipeline(symbol: str, raw_df: pd.DataFrame) -> dict:
     lstm_model.save(lstm, symbol)
 
     # 4. Validation Probabilities
-    tft_val_p  = tft_model.predict_proba(tft, X_val)
+    cat_val_p  = catboost_model.predict_proba(cat, X_val)
     cnn_val_p  = cnn_model.predict_proba(cnn,  X_val)
     lstm_val_p = lstm_model.predict_proba(lstm,  X_val)
 
     # 5. Optimise Ensemble Weights on Validation Set
-    best_weights = optimise_weights(tft_val_p, cnn_val_p, lstm_val_p, y_val)
+    best_weights = optimise_weights(cat_val_p, cnn_val_p, lstm_val_p, y_val)
     save_weights(best_weights, symbol)
 
     # 6. Test Set Predictions
-    tft_test_p  = tft_model.predict_proba(tft, X_test)
+    cat_test_p  = catboost_model.predict_proba(cat, X_test)
     cnn_test_p  = cnn_model.predict_proba(cnn,  X_test)
     lstm_test_p = lstm_model.predict_proba(lstm,  X_test)
 
-    blended = weighted_ensemble(tft_test_p, cnn_test_p, lstm_test_p, best_weights)
+    blended = weighted_ensemble(cat_test_p, cnn_test_p, lstm_test_p, best_weights)
     signals = generate_signals(blended)
 
     # 7. Evaluate Signal Quality
