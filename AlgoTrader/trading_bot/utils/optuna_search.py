@@ -86,7 +86,9 @@ def suggest_tft_params(trial: optuna.Trial) -> dict:
         "n_heads":         trial.suggest_categorical("n_heads",
                                [h for h in [2, 4, 8] if d_model % h == 0]),
         "n_lstm_layers":   trial.suggest_int("n_lstm_layers", 1, 3),
-        "dropout":         trial.suggest_float("dropout", 0.05, 0.4),
+        # MIOpen dropout kernel broken on gfx1100+MSVC14.39 — locked to 0.0
+        # Re-enable once rocRAND headers are found: dropout = trial.suggest_float("dropout", 0.05, 0.4)
+        "dropout":         0.0,
         "epochs":          50,
         "batch_size":      trial.suggest_categorical("batch_size", [32, 64, 128]),
         "learning_rate":   trial.suggest_float("lr", 1e-4, 5e-3, log=True),

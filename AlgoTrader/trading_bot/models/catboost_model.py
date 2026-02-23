@@ -14,6 +14,7 @@ from loguru import logger
 from catboost import CatBoostClassifier
 from config.settings import MODEL_DIR
 
+
 CATBOOST_PARAMS = {
     "iterations":        500,
     "learning_rate":     0.05,

@@ -16,6 +16,21 @@ from config.settings import LSTM_PARAMS, MODEL_DIR
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+class MIOpenSafeLayerNorm(nn.Module):
+    """LayerNorm avoiding MIOpen's broken gfx1100+MSVC14.39 reduction kernel."""
+    def __init__(self, normalized_shape: int, eps: float = 1e-5):
+        super().__init__()
+        self.weight = nn.Parameter(torch.ones(normalized_shape))
+        self.bias   = nn.Parameter(torch.zeros(normalized_shape))
+        self.eps    = eps
+
+    def forward(self, x):
+        mean = x.mean(dim=-1, keepdim=True)
+        var  = x.var(dim=-1, keepdim=True, unbiased=False)
+        x_norm = (x - mean) / torch.sqrt(var + self.eps)
+        return self.weight * x_norm + self.bias
+
+
 
 # ─── Dataset ────────────────────────────────────────────────────────────────
 
@@ -40,11 +55,13 @@ class LSTMClassifier(nn.Module):
     def __init__(self, input_size: int, hidden_size: int, num_layers: int,
                  num_classes: int, dropout: float):
         super().__init__()
+        # nn.LSTM dropout triggers MIOpen JIT kernel — broken on gfx1100+MSVC14.39
+        # dropout=0.0 in LSTM; nn.Dropout below applies correctly via Python
         self.lstm = nn.LSTM(
             input_size, hidden_size, num_layers,
-            batch_first=True, dropout=dropout if num_layers > 1 else 0
+            batch_first=True, dropout=0.0  # MIOpen fused dropout disabled
         )
-        self.norm   = nn.LayerNorm(hidden_size)
+        self.norm   = MIOpenSafeLayerNorm(hidden_size)
         self.dropout = nn.Dropout(dropout)
         self.fc     = nn.Linear(hidden_size, num_classes)
 

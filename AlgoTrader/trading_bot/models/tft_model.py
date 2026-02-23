@@ -26,12 +26,32 @@ from config.settings import MODEL_DIR
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+class MIOpenSafeLayerNorm(nn.Module):
+    """
+    LayerNorm implemented with explicit PyTorch ops to bypass MIOpen's
+    JIT-compiled reduction kernel (gridwise_generic_reduction), which fails
+    on gfx1100 (RX 7000 series) + MSVC 14.39 due to a std::forward redefinition.
+    Mathematically identical to nn.LayerNorm but uses torch.mean/var directly.
+    """
+    def __init__(self, normalized_shape: int, eps: float = 1e-5):
+        super().__init__()
+        self.weight = nn.Parameter(torch.ones(normalized_shape))
+        self.bias   = nn.Parameter(torch.zeros(normalized_shape))
+        self.eps    = eps
+
+    def forward(self, x):
+        mean = x.mean(dim=-1, keepdim=True)
+        var  = x.var(dim=-1, keepdim=True, unbiased=False)
+        x_norm = (x - mean) / torch.sqrt(var + self.eps)
+        return self.weight * x_norm + self.bias
+
+
 TFT_PARAMS = {
     "sequence_length":  48,    # 48h look-back window
     "d_model":          64,    # Model dimension
     "n_heads":          4,     # Attention heads
     "n_lstm_layers":    2,     # LSTM layers in encoder/decoder
-    "dropout":          0.1,
+    "dropout":          0.0,  # MIOpen dropout kernel broken on gfx1100/Win — use Python-layer dropout
     "epochs":           40,
     "batch_size":       128,
     "learning_rate":    0.0005,
@@ -65,7 +85,7 @@ class GatedLinearUnit(nn.Module):
         self.fc1     = nn.Linear(d_model, d_model)
         self.fc2     = nn.Linear(d_model, d_model)
         self.dropout = nn.Dropout(dropout)
-        self.norm    = nn.LayerNorm(d_model)
+        self.norm    = MIOpenSafeLayerNorm(d_model)
 
     def forward(self, x):
         return self.norm(self.dropout(self.fc1(x)) * torch.sigmoid(self.fc2(x)) + x)
@@ -83,7 +103,7 @@ class VariableSelectionNetwork(nn.Module):
             nn.Softmax(dim=-1),
         )
         self.dropout = nn.Dropout(dropout)
-        self.norm    = nn.LayerNorm(d_model)
+        self.norm    = MIOpenSafeLayerNorm(d_model)
 
     def forward(self, x):
         # x: (batch, seq_len, input_size)
@@ -96,8 +116,8 @@ class TemporalSelfAttention(nn.Module):
     """Multi-head self-attention over the temporal dimension."""
     def __init__(self, d_model: int, n_heads: int, dropout: float):
         super().__init__()
-        self.attn    = nn.MultiheadAttention(d_model, n_heads, dropout=dropout, batch_first=True)
-        self.norm    = nn.LayerNorm(d_model)
+        self.attn = nn.MultiheadAttention(d_model, n_heads, dropout=0.0, batch_first=True)  # MIOpen-safe
+        self.norm    = MIOpenSafeLayerNorm(d_model)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
@@ -116,10 +136,13 @@ class TemporalFusionTransformer(nn.Module):
         self.var_select = VariableSelectionNetwork(input_size, d_model, dropout)
 
         # 2. Local processing — LSTM captures local temporal patterns
+        # NOTE: nn.LSTM dropout triggers MIOpen's JIT kernel (broken on gfx1100+MSVC14.39).
+        # Use dropout=0.0 in LSTM and apply a standard nn.Dropout after instead.
         self.lstm = nn.LSTM(
             d_model, d_model, n_lstm_layers,
-            batch_first=True, dropout=dropout if n_lstm_layers > 1 else 0
+            batch_first=True, dropout=0.0  # MIOpen fused dropout disabled — see lstm_dropout below
         )
+        self.lstm_dropout = nn.Dropout(dropout)  # Applied in Python, not MIOpen
         self.lstm_glu = GatedLinearUnit(d_model, dropout)
 
         # 3. Temporal self-attention — captures long-range dependencies
@@ -133,7 +156,7 @@ class TemporalFusionTransformer(nn.Module):
             nn.Dropout(dropout),
             nn.Linear(d_model * 2, d_model),
         )
-        self.ff_norm = nn.LayerNorm(d_model)
+        self.ff_norm = MIOpenSafeLayerNorm(d_model)
 
         # 5. Classification head
         self.classifier = nn.Linear(d_model, num_classes)
@@ -142,6 +165,7 @@ class TemporalFusionTransformer(nn.Module):
         # x: (batch, seq_len, input_size)
         x = self.var_select(x)                    # Feature selection
         lstm_out, _ = self.lstm(x)                # Local patterns
+        lstm_out = self.lstm_dropout(lstm_out)    # Python dropout (MIOpen kernel disabled)
         x = self.lstm_glu(lstm_out)               # Gate LSTM output
         x = self.attention(x)                     # Long-range patterns
         x = self.attn_glu(x)                      # Gate attention output

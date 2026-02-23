@@ -1,0 +1,1616 @@
+2026-02-23 09:59:25.420 | INFO     | __main__:main:397 - Testing 5 symbols x 6 timeframes = 30 combinations
+2026-02-23 09:59:25.420 | INFO     | data.alt_data:fetch_all_alt_data:172 - Fetching alternative data...
+2026-02-23 09:59:25.730 | SUCCESS  | data.alt_data:fetch_fear_greed:44 - Fear & Greed: 1825 records (2021-02-24 -> 2026-02-23)
+2026-02-23 09:59:25.906 | WARNING  | data.alt_data:fetch_btc_dominance:88 - BTC dominance chart endpoint failed: Empty BTC dominance series from chart endpoint — trying /global fallback
+2026-02-23 09:59:26.070 | WARNING  | data.alt_data:fetch_btc_dominance:108 - BTC Dominance: using current-only value (56.4%) — historical chart unavailable. Feature will be constant.
+2026-02-23 09:59:27.446 | SUCCESS  | data.alt_data:fetch_google_trends:146 - Google Trends: 262 records
+2026-02-23 09:59:27.471 | SUCCESS  | data.alt_data:fetch_all_alt_data:208 - Alt data saved: 1825 rows, columns: ['timestamp', 'fear_greed', 'date', 'btc_dominance', 'google_trends_btc']
+2026-02-23 09:59:27.471 | INFO     | __main__:main:407 - 
+============================================================
+Timeframe: 15 minutes (15m)
+============================================================
+2026-02-23 09:59:28.044 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching INJ/USD [15m] — 365 days...
+2026-02-23 09:59:44.013 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - INJ/USD 15m: 35040 candles (2025-02-23 -> 2026-02-23)
+2026-02-23 09:59:44.046 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching LINK/USD [15m] — 365 days...
+2026-02-23 10:00:01.890 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - LINK/USD 15m: 35041 candles (2025-02-23 -> 2026-02-23)
+2026-02-23 10:00:01.925 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching DOGE/USD [15m] — 365 days...
+2026-02-23 10:00:23.188 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - DOGE/USD 15m: 35040 candles (2025-02-23 -> 2026-02-23)
+2026-02-23 10:00:23.231 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching OP/USD [15m] — 365 days...
+2026-02-23 10:00:40.231 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - OP/USD 15m: 35040 candles (2025-02-23 -> 2026-02-23)
+2026-02-23 10:00:40.274 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching ARB/USD [15m] — 365 days...
+2026-02-23 10:00:58.298 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - ARB/USD 15m: 35040 candles (2025-02-23 -> 2026-02-23)
+2026-02-23 10:00:58.340 | INFO     | __main__:main:423 - 
+Processing: INJ/USD [15m]
+2026-02-23 10:00:58.373 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 10:00:58.377 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 10:00:58.378 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: INJ/USD_15m
+============================================================
+2026-02-23 10:00:58.378 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-23 10:00:58.379 | INFO     | data.feature_engineer:build_features:283 - Building features for INJ/USD_15m (35040 rows)
+2026-02-23 10:00:58.569 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 34840 usable rows
+2026-02-23 10:00:58.572 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=11701 NEUTRAL=12035 UP=11104
+2026-02-23 10:00:58.572 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=16586 trending_up=9176 trending_down=9078
+2026-02-23 10:00:58.573 | WARNING  | utils.walk_forward:walk_forward_validate:325 - Insufficient data for walk-forward [15m]: 34840/45600 bars — scaling down proportionally (train=26771 val=4034 test=4034)
+2026-02-23 10:00:58.726 | INFO     | utils.optuna_search:run_optuna_search:207 - Optuna search: INJ/USD_15m [15m] — 30 trials
+2026-02-23 10:01:00.867 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:06.944 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:08.754 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:01:11.199 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:01:11.451 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:01:12.751 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:01:13.556 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:15.451 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:16.323 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:17.321 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:17.588 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:01:17.858 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:18.555 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:19.413 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:19.662 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:20.489 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:01:20.761 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:21.626 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:21.880 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:01:22.151 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:01:23.022 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:23.294 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:01:24.140 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:01:24.983 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:01:25.815 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:01:26.652 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:01:27.450 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:28.282 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:28.539 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:01:29.695 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:01:29.938 | SUCCESS  | utils.optuna_search:run_optuna_search:220 - Optuna [INJ/USD_15m]: best Sharpe=-999.000 after 30 trials
+2026-02-23 10:01:29.945 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-23 10:01:29.966 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=26771 val=4034 test=4034
+2026-02-23 10:01:29.980 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_15m_f1 on cuda — 26759 train samples
+2026-02-23 10:01:30.790 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: miopenStatusUnknownError
+2026-02-23 10:01:30.793 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 10:01:30.794 | INFO     | __main__:main:423 - 
+Processing: LINK/USD [15m]
+2026-02-23 10:01:30.807 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 10:01:30.810 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 10:01:30.810 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: LINK/USD_15m
+============================================================
+2026-02-23 10:01:30.811 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-23 10:01:30.811 | INFO     | data.feature_engineer:build_features:283 - Building features for LINK/USD_15m (35041 rows)
+2026-02-23 10:01:31.004 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 34841 usable rows
+2026-02-23 10:01:31.005 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=10363 NEUTRAL=14273 UP=10205
+2026-02-23 10:01:31.006 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=16442 trending_up=9386 trending_down=9013
+2026-02-23 10:01:31.006 | WARNING  | utils.walk_forward:walk_forward_validate:325 - Insufficient data for walk-forward [15m]: 34841/45600 bars — scaling down proportionally (train=26772 val=4034 test=4034)
+2026-02-23 10:01:31.055 | INFO     | utils.optuna_search:run_optuna_search:207 - Optuna search: LINK/USD_15m [15m] — 30 trials
+2026-02-23 10:01:31.072 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26760 train samples
+2026-02-23 10:01:31.880 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26760 train samples
+2026-02-23 10:01:32.703 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26724 train samples
+2026-02-23 10:01:33.513 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26748 train samples
+2026-02-23 10:01:33.754 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26748 train samples
+2026-02-23 10:01:34.581 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26748 train samples
+2026-02-23 10:01:35.403 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26760 train samples
+2026-02-23 10:01:36.221 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26760 train samples
+2026-02-23 10:01:36.967 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26760 train samples
+2026-02-23 10:01:37.208 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26760 train samples
+2026-02-23 10:01:37.457 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26724 train samples
+2026-02-23 10:01:37.705 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26760 train samples
+2026-02-23 10:01:37.956 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26760 train samples
+2026-02-23 10:01:38.737 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26760 train samples
+2026-02-23 10:01:38.999 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26760 train samples
+2026-02-23 10:01:39.864 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26724 train samples
+2026-02-23 10:01:40.128 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26760 train samples
+2026-02-23 10:01:40.936 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26760 train samples
+2026-02-23 10:01:41.206 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26748 train samples
+2026-02-23 10:01:41.495 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26724 train samples
+2026-02-23 10:01:42.343 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26760 train samples
+2026-02-23 10:01:42.606 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26724 train samples
+2026-02-23 10:01:43.379 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26724 train samples
+2026-02-23 10:01:44.138 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26724 train samples
+2026-02-23 10:01:44.886 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26724 train samples
+2026-02-23 10:01:45.636 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26724 train samples
+2026-02-23 10:01:46.395 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26760 train samples
+2026-02-23 10:01:47.126 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26760 train samples
+2026-02-23 10:01:47.371 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26748 train samples
+2026-02-23 10:01:48.141 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26724 train samples
+2026-02-23 10:01:48.376 | SUCCESS  | utils.optuna_search:run_optuna_search:220 - Optuna [LINK/USD_15m]: best Sharpe=-999.000 after 30 trials
+2026-02-23 10:01:48.381 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-23 10:01:48.398 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=26772 val=4034 test=4034
+2026-02-23 10:01:48.413 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_15m_f1 on cuda — 26760 train samples
+2026-02-23 10:01:49.131 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: miopenStatusUnknownError
+2026-02-23 10:01:49.134 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 10:01:49.141 | INFO     | __main__:main:423 - 
+Processing: DOGE/USD [15m]
+2026-02-23 10:01:49.152 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 10:01:49.155 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 10:01:49.155 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: DOGE/USD_15m
+============================================================
+2026-02-23 10:01:49.156 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-23 10:01:49.156 | INFO     | data.feature_engineer:build_features:283 - Building features for DOGE/USD_15m (35040 rows)
+2026-02-23 10:01:49.312 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 34840 usable rows
+2026-02-23 10:01:49.313 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=10304 NEUTRAL=14363 UP=10173
+2026-02-23 10:01:49.314 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=14366 trending_up=9329 trending_down=11145
+2026-02-23 10:01:49.314 | WARNING  | utils.walk_forward:walk_forward_validate:325 - Insufficient data for walk-forward [15m]: 34840/45600 bars — scaling down proportionally (train=26771 val=4034 test=4034)
+2026-02-23 10:01:49.364 | INFO     | utils.optuna_search:run_optuna_search:207 - Optuna search: DOGE/USD_15m [15m] — 30 trials
+2026-02-23 10:01:49.387 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:50.151 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:50.899 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:01:51.639 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:01:51.865 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:01:52.632 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:01:53.391 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:54.150 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:54.988 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:55.258 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:55.523 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:01:55.783 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:56.048 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:56.874 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:57.138 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:57.963 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:01:58.225 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:59.010 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:01:59.261 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:01:59.522 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:00.324 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:00.588 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:01.368 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:02.161 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:02.956 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:03.752 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:04.487 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:05.214 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:05.467 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:02:06.197 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:06.421 | SUCCESS  | utils.optuna_search:run_optuna_search:220 - Optuna [DOGE/USD_15m]: best Sharpe=-999.000 after 30 trials
+2026-02-23 10:02:06.426 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-23 10:02:06.446 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=26771 val=4034 test=4034
+2026-02-23 10:02:06.461 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_15m_f1 on cuda — 26759 train samples
+2026-02-23 10:02:07.123 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: miopenStatusUnknownError
+2026-02-23 10:02:07.126 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 10:02:07.131 | INFO     | __main__:main:423 - 
+Processing: OP/USD [15m]
+2026-02-23 10:02:07.141 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 10:02:07.143 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 10:02:07.144 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: OP/USD_15m
+============================================================
+2026-02-23 10:02:07.144 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-23 10:02:07.144 | INFO     | data.feature_engineer:build_features:283 - Building features for OP/USD_15m (35040 rows)
+2026-02-23 10:02:07.289 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 34840 usable rows
+2026-02-23 10:02:07.290 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=11375 NEUTRAL=12546 UP=10919
+2026-02-23 10:02:07.291 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=16043 trending_up=9267 trending_down=9530
+2026-02-23 10:02:07.291 | WARNING  | utils.walk_forward:walk_forward_validate:325 - Insufficient data for walk-forward [15m]: 34840/45600 bars — scaling down proportionally (train=26771 val=4034 test=4034)
+2026-02-23 10:02:07.334 | INFO     | utils.optuna_search:run_optuna_search:207 - Optuna search: OP/USD_15m [15m] — 30 trials
+2026-02-23 10:02:07.351 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:08.032 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:08.746 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:09.423 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:02:09.653 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:02:10.428 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:02:11.160 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:11.861 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:12.588 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:12.831 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:13.067 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:13.313 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:13.554 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:14.296 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:14.542 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:15.263 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:15.508 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:16.219 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:16.461 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:02:16.710 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:17.434 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:17.683 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:18.455 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:19.196 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:19.928 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:20.666 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:21.395 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:22.107 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:22.358 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:02:23.085 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:23.303 | SUCCESS  | utils.optuna_search:run_optuna_search:220 - Optuna [OP/USD_15m]: best Sharpe=-999.000 after 30 trials
+2026-02-23 10:02:23.309 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-23 10:02:23.332 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=26771 val=4034 test=4034
+2026-02-23 10:02:23.347 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_15m_f1 on cuda — 26759 train samples
+2026-02-23 10:02:24.029 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: miopenStatusUnknownError
+2026-02-23 10:02:24.032 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 10:02:24.037 | INFO     | __main__:main:423 - 
+Processing: ARB/USD [15m]
+2026-02-23 10:02:24.048 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 10:02:24.050 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 10:02:24.051 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: ARB/USD_15m
+============================================================
+2026-02-23 10:02:24.051 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-23 10:02:24.051 | INFO     | data.feature_engineer:build_features:283 - Building features for ARB/USD_15m (35040 rows)
+2026-02-23 10:02:24.204 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 34840 usable rows
+2026-02-23 10:02:24.204 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=11372 NEUTRAL=12547 UP=10921
+2026-02-23 10:02:24.205 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=15658 trending_up=8988 trending_down=10194
+2026-02-23 10:02:24.205 | WARNING  | utils.walk_forward:walk_forward_validate:325 - Insufficient data for walk-forward [15m]: 34840/45600 bars — scaling down proportionally (train=26771 val=4034 test=4034)
+2026-02-23 10:02:24.251 | INFO     | utils.optuna_search:run_optuna_search:207 - Optuna search: ARB/USD_15m [15m] — 30 trials
+2026-02-23 10:02:24.268 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:25.006 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:25.732 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:26.446 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:02:26.681 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:02:27.381 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:02:28.088 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:28.823 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:29.526 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:29.763 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:29.998 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:30.238 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:30.486 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:31.234 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:31.480 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:32.228 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:32.502 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:33.301 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:33.571 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:02:33.846 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:34.707 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:34.968 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:35.770 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:36.574 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:37.295 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:38.143 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:38.902 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:39.662 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26759 train samples
+2026-02-23 10:02:39.927 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26747 train samples
+2026-02-23 10:02:40.739 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 26723 train samples
+2026-02-23 10:02:40.974 | SUCCESS  | utils.optuna_search:run_optuna_search:220 - Optuna [ARB/USD_15m]: best Sharpe=-999.000 after 30 trials
+2026-02-23 10:02:40.980 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-23 10:02:41.004 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=26771 val=4034 test=4034
+2026-02-23 10:02:41.019 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_15m_f1 on cuda — 26759 train samples
+2026-02-23 10:02:41.780 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: miopenStatusUnknownError
+2026-02-23 10:02:41.783 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 10:02:41.790 | INFO     | __main__:main:407 - 
+============================================================
+Timeframe: 1 hour (1h)
+============================================================
+2026-02-23 10:02:41.855 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded INJ/USD 1h from cache (43787 rows)
+2026-02-23 10:02:41.904 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching LINK/USD [1h] — 1825 days...
+2026-02-23 10:03:06.939 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - LINK/USD 1h: 43787 candles (2021-02-24 -> 2026-02-23)
+2026-02-23 10:03:07.034 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching DOGE/USD [1h] — 1825 days...
+2026-02-23 10:03:27.510 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - DOGE/USD 1h: 43787 candles (2021-02-24 -> 2026-02-23)
+2026-02-23 10:03:27.593 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching OP/USD [1h] — 1825 days...
+2026-02-23 10:03:43.734 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - OP/USD 1h: 32714 candles (2022-06-01 -> 2026-02-23)
+2026-02-23 10:03:43.810 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching ARB/USD [1h] — 1825 days...
+2026-02-23 10:03:57.036 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - ARB/USD 1h: 25627 candles (2023-03-23 -> 2026-02-23)
+2026-02-23 10:03:57.074 | INFO     | __main__:main:423 - 
+Processing: INJ/USD [1h]
+2026-02-23 10:03:57.086 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 10:03:57.089 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 10:03:57.090 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: INJ/USD_1h
+============================================================
+2026-02-23 10:03:57.090 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [1h]: train=8760 bars val=1320 test=1320 step=1320
+2026-02-23 10:03:57.091 | INFO     | data.feature_engineer:build_features:283 - Building features for INJ/USD_1h (43787 rows)
+2026-02-23 10:03:57.303 | INFO     | data.feature_engineer:build_features:308 - Dropped 205 NaN/inf rows → 43582 usable rows
+2026-02-23 10:03:57.305 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=18141 NEUTRAL=8172 UP=17269
+2026-02-23 10:03:57.306 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=18575 trending_up=14343 trending_down=10664
+2026-02-23 10:03:57.335 | INFO     | utils.optuna_search:run_optuna_search:207 - Optuna search: INJ/USD_1h [1h] — 30 trials
+2026-02-23 10:03:57.353 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:03:58.257 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:03:59.139 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:00.028 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:04:00.280 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:04:01.164 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:04:02.086 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:02.956 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:03.812 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:04.077 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:04.340 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:04.608 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:04.903 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:05.804 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:06.082 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:06.919 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:07.171 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:07.967 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:08.231 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:04:08.498 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:09.410 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:09.680 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:10.569 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:11.466 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:12.297 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:13.213 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:14.088 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:14.965 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:15.212 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:04:16.114 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:16.357 | SUCCESS  | utils.optuna_search:run_optuna_search:220 - Optuna [INJ/USD_1h]: best Sharpe=-999.000 after 30 trials
+2026-02-23 10:04:16.364 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-23 10:04:16.376 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=8760 val=1320 test=1320
+2026-02-23 10:04:16.388 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f1 on cuda — 8748 train samples
+2026-02-23 10:04:17.229 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: miopenStatusUnknownError
+2026-02-23 10:04:17.243 | INFO     | utils.walk_forward:run_fold:164 - Fold 2: train=8760 val=1320 test=1320
+2026-02-23 10:04:17.255 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f2 on cuda — 8748 train samples
+2026-02-23 10:04:18.103 | ERROR    | utils.walk_forward:run_fold:202 - Fold 2 training failed: miopenStatusUnknownError
+2026-02-23 10:04:18.116 | INFO     | utils.walk_forward:run_fold:164 - Fold 3: train=8760 val=1320 test=1320
+2026-02-23 10:04:18.130 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f3 on cuda — 8748 train samples
+2026-02-23 10:04:18.987 | ERROR    | utils.walk_forward:run_fold:202 - Fold 3 training failed: miopenStatusUnknownError
+2026-02-23 10:04:19.004 | INFO     | utils.walk_forward:run_fold:164 - Fold 4: train=8760 val=1320 test=1320
+2026-02-23 10:04:19.019 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f4 on cuda — 8748 train samples
+2026-02-23 10:04:19.866 | ERROR    | utils.walk_forward:run_fold:202 - Fold 4 training failed: miopenStatusUnknownError
+2026-02-23 10:04:19.882 | INFO     | utils.walk_forward:run_fold:164 - Fold 5: train=8760 val=1320 test=1320
+2026-02-23 10:04:19.898 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f5 on cuda — 8748 train samples
+2026-02-23 10:04:20.775 | ERROR    | utils.walk_forward:run_fold:202 - Fold 5 training failed: miopenStatusUnknownError
+2026-02-23 10:04:20.792 | INFO     | utils.walk_forward:run_fold:164 - Fold 6: train=8760 val=1320 test=1320
+2026-02-23 10:04:20.815 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f6 on cuda — 8748 train samples
+2026-02-23 10:04:21.680 | ERROR    | utils.walk_forward:run_fold:202 - Fold 6 training failed: miopenStatusUnknownError
+2026-02-23 10:04:21.694 | INFO     | utils.walk_forward:run_fold:164 - Fold 7: train=8760 val=1320 test=1320
+2026-02-23 10:04:21.710 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f7 on cuda — 8748 train samples
+2026-02-23 10:04:22.565 | ERROR    | utils.walk_forward:run_fold:202 - Fold 7 training failed: miopenStatusUnknownError
+2026-02-23 10:04:22.582 | INFO     | utils.walk_forward:run_fold:164 - Fold 8: train=8760 val=1320 test=1320
+2026-02-23 10:04:22.596 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f8 on cuda — 8748 train samples
+2026-02-23 10:04:23.433 | ERROR    | utils.walk_forward:run_fold:202 - Fold 8 training failed: miopenStatusUnknownError
+2026-02-23 10:04:23.447 | INFO     | utils.walk_forward:run_fold:164 - Fold 9: train=8760 val=1320 test=1320
+2026-02-23 10:04:23.460 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f9 on cuda — 8748 train samples
+2026-02-23 10:04:24.281 | ERROR    | utils.walk_forward:run_fold:202 - Fold 9 training failed: miopenStatusUnknownError
+2026-02-23 10:04:24.295 | INFO     | utils.walk_forward:run_fold:164 - Fold 10: train=8760 val=1320 test=1320
+2026-02-23 10:04:24.309 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f10 on cuda — 8748 train samples
+2026-02-23 10:04:25.152 | ERROR    | utils.walk_forward:run_fold:202 - Fold 10 training failed: miopenStatusUnknownError
+2026-02-23 10:04:25.164 | INFO     | utils.walk_forward:run_fold:164 - Fold 11: train=8760 val=1320 test=1320
+2026-02-23 10:04:25.177 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f11 on cuda — 8748 train samples
+2026-02-23 10:04:26.001 | ERROR    | utils.walk_forward:run_fold:202 - Fold 11 training failed: miopenStatusUnknownError
+2026-02-23 10:04:26.017 | INFO     | utils.walk_forward:run_fold:164 - Fold 12: train=8760 val=1320 test=1320
+2026-02-23 10:04:26.030 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f12 on cuda — 8748 train samples
+2026-02-23 10:04:26.830 | ERROR    | utils.walk_forward:run_fold:202 - Fold 12 training failed: miopenStatusUnknownError
+2026-02-23 10:04:26.844 | INFO     | utils.walk_forward:run_fold:164 - Fold 13: train=8760 val=1320 test=1320
+2026-02-23 10:04:26.858 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f13 on cuda — 8748 train samples
+2026-02-23 10:04:27.640 | ERROR    | utils.walk_forward:run_fold:202 - Fold 13 training failed: miopenStatusUnknownError
+2026-02-23 10:04:27.657 | INFO     | utils.walk_forward:run_fold:164 - Fold 14: train=8760 val=1320 test=1320
+2026-02-23 10:04:27.670 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f14 on cuda — 8748 train samples
+2026-02-23 10:04:28.599 | ERROR    | utils.walk_forward:run_fold:202 - Fold 14 training failed: miopenStatusUnknownError
+2026-02-23 10:04:28.614 | INFO     | utils.walk_forward:run_fold:164 - Fold 15: train=8760 val=1320 test=1320
+2026-02-23 10:04:28.626 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f15 on cuda — 8748 train samples
+2026-02-23 10:04:29.465 | ERROR    | utils.walk_forward:run_fold:202 - Fold 15 training failed: miopenStatusUnknownError
+2026-02-23 10:04:29.481 | INFO     | utils.walk_forward:run_fold:164 - Fold 16: train=8760 val=1320 test=1320
+2026-02-23 10:04:29.495 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f16 on cuda — 8748 train samples
+2026-02-23 10:04:30.326 | ERROR    | utils.walk_forward:run_fold:202 - Fold 16 training failed: miopenStatusUnknownError
+2026-02-23 10:04:30.342 | INFO     | utils.walk_forward:run_fold:164 - Fold 17: train=8760 val=1320 test=1320
+2026-02-23 10:04:30.355 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f17 on cuda — 8748 train samples
+2026-02-23 10:04:31.186 | ERROR    | utils.walk_forward:run_fold:202 - Fold 17 training failed: miopenStatusUnknownError
+2026-02-23 10:04:31.201 | INFO     | utils.walk_forward:run_fold:164 - Fold 18: train=8760 val=1320 test=1320
+2026-02-23 10:04:31.212 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f18 on cuda — 8748 train samples
+2026-02-23 10:04:32.056 | ERROR    | utils.walk_forward:run_fold:202 - Fold 18 training failed: miopenStatusUnknownError
+2026-02-23 10:04:32.070 | INFO     | utils.walk_forward:run_fold:164 - Fold 19: train=8760 val=1320 test=1320
+2026-02-23 10:04:32.083 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f19 on cuda — 8748 train samples
+2026-02-23 10:04:32.900 | ERROR    | utils.walk_forward:run_fold:202 - Fold 19 training failed: miopenStatusUnknownError
+2026-02-23 10:04:32.917 | INFO     | utils.walk_forward:run_fold:164 - Fold 20: train=8760 val=1320 test=1320
+2026-02-23 10:04:32.931 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f20 on cuda — 8748 train samples
+2026-02-23 10:04:33.754 | ERROR    | utils.walk_forward:run_fold:202 - Fold 20 training failed: miopenStatusUnknownError
+2026-02-23 10:04:33.769 | INFO     | utils.walk_forward:run_fold:164 - Fold 21: train=8760 val=1320 test=1320
+2026-02-23 10:04:33.784 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f21 on cuda — 8748 train samples
+2026-02-23 10:04:34.579 | ERROR    | utils.walk_forward:run_fold:202 - Fold 21 training failed: miopenStatusUnknownError
+2026-02-23 10:04:34.592 | INFO     | utils.walk_forward:run_fold:164 - Fold 22: train=8760 val=1320 test=1320
+2026-02-23 10:04:34.606 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f22 on cuda — 8748 train samples
+2026-02-23 10:04:35.402 | ERROR    | utils.walk_forward:run_fold:202 - Fold 22 training failed: miopenStatusUnknownError
+2026-02-23 10:04:35.419 | INFO     | utils.walk_forward:run_fold:164 - Fold 23: train=8760 val=1320 test=1320
+2026-02-23 10:04:35.432 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f23 on cuda — 8748 train samples
+2026-02-23 10:04:36.164 | ERROR    | utils.walk_forward:run_fold:202 - Fold 23 training failed: miopenStatusUnknownError
+2026-02-23 10:04:36.176 | INFO     | utils.walk_forward:run_fold:164 - Fold 24: train=8760 val=1320 test=1320
+2026-02-23 10:04:36.188 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f24 on cuda — 8748 train samples
+2026-02-23 10:04:36.891 | ERROR    | utils.walk_forward:run_fold:202 - Fold 24 training failed: miopenStatusUnknownError
+2026-02-23 10:04:36.903 | INFO     | utils.walk_forward:run_fold:164 - Fold 25: train=8760 val=1320 test=1320
+2026-02-23 10:04:36.916 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_1h_f25 on cuda — 8748 train samples
+2026-02-23 10:04:37.577 | ERROR    | utils.walk_forward:run_fold:202 - Fold 25 training failed: miopenStatusUnknownError
+2026-02-23 10:04:37.579 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 10:04:37.582 | INFO     | __main__:main:423 - 
+Processing: LINK/USD [1h]
+2026-02-23 10:04:37.596 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 10:04:37.599 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 10:04:37.600 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: LINK/USD_1h
+============================================================
+2026-02-23 10:04:37.600 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [1h]: train=8760 bars val=1320 test=1320 step=1320
+2026-02-23 10:04:37.600 | INFO     | data.feature_engineer:build_features:283 - Building features for LINK/USD_1h (43787 rows)
+2026-02-23 10:04:37.798 | INFO     | data.feature_engineer:build_features:308 - Dropped 205 NaN/inf rows → 43582 usable rows
+2026-02-23 10:04:37.800 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=16679 NEUTRAL=10190 UP=16713
+2026-02-23 10:04:37.800 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=18584 trending_up=10900 trending_down=14098
+2026-02-23 10:04:37.826 | INFO     | utils.optuna_search:run_optuna_search:207 - Optuna search: LINK/USD_1h [1h] — 30 trials
+2026-02-23 10:04:37.851 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:38.609 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:39.357 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:40.122 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:04:40.348 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:04:41.103 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:04:41.845 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:42.579 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:43.365 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:43.632 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:43.895 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:44.142 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:44.383 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:45.175 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:45.414 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:46.174 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:46.413 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:47.174 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:47.412 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:04:47.654 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:48.410 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:48.651 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:49.418 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:50.175 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:50.947 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:51.682 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:52.433 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:53.195 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:04:53.434 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:04:54.185 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:04:54.408 | SUCCESS  | utils.optuna_search:run_optuna_search:220 - Optuna [LINK/USD_1h]: best Sharpe=-999.000 after 30 trials
+2026-02-23 10:04:54.413 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-23 10:04:54.424 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=8760 val=1320 test=1320
+2026-02-23 10:04:54.437 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f1 on cuda — 8748 train samples
+2026-02-23 10:04:55.187 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: miopenStatusUnknownError
+2026-02-23 10:04:55.199 | INFO     | utils.walk_forward:run_fold:164 - Fold 2: train=8760 val=1320 test=1320
+2026-02-23 10:04:55.211 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f2 on cuda — 8748 train samples
+2026-02-23 10:04:55.952 | ERROR    | utils.walk_forward:run_fold:202 - Fold 2 training failed: miopenStatusUnknownError
+2026-02-23 10:04:55.966 | INFO     | utils.walk_forward:run_fold:164 - Fold 3: train=8760 val=1320 test=1320
+2026-02-23 10:04:55.979 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f3 on cuda — 8748 train samples
+2026-02-23 10:04:56.688 | ERROR    | utils.walk_forward:run_fold:202 - Fold 3 training failed: miopenStatusUnknownError
+2026-02-23 10:04:56.700 | INFO     | utils.walk_forward:run_fold:164 - Fold 4: train=8760 val=1320 test=1320
+2026-02-23 10:04:56.713 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f4 on cuda — 8748 train samples
+2026-02-23 10:04:57.457 | ERROR    | utils.walk_forward:run_fold:202 - Fold 4 training failed: miopenStatusUnknownError
+2026-02-23 10:04:57.471 | INFO     | utils.walk_forward:run_fold:164 - Fold 5: train=8760 val=1320 test=1320
+2026-02-23 10:04:57.482 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f5 on cuda — 8748 train samples
+2026-02-23 10:04:58.207 | ERROR    | utils.walk_forward:run_fold:202 - Fold 5 training failed: miopenStatusUnknownError
+2026-02-23 10:04:58.219 | INFO     | utils.walk_forward:run_fold:164 - Fold 6: train=8760 val=1320 test=1320
+2026-02-23 10:04:58.232 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f6 on cuda — 8748 train samples
+2026-02-23 10:04:58.967 | ERROR    | utils.walk_forward:run_fold:202 - Fold 6 training failed: miopenStatusUnknownError
+2026-02-23 10:04:58.982 | INFO     | utils.walk_forward:run_fold:164 - Fold 7: train=8760 val=1320 test=1320
+2026-02-23 10:04:58.994 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f7 on cuda — 8748 train samples
+2026-02-23 10:04:59.713 | ERROR    | utils.walk_forward:run_fold:202 - Fold 7 training failed: miopenStatusUnknownError
+2026-02-23 10:04:59.725 | INFO     | utils.walk_forward:run_fold:164 - Fold 8: train=8760 val=1320 test=1320
+2026-02-23 10:04:59.738 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f8 on cuda — 8748 train samples
+2026-02-23 10:05:00.466 | ERROR    | utils.walk_forward:run_fold:202 - Fold 8 training failed: miopenStatusUnknownError
+2026-02-23 10:05:00.481 | INFO     | utils.walk_forward:run_fold:164 - Fold 9: train=8760 val=1320 test=1320
+2026-02-23 10:05:00.493 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f9 on cuda — 8748 train samples
+2026-02-23 10:05:01.236 | ERROR    | utils.walk_forward:run_fold:202 - Fold 9 training failed: miopenStatusUnknownError
+2026-02-23 10:05:01.250 | INFO     | utils.walk_forward:run_fold:164 - Fold 10: train=8760 val=1320 test=1320
+2026-02-23 10:05:01.262 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f10 on cuda — 8748 train samples
+2026-02-23 10:05:01.988 | ERROR    | utils.walk_forward:run_fold:202 - Fold 10 training failed: miopenStatusUnknownError
+2026-02-23 10:05:02.002 | INFO     | utils.walk_forward:run_fold:164 - Fold 11: train=8760 val=1320 test=1320
+2026-02-23 10:05:02.014 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f11 on cuda — 8748 train samples
+2026-02-23 10:05:02.716 | ERROR    | utils.walk_forward:run_fold:202 - Fold 11 training failed: miopenStatusUnknownError
+2026-02-23 10:05:02.728 | INFO     | utils.walk_forward:run_fold:164 - Fold 12: train=8760 val=1320 test=1320
+2026-02-23 10:05:02.742 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f12 on cuda — 8748 train samples
+2026-02-23 10:05:03.478 | ERROR    | utils.walk_forward:run_fold:202 - Fold 12 training failed: miopenStatusUnknownError
+2026-02-23 10:05:03.491 | INFO     | utils.walk_forward:run_fold:164 - Fold 13: train=8760 val=1320 test=1320
+2026-02-23 10:05:03.504 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f13 on cuda — 8748 train samples
+2026-02-23 10:05:04.240 | ERROR    | utils.walk_forward:run_fold:202 - Fold 13 training failed: miopenStatusUnknownError
+2026-02-23 10:05:04.252 | INFO     | utils.walk_forward:run_fold:164 - Fold 14: train=8760 val=1320 test=1320
+2026-02-23 10:05:04.264 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f14 on cuda — 8748 train samples
+2026-02-23 10:05:05.018 | ERROR    | utils.walk_forward:run_fold:202 - Fold 14 training failed: miopenStatusUnknownError
+2026-02-23 10:05:05.031 | INFO     | utils.walk_forward:run_fold:164 - Fold 15: train=8760 val=1320 test=1320
+2026-02-23 10:05:05.045 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f15 on cuda — 8748 train samples
+2026-02-23 10:05:05.780 | ERROR    | utils.walk_forward:run_fold:202 - Fold 15 training failed: miopenStatusUnknownError
+2026-02-23 10:05:05.793 | INFO     | utils.walk_forward:run_fold:164 - Fold 16: train=8760 val=1320 test=1320
+2026-02-23 10:05:05.808 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f16 on cuda — 8748 train samples
+2026-02-23 10:05:06.517 | ERROR    | utils.walk_forward:run_fold:202 - Fold 16 training failed: miopenStatusUnknownError
+2026-02-23 10:05:06.535 | INFO     | utils.walk_forward:run_fold:164 - Fold 17: train=8760 val=1320 test=1320
+2026-02-23 10:05:06.551 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f17 on cuda — 8748 train samples
+2026-02-23 10:05:07.263 | ERROR    | utils.walk_forward:run_fold:202 - Fold 17 training failed: miopenStatusUnknownError
+2026-02-23 10:05:07.275 | INFO     | utils.walk_forward:run_fold:164 - Fold 18: train=8760 val=1320 test=1320
+2026-02-23 10:05:07.287 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f18 on cuda — 8748 train samples
+2026-02-23 10:05:07.990 | ERROR    | utils.walk_forward:run_fold:202 - Fold 18 training failed: miopenStatusUnknownError
+2026-02-23 10:05:08.004 | INFO     | utils.walk_forward:run_fold:164 - Fold 19: train=8760 val=1320 test=1320
+2026-02-23 10:05:08.016 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f19 on cuda — 8748 train samples
+2026-02-23 10:05:08.707 | ERROR    | utils.walk_forward:run_fold:202 - Fold 19 training failed: miopenStatusUnknownError
+2026-02-23 10:05:08.722 | INFO     | utils.walk_forward:run_fold:164 - Fold 20: train=8760 val=1320 test=1320
+2026-02-23 10:05:08.733 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f20 on cuda — 8748 train samples
+2026-02-23 10:05:09.455 | ERROR    | utils.walk_forward:run_fold:202 - Fold 20 training failed: miopenStatusUnknownError
+2026-02-23 10:05:09.468 | INFO     | utils.walk_forward:run_fold:164 - Fold 21: train=8760 val=1320 test=1320
+2026-02-23 10:05:09.482 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f21 on cuda — 8748 train samples
+2026-02-23 10:05:10.225 | ERROR    | utils.walk_forward:run_fold:202 - Fold 21 training failed: miopenStatusUnknownError
+2026-02-23 10:05:10.237 | INFO     | utils.walk_forward:run_fold:164 - Fold 22: train=8760 val=1320 test=1320
+2026-02-23 10:05:10.248 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f22 on cuda — 8748 train samples
+2026-02-23 10:05:10.994 | ERROR    | utils.walk_forward:run_fold:202 - Fold 22 training failed: miopenStatusUnknownError
+2026-02-23 10:05:11.008 | INFO     | utils.walk_forward:run_fold:164 - Fold 23: train=8760 val=1320 test=1320
+2026-02-23 10:05:11.023 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f23 on cuda — 8748 train samples
+2026-02-23 10:05:11.739 | ERROR    | utils.walk_forward:run_fold:202 - Fold 23 training failed: miopenStatusUnknownError
+2026-02-23 10:05:11.753 | INFO     | utils.walk_forward:run_fold:164 - Fold 24: train=8760 val=1320 test=1320
+2026-02-23 10:05:11.765 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f24 on cuda — 8748 train samples
+2026-02-23 10:05:12.483 | ERROR    | utils.walk_forward:run_fold:202 - Fold 24 training failed: miopenStatusUnknownError
+2026-02-23 10:05:12.498 | INFO     | utils.walk_forward:run_fold:164 - Fold 25: train=8760 val=1320 test=1320
+2026-02-23 10:05:12.510 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_1h_f25 on cuda — 8748 train samples
+2026-02-23 10:05:13.247 | ERROR    | utils.walk_forward:run_fold:202 - Fold 25 training failed: miopenStatusUnknownError
+2026-02-23 10:05:13.249 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 10:05:13.254 | INFO     | __main__:main:423 - 
+Processing: DOGE/USD [1h]
+2026-02-23 10:05:13.266 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 10:05:13.269 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 10:05:13.270 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: DOGE/USD_1h
+============================================================
+2026-02-23 10:05:13.270 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [1h]: train=8760 bars val=1320 test=1320 step=1320
+2026-02-23 10:05:13.270 | INFO     | data.feature_engineer:build_features:283 - Building features for DOGE/USD_1h (43787 rows)
+2026-02-23 10:05:13.448 | INFO     | data.feature_engineer:build_features:308 - Dropped 205 NaN/inf rows → 43582 usable rows
+2026-02-23 10:05:13.449 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=16176 NEUTRAL=11649 UP=15757
+2026-02-23 10:05:13.450 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=17128 trending_up=11714 trending_down=14740
+2026-02-23 10:05:13.476 | INFO     | utils.optuna_search:run_optuna_search:207 - Optuna search: DOGE/USD_1h [1h] — 30 trials
+2026-02-23 10:05:13.492 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:14.237 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:14.979 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:05:15.717 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:05:15.949 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:05:16.667 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:05:17.421 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:18.168 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:18.937 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:19.175 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:19.414 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:05:19.657 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:19.899 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:20.631 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:20.878 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:21.621 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:05:21.861 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:22.596 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:22.833 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:05:23.088 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:05:23.864 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:24.114 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:05:24.868 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:05:25.621 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:05:26.375 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:05:27.124 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:05:27.869 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:28.608 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:28.848 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:05:29.600 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:05:29.826 | SUCCESS  | utils.optuna_search:run_optuna_search:220 - Optuna [DOGE/USD_1h]: best Sharpe=-999.000 after 30 trials
+2026-02-23 10:05:29.832 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-23 10:05:29.843 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=8760 val=1320 test=1320
+2026-02-23 10:05:29.856 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f1 on cuda — 8748 train samples
+2026-02-23 10:05:30.572 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: miopenStatusUnknownError
+2026-02-23 10:05:30.585 | INFO     | utils.walk_forward:run_fold:164 - Fold 2: train=8760 val=1320 test=1320
+2026-02-23 10:05:30.599 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f2 on cuda — 8748 train samples
+2026-02-23 10:05:31.334 | ERROR    | utils.walk_forward:run_fold:202 - Fold 2 training failed: miopenStatusUnknownError
+2026-02-23 10:05:31.348 | INFO     | utils.walk_forward:run_fold:164 - Fold 3: train=8760 val=1320 test=1320
+2026-02-23 10:05:31.363 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f3 on cuda — 8748 train samples
+2026-02-23 10:05:32.085 | ERROR    | utils.walk_forward:run_fold:202 - Fold 3 training failed: miopenStatusUnknownError
+2026-02-23 10:05:32.097 | INFO     | utils.walk_forward:run_fold:164 - Fold 4: train=8760 val=1320 test=1320
+2026-02-23 10:05:32.123 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f4 on cuda — 8748 train samples
+2026-02-23 10:05:32.863 | ERROR    | utils.walk_forward:run_fold:202 - Fold 4 training failed: miopenStatusUnknownError
+2026-02-23 10:05:32.875 | INFO     | utils.walk_forward:run_fold:164 - Fold 5: train=8760 val=1320 test=1320
+2026-02-23 10:05:32.888 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f5 on cuda — 8748 train samples
+2026-02-23 10:05:33.612 | ERROR    | utils.walk_forward:run_fold:202 - Fold 5 training failed: miopenStatusUnknownError
+2026-02-23 10:05:33.624 | INFO     | utils.walk_forward:run_fold:164 - Fold 6: train=8760 val=1320 test=1320
+2026-02-23 10:05:33.637 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f6 on cuda — 8748 train samples
+2026-02-23 10:05:34.366 | ERROR    | utils.walk_forward:run_fold:202 - Fold 6 training failed: miopenStatusUnknownError
+2026-02-23 10:05:34.379 | INFO     | utils.walk_forward:run_fold:164 - Fold 7: train=8760 val=1320 test=1320
+2026-02-23 10:05:34.391 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f7 on cuda — 8748 train samples
+2026-02-23 10:05:35.133 | ERROR    | utils.walk_forward:run_fold:202 - Fold 7 training failed: miopenStatusUnknownError
+2026-02-23 10:05:35.147 | INFO     | utils.walk_forward:run_fold:164 - Fold 8: train=8760 val=1320 test=1320
+2026-02-23 10:05:35.160 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f8 on cuda — 8748 train samples
+2026-02-23 10:05:35.903 | ERROR    | utils.walk_forward:run_fold:202 - Fold 8 training failed: miopenStatusUnknownError
+2026-02-23 10:05:35.917 | INFO     | utils.walk_forward:run_fold:164 - Fold 9: train=8760 val=1320 test=1320
+2026-02-23 10:05:35.932 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f9 on cuda — 8748 train samples
+2026-02-23 10:05:36.627 | ERROR    | utils.walk_forward:run_fold:202 - Fold 9 training failed: miopenStatusUnknownError
+2026-02-23 10:05:36.639 | INFO     | utils.walk_forward:run_fold:164 - Fold 10: train=8760 val=1320 test=1320
+2026-02-23 10:05:36.651 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f10 on cuda — 8748 train samples
+2026-02-23 10:05:37.359 | ERROR    | utils.walk_forward:run_fold:202 - Fold 10 training failed: miopenStatusUnknownError
+2026-02-23 10:05:37.370 | INFO     | utils.walk_forward:run_fold:164 - Fold 11: train=8760 val=1320 test=1320
+2026-02-23 10:05:37.381 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f11 on cuda — 8748 train samples
+2026-02-23 10:05:38.080 | ERROR    | utils.walk_forward:run_fold:202 - Fold 11 training failed: miopenStatusUnknownError
+2026-02-23 10:05:38.090 | INFO     | utils.walk_forward:run_fold:164 - Fold 12: train=8760 val=1320 test=1320
+2026-02-23 10:05:38.102 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f12 on cuda — 8748 train samples
+2026-02-23 10:05:38.801 | ERROR    | utils.walk_forward:run_fold:202 - Fold 12 training failed: miopenStatusUnknownError
+2026-02-23 10:05:38.814 | INFO     | utils.walk_forward:run_fold:164 - Fold 13: train=8760 val=1320 test=1320
+2026-02-23 10:05:38.826 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f13 on cuda — 8748 train samples
+2026-02-23 10:05:39.538 | ERROR    | utils.walk_forward:run_fold:202 - Fold 13 training failed: miopenStatusUnknownError
+2026-02-23 10:05:39.551 | INFO     | utils.walk_forward:run_fold:164 - Fold 14: train=8760 val=1320 test=1320
+2026-02-23 10:05:39.566 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f14 on cuda — 8748 train samples
+2026-02-23 10:05:40.304 | ERROR    | utils.walk_forward:run_fold:202 - Fold 14 training failed: miopenStatusUnknownError
+2026-02-23 10:05:40.316 | INFO     | utils.walk_forward:run_fold:164 - Fold 15: train=8760 val=1320 test=1320
+2026-02-23 10:05:40.330 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f15 on cuda — 8748 train samples
+2026-02-23 10:05:41.072 | ERROR    | utils.walk_forward:run_fold:202 - Fold 15 training failed: miopenStatusUnknownError
+2026-02-23 10:05:41.084 | INFO     | utils.walk_forward:run_fold:164 - Fold 16: train=8760 val=1320 test=1320
+2026-02-23 10:05:41.096 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f16 on cuda — 8748 train samples
+2026-02-23 10:05:41.829 | ERROR    | utils.walk_forward:run_fold:202 - Fold 16 training failed: miopenStatusUnknownError
+2026-02-23 10:05:41.841 | INFO     | utils.walk_forward:run_fold:164 - Fold 17: train=8760 val=1320 test=1320
+2026-02-23 10:05:41.853 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f17 on cuda — 8748 train samples
+2026-02-23 10:05:42.560 | ERROR    | utils.walk_forward:run_fold:202 - Fold 17 training failed: miopenStatusUnknownError
+2026-02-23 10:05:42.573 | INFO     | utils.walk_forward:run_fold:164 - Fold 18: train=8760 val=1320 test=1320
+2026-02-23 10:05:42.585 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f18 on cuda — 8748 train samples
+2026-02-23 10:05:43.333 | ERROR    | utils.walk_forward:run_fold:202 - Fold 18 training failed: miopenStatusUnknownError
+2026-02-23 10:05:43.347 | INFO     | utils.walk_forward:run_fold:164 - Fold 19: train=8760 val=1320 test=1320
+2026-02-23 10:05:43.360 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f19 on cuda — 8748 train samples
+2026-02-23 10:05:44.095 | ERROR    | utils.walk_forward:run_fold:202 - Fold 19 training failed: miopenStatusUnknownError
+2026-02-23 10:05:44.106 | INFO     | utils.walk_forward:run_fold:164 - Fold 20: train=8760 val=1320 test=1320
+2026-02-23 10:05:44.117 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f20 on cuda — 8748 train samples
+2026-02-23 10:05:44.847 | ERROR    | utils.walk_forward:run_fold:202 - Fold 20 training failed: miopenStatusUnknownError
+2026-02-23 10:05:44.860 | INFO     | utils.walk_forward:run_fold:164 - Fold 21: train=8760 val=1320 test=1320
+2026-02-23 10:05:44.875 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f21 on cuda — 8748 train samples
+2026-02-23 10:05:45.607 | ERROR    | utils.walk_forward:run_fold:202 - Fold 21 training failed: miopenStatusUnknownError
+2026-02-23 10:05:45.622 | INFO     | utils.walk_forward:run_fold:164 - Fold 22: train=8760 val=1320 test=1320
+2026-02-23 10:05:45.635 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f22 on cuda — 8748 train samples
+2026-02-23 10:05:46.359 | ERROR    | utils.walk_forward:run_fold:202 - Fold 22 training failed: miopenStatusUnknownError
+2026-02-23 10:05:46.372 | INFO     | utils.walk_forward:run_fold:164 - Fold 23: train=8760 val=1320 test=1320
+2026-02-23 10:05:46.382 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f23 on cuda — 8748 train samples
+2026-02-23 10:05:47.107 | ERROR    | utils.walk_forward:run_fold:202 - Fold 23 training failed: miopenStatusUnknownError
+2026-02-23 10:05:47.120 | INFO     | utils.walk_forward:run_fold:164 - Fold 24: train=8760 val=1320 test=1320
+2026-02-23 10:05:47.131 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f24 on cuda — 8748 train samples
+2026-02-23 10:05:47.867 | ERROR    | utils.walk_forward:run_fold:202 - Fold 24 training failed: miopenStatusUnknownError
+2026-02-23 10:05:47.880 | INFO     | utils.walk_forward:run_fold:164 - Fold 25: train=8760 val=1320 test=1320
+2026-02-23 10:05:47.891 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_1h_f25 on cuda — 8748 train samples
+2026-02-23 10:05:48.590 | ERROR    | utils.walk_forward:run_fold:202 - Fold 25 training failed: miopenStatusUnknownError
+2026-02-23 10:05:48.592 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 10:05:48.595 | INFO     | __main__:main:423 - 
+Processing: OP/USD [1h]
+2026-02-23 10:05:48.610 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 10:05:48.613 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 10:05:48.614 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: OP/USD_1h
+============================================================
+2026-02-23 10:05:48.614 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [1h]: train=8760 bars val=1320 test=1320 step=1320
+2026-02-23 10:05:48.615 | INFO     | data.feature_engineer:build_features:283 - Building features for OP/USD_1h (32714 rows)
+2026-02-23 10:05:48.764 | INFO     | data.feature_engineer:build_features:308 - Dropped 205 NaN/inf rows → 32509 usable rows
+2026-02-23 10:05:48.765 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=13175 NEUTRAL=6823 UP=12511
+2026-02-23 10:05:48.766 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=14496 trending_up=8308 trending_down=9705
+2026-02-23 10:05:48.788 | INFO     | utils.optuna_search:run_optuna_search:207 - Optuna search: OP/USD_1h [1h] — 30 trials
+2026-02-23 10:05:48.804 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:49.545 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:50.315 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:05:51.065 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:05:51.304 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:05:52.048 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:05:52.788 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:53.532 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:54.278 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:54.512 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:54.758 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:05:55.006 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:55.248 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:56.017 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:56.242 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:57.005 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:05:57.252 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:58.008 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:58.246 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:05:58.502 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:05:59.268 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:05:59.510 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:06:00.273 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:06:01.034 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:06:01.791 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:06:02.517 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:06:03.266 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:06:04.025 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:06:04.257 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:06:05.010 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:06:05.239 | SUCCESS  | utils.optuna_search:run_optuna_search:220 - Optuna [OP/USD_1h]: best Sharpe=-999.000 after 30 trials
+2026-02-23 10:06:05.246 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-23 10:06:05.254 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=8760 val=1320 test=1320
+2026-02-23 10:06:05.265 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_1h_f1 on cuda — 8748 train samples
+2026-02-23 10:06:06.000 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: miopenStatusUnknownError
+2026-02-23 10:06:06.013 | INFO     | utils.walk_forward:run_fold:164 - Fold 2: train=8760 val=1320 test=1320
+2026-02-23 10:06:06.026 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_1h_f2 on cuda — 8748 train samples
+2026-02-23 10:06:06.734 | ERROR    | utils.walk_forward:run_fold:202 - Fold 2 training failed: miopenStatusUnknownError
+2026-02-23 10:06:06.746 | INFO     | utils.walk_forward:run_fold:164 - Fold 3: train=8760 val=1320 test=1320
+2026-02-23 10:06:06.762 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_1h_f3 on cuda — 8748 train samples
+2026-02-23 10:06:07.454 | ERROR    | utils.walk_forward:run_fold:202 - Fold 3 training failed: miopenStatusUnknownError
+2026-02-23 10:06:07.465 | INFO     | utils.walk_forward:run_fold:164 - Fold 4: train=8760 val=1320 test=1320
+2026-02-23 10:06:07.478 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_1h_f4 on cuda — 8748 train samples
+2026-02-23 10:06:08.197 | ERROR    | utils.walk_forward:run_fold:202 - Fold 4 training failed: miopenStatusUnknownError
+2026-02-23 10:06:08.207 | INFO     | utils.walk_forward:run_fold:164 - Fold 5: train=8760 val=1320 test=1320
+2026-02-23 10:06:08.219 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_1h_f5 on cuda — 8748 train samples
+2026-02-23 10:06:09.064 | ERROR    | utils.walk_forward:run_fold:202 - Fold 5 training failed: miopenStatusUnknownError
+2026-02-23 10:06:09.074 | INFO     | utils.walk_forward:run_fold:164 - Fold 6: train=8760 val=1320 test=1320
+2026-02-23 10:06:09.088 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_1h_f6 on cuda — 8748 train samples
+2026-02-23 10:06:09.841 | ERROR    | utils.walk_forward:run_fold:202 - Fold 6 training failed: miopenStatusUnknownError
+2026-02-23 10:06:09.852 | INFO     | utils.walk_forward:run_fold:164 - Fold 7: train=8760 val=1320 test=1320
+2026-02-23 10:06:09.864 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_1h_f7 on cuda — 8748 train samples
+2026-02-23 10:06:10.577 | ERROR    | utils.walk_forward:run_fold:202 - Fold 7 training failed: miopenStatusUnknownError
+2026-02-23 10:06:10.589 | INFO     | utils.walk_forward:run_fold:164 - Fold 8: train=8760 val=1320 test=1320
+2026-02-23 10:06:10.603 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_1h_f8 on cuda — 8748 train samples
+2026-02-23 10:06:11.340 | ERROR    | utils.walk_forward:run_fold:202 - Fold 8 training failed: miopenStatusUnknownError
+2026-02-23 10:06:11.357 | INFO     | utils.walk_forward:run_fold:164 - Fold 9: train=8760 val=1320 test=1320
+2026-02-23 10:06:11.370 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_1h_f9 on cuda — 8748 train samples
+2026-02-23 10:06:12.093 | ERROR    | utils.walk_forward:run_fold:202 - Fold 9 training failed: miopenStatusUnknownError
+2026-02-23 10:06:12.102 | INFO     | utils.walk_forward:run_fold:164 - Fold 10: train=8760 val=1320 test=1320
+2026-02-23 10:06:12.116 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_1h_f10 on cuda — 8748 train samples
+2026-02-23 10:06:12.844 | ERROR    | utils.walk_forward:run_fold:202 - Fold 10 training failed: miopenStatusUnknownError
+2026-02-23 10:06:12.856 | INFO     | utils.walk_forward:run_fold:164 - Fold 11: train=8760 val=1320 test=1320
+2026-02-23 10:06:12.867 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_1h_f11 on cuda — 8748 train samples
+2026-02-23 10:06:13.587 | ERROR    | utils.walk_forward:run_fold:202 - Fold 11 training failed: miopenStatusUnknownError
+2026-02-23 10:06:13.597 | INFO     | utils.walk_forward:run_fold:164 - Fold 12: train=8760 val=1320 test=1320
+2026-02-23 10:06:13.609 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_1h_f12 on cuda — 8748 train samples
+2026-02-23 10:06:14.329 | ERROR    | utils.walk_forward:run_fold:202 - Fold 12 training failed: miopenStatusUnknownError
+2026-02-23 10:06:14.340 | INFO     | utils.walk_forward:run_fold:164 - Fold 13: train=8760 val=1320 test=1320
+2026-02-23 10:06:14.354 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_1h_f13 on cuda — 8748 train samples
+2026-02-23 10:06:15.091 | ERROR    | utils.walk_forward:run_fold:202 - Fold 13 training failed: miopenStatusUnknownError
+2026-02-23 10:06:15.100 | INFO     | utils.walk_forward:run_fold:164 - Fold 14: train=8760 val=1320 test=1320
+2026-02-23 10:06:15.113 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_1h_f14 on cuda — 8748 train samples
+2026-02-23 10:06:15.863 | ERROR    | utils.walk_forward:run_fold:202 - Fold 14 training failed: miopenStatusUnknownError
+2026-02-23 10:06:15.875 | INFO     | utils.walk_forward:run_fold:164 - Fold 15: train=8760 val=1320 test=1320
+2026-02-23 10:06:15.889 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_1h_f15 on cuda — 8748 train samples
+2026-02-23 10:06:16.582 | ERROR    | utils.walk_forward:run_fold:202 - Fold 15 training failed: miopenStatusUnknownError
+2026-02-23 10:06:16.593 | INFO     | utils.walk_forward:run_fold:164 - Fold 16: train=8760 val=1320 test=1320
+2026-02-23 10:06:16.606 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_1h_f16 on cuda — 8748 train samples
+2026-02-23 10:06:17.342 | ERROR    | utils.walk_forward:run_fold:202 - Fold 16 training failed: miopenStatusUnknownError
+2026-02-23 10:06:17.343 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 10:06:17.347 | INFO     | __main__:main:423 - 
+Processing: ARB/USD [1h]
+2026-02-23 10:06:17.359 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 10:06:17.361 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 10:06:17.362 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: ARB/USD_1h
+============================================================
+2026-02-23 10:06:17.362 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [1h]: train=8760 bars val=1320 test=1320 step=1320
+2026-02-23 10:06:17.362 | INFO     | data.feature_engineer:build_features:283 - Building features for ARB/USD_1h (25627 rows)
+2026-02-23 10:06:17.499 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 25427 usable rows
+2026-02-23 10:06:17.500 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=9990 NEUTRAL=6066 UP=9371
+2026-02-23 10:06:17.501 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=10871 trending_up=6059 trending_down=8497
+2026-02-23 10:06:17.520 | INFO     | utils.optuna_search:run_optuna_search:207 - Optuna search: ARB/USD_1h [1h] — 30 trials
+2026-02-23 10:06:17.535 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:06:18.283 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:06:19.046 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:06:19.803 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:06:20.030 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:06:20.768 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:06:21.517 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:06:22.267 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:06:23.014 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:06:23.244 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:06:23.499 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:06:23.741 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:06:23.981 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:06:24.721 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:06:24.963 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:06:25.724 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:06:25.967 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:06:26.698 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:06:26.936 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:06:27.172 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:06:27.946 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:06:28.178 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:06:28.935 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:06:29.736 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:06:30.479 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:06:31.232 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:06:31.998 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:06:32.728 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8748 train samples
+2026-02-23 10:06:32.970 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8736 train samples
+2026-02-23 10:06:33.726 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 8712 train samples
+2026-02-23 10:06:33.950 | SUCCESS  | utils.optuna_search:run_optuna_search:220 - Optuna [ARB/USD_1h]: best Sharpe=-999.000 after 30 trials
+2026-02-23 10:06:33.955 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-23 10:06:33.964 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=8760 val=1320 test=1320
+2026-02-23 10:06:33.975 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_1h_f1 on cuda — 8748 train samples
+2026-02-23 10:06:34.701 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: miopenStatusUnknownError
+2026-02-23 10:06:34.713 | INFO     | utils.walk_forward:run_fold:164 - Fold 2: train=8760 val=1320 test=1320
+2026-02-23 10:06:34.727 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_1h_f2 on cuda — 8748 train samples
+2026-02-23 10:06:35.470 | ERROR    | utils.walk_forward:run_fold:202 - Fold 2 training failed: miopenStatusUnknownError
+2026-02-23 10:06:35.481 | INFO     | utils.walk_forward:run_fold:164 - Fold 3: train=8760 val=1320 test=1320
+2026-02-23 10:06:35.497 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_1h_f3 on cuda — 8748 train samples
+2026-02-23 10:06:36.229 | ERROR    | utils.walk_forward:run_fold:202 - Fold 3 training failed: miopenStatusUnknownError
+2026-02-23 10:06:36.237 | INFO     | utils.walk_forward:run_fold:164 - Fold 4: train=8760 val=1320 test=1320
+2026-02-23 10:06:36.249 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_1h_f4 on cuda — 8748 train samples
+2026-02-23 10:06:36.967 | ERROR    | utils.walk_forward:run_fold:202 - Fold 4 training failed: miopenStatusUnknownError
+2026-02-23 10:06:36.979 | INFO     | utils.walk_forward:run_fold:164 - Fold 5: train=8760 val=1320 test=1320
+2026-02-23 10:06:36.994 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_1h_f5 on cuda — 8748 train samples
+2026-02-23 10:06:37.688 | ERROR    | utils.walk_forward:run_fold:202 - Fold 5 training failed: miopenStatusUnknownError
+2026-02-23 10:06:37.697 | INFO     | utils.walk_forward:run_fold:164 - Fold 6: train=8760 val=1320 test=1320
+2026-02-23 10:06:37.711 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_1h_f6 on cuda — 8748 train samples
+2026-02-23 10:06:38.422 | ERROR    | utils.walk_forward:run_fold:202 - Fold 6 training failed: miopenStatusUnknownError
+2026-02-23 10:06:38.431 | INFO     | utils.walk_forward:run_fold:164 - Fold 7: train=8760 val=1320 test=1320
+2026-02-23 10:06:38.444 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_1h_f7 on cuda — 8748 train samples
+2026-02-23 10:06:39.168 | ERROR    | utils.walk_forward:run_fold:202 - Fold 7 training failed: miopenStatusUnknownError
+2026-02-23 10:06:39.178 | INFO     | utils.walk_forward:run_fold:164 - Fold 8: train=8760 val=1320 test=1320
+2026-02-23 10:06:39.190 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_1h_f8 on cuda — 8748 train samples
+2026-02-23 10:06:39.945 | ERROR    | utils.walk_forward:run_fold:202 - Fold 8 training failed: miopenStatusUnknownError
+2026-02-23 10:06:39.956 | INFO     | utils.walk_forward:run_fold:164 - Fold 9: train=8760 val=1320 test=1320
+2026-02-23 10:06:39.969 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_1h_f9 on cuda — 8748 train samples
+2026-02-23 10:06:40.685 | ERROR    | utils.walk_forward:run_fold:202 - Fold 9 training failed: miopenStatusUnknownError
+2026-02-23 10:06:40.695 | INFO     | utils.walk_forward:run_fold:164 - Fold 10: train=8760 val=1320 test=1320
+2026-02-23 10:06:40.706 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_1h_f10 on cuda — 8748 train samples
+2026-02-23 10:06:41.434 | ERROR    | utils.walk_forward:run_fold:202 - Fold 10 training failed: miopenStatusUnknownError
+2026-02-23 10:06:41.445 | INFO     | utils.walk_forward:run_fold:164 - Fold 11: train=8760 val=1320 test=1320
+2026-02-23 10:06:41.458 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_1h_f11 on cuda — 8748 train samples
+2026-02-23 10:06:42.178 | ERROR    | utils.walk_forward:run_fold:202 - Fold 11 training failed: miopenStatusUnknownError
+2026-02-23 10:06:42.179 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 10:06:42.181 | INFO     | __main__:main:407 - 
+============================================================
+Timeframe: 2 hours (2h)
+============================================================
+2026-02-23 10:06:42.215 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching INJ/USD [2h] — 1825 days...
+2026-02-23 10:06:56.123 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - INJ/USD 2h: 21896 candles (2021-02-24 -> 2026-02-23)
+2026-02-23 10:06:56.186 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching LINK/USD [2h] — 1825 days...
+2026-02-23 10:07:07.396 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - LINK/USD 2h: 21896 candles (2021-02-24 -> 2026-02-23)
+2026-02-23 10:07:07.465 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching DOGE/USD [2h] — 1825 days...
+2026-02-23 10:07:18.541 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - DOGE/USD 2h: 21896 candles (2021-02-24 -> 2026-02-23)
+2026-02-23 10:07:18.606 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching OP/USD [2h] — 1825 days...
+2026-02-23 10:07:28.016 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - OP/USD 2h: 16358 candles (2022-06-01 -> 2026-02-23)
+2026-02-23 10:07:28.076 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching ARB/USD [2h] — 1825 days...
+2026-02-23 10:07:34.806 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - ARB/USD 2h: 12815 candles (2023-03-23 -> 2026-02-23)
+2026-02-23 10:07:34.843 | INFO     | __main__:main:423 - 
+Processing: INJ/USD [2h]
+2026-02-23 10:07:34.852 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 10:07:34.854 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 10:07:34.854 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: INJ/USD_2h
+============================================================
+2026-02-23 10:07:34.855 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [2h]: train=4380 bars val=660 test=660 step=660
+2026-02-23 10:07:34.855 | INFO     | data.feature_engineer:build_features:283 - Building features for INJ/USD_2h (21896 rows)
+2026-02-23 10:07:34.978 | INFO     | data.feature_engineer:build_features:308 - Dropped 205 NaN/inf rows → 21691 usable rows
+2026-02-23 10:07:34.979 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=9755 NEUTRAL=2795 UP=9141
+2026-02-23 10:07:34.980 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=9396 trending_up=7567 trending_down=4728
+2026-02-23 10:07:34.993 | INFO     | utils.optuna_search:run_optuna_search:207 - Optuna search: INJ/USD_2h [2h] — 30 trials
+2026-02-23 10:07:35.007 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:07:35.763 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:07:36.507 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:07:37.231 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:07:37.460 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:07:38.205 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:07:39.016 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:07:39.784 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:07:40.517 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:07:40.749 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:07:40.998 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:07:41.230 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:07:41.476 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:07:42.234 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:07:42.474 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:07:43.226 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:07:43.478 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:07:44.258 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:07:44.503 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:07:44.755 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:07:45.544 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:07:45.791 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:07:46.530 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:07:47.277 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:07:48.044 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:07:48.779 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:07:49.506 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:07:50.271 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:07:50.508 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:07:51.260 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:07:51.486 | SUCCESS  | utils.optuna_search:run_optuna_search:220 - Optuna [INJ/USD_2h]: best Sharpe=-999.000 after 30 trials
+2026-02-23 10:07:51.491 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-23 10:07:51.498 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=4380 val=660 test=660
+2026-02-23 10:07:51.511 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f1 on cuda — 4368 train samples
+2026-02-23 10:07:52.253 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: miopenStatusUnknownError
+2026-02-23 10:07:52.261 | INFO     | utils.walk_forward:run_fold:164 - Fold 2: train=4380 val=660 test=660
+2026-02-23 10:07:52.273 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f2 on cuda — 4368 train samples
+2026-02-23 10:07:53.001 | ERROR    | utils.walk_forward:run_fold:202 - Fold 2 training failed: miopenStatusUnknownError
+2026-02-23 10:07:53.011 | INFO     | utils.walk_forward:run_fold:164 - Fold 3: train=4380 val=660 test=660
+2026-02-23 10:07:53.022 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f3 on cuda — 4368 train samples
+2026-02-23 10:07:53.738 | ERROR    | utils.walk_forward:run_fold:202 - Fold 3 training failed: miopenStatusUnknownError
+2026-02-23 10:07:53.746 | INFO     | utils.walk_forward:run_fold:164 - Fold 4: train=4380 val=660 test=660
+2026-02-23 10:07:53.759 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f4 on cuda — 4368 train samples
+2026-02-23 10:07:54.466 | ERROR    | utils.walk_forward:run_fold:202 - Fold 4 training failed: miopenStatusUnknownError
+2026-02-23 10:07:54.474 | INFO     | utils.walk_forward:run_fold:164 - Fold 5: train=4380 val=660 test=660
+2026-02-23 10:07:54.486 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f5 on cuda — 4368 train samples
+2026-02-23 10:07:55.222 | ERROR    | utils.walk_forward:run_fold:202 - Fold 5 training failed: miopenStatusUnknownError
+2026-02-23 10:07:55.229 | INFO     | utils.walk_forward:run_fold:164 - Fold 6: train=4380 val=660 test=660
+2026-02-23 10:07:55.241 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f6 on cuda — 4368 train samples
+2026-02-23 10:07:55.997 | ERROR    | utils.walk_forward:run_fold:202 - Fold 6 training failed: miopenStatusUnknownError
+2026-02-23 10:07:56.006 | INFO     | utils.walk_forward:run_fold:164 - Fold 7: train=4380 val=660 test=660
+2026-02-23 10:07:56.019 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f7 on cuda — 4368 train samples
+2026-02-23 10:07:56.730 | ERROR    | utils.walk_forward:run_fold:202 - Fold 7 training failed: miopenStatusUnknownError
+2026-02-23 10:07:56.738 | INFO     | utils.walk_forward:run_fold:164 - Fold 8: train=4380 val=660 test=660
+2026-02-23 10:07:56.753 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f8 on cuda — 4368 train samples
+2026-02-23 10:07:57.470 | ERROR    | utils.walk_forward:run_fold:202 - Fold 8 training failed: miopenStatusUnknownError
+2026-02-23 10:07:57.478 | INFO     | utils.walk_forward:run_fold:164 - Fold 9: train=4380 val=660 test=660
+2026-02-23 10:07:57.490 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f9 on cuda — 4368 train samples
+2026-02-23 10:07:58.226 | ERROR    | utils.walk_forward:run_fold:202 - Fold 9 training failed: miopenStatusUnknownError
+2026-02-23 10:07:58.233 | INFO     | utils.walk_forward:run_fold:164 - Fold 10: train=4380 val=660 test=660
+2026-02-23 10:07:58.244 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f10 on cuda — 4368 train samples
+2026-02-23 10:07:58.980 | ERROR    | utils.walk_forward:run_fold:202 - Fold 10 training failed: miopenStatusUnknownError
+2026-02-23 10:07:58.989 | INFO     | utils.walk_forward:run_fold:164 - Fold 11: train=4380 val=660 test=660
+2026-02-23 10:07:59.000 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f11 on cuda — 4368 train samples
+2026-02-23 10:07:59.714 | ERROR    | utils.walk_forward:run_fold:202 - Fold 11 training failed: miopenStatusUnknownError
+2026-02-23 10:07:59.723 | INFO     | utils.walk_forward:run_fold:164 - Fold 12: train=4380 val=660 test=660
+2026-02-23 10:07:59.735 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f12 on cuda — 4368 train samples
+2026-02-23 10:08:00.496 | ERROR    | utils.walk_forward:run_fold:202 - Fold 12 training failed: miopenStatusUnknownError
+2026-02-23 10:08:00.504 | INFO     | utils.walk_forward:run_fold:164 - Fold 13: train=4380 val=660 test=660
+2026-02-23 10:08:00.517 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f13 on cuda — 4368 train samples
+2026-02-23 10:08:01.256 | ERROR    | utils.walk_forward:run_fold:202 - Fold 13 training failed: miopenStatusUnknownError
+2026-02-23 10:08:01.264 | INFO     | utils.walk_forward:run_fold:164 - Fold 14: train=4380 val=660 test=660
+2026-02-23 10:08:01.278 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f14 on cuda — 4368 train samples
+2026-02-23 10:08:02.057 | ERROR    | utils.walk_forward:run_fold:202 - Fold 14 training failed: miopenStatusUnknownError
+2026-02-23 10:08:02.065 | INFO     | utils.walk_forward:run_fold:164 - Fold 15: train=4380 val=660 test=660
+2026-02-23 10:08:02.075 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f15 on cuda — 4368 train samples
+2026-02-23 10:08:02.796 | ERROR    | utils.walk_forward:run_fold:202 - Fold 15 training failed: miopenStatusUnknownError
+2026-02-23 10:08:02.804 | INFO     | utils.walk_forward:run_fold:164 - Fold 16: train=4380 val=660 test=660
+2026-02-23 10:08:02.817 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f16 on cuda — 4368 train samples
+2026-02-23 10:08:03.519 | ERROR    | utils.walk_forward:run_fold:202 - Fold 16 training failed: miopenStatusUnknownError
+2026-02-23 10:08:03.528 | INFO     | utils.walk_forward:run_fold:164 - Fold 17: train=4380 val=660 test=660
+2026-02-23 10:08:03.540 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f17 on cuda — 4368 train samples
+2026-02-23 10:08:04.301 | ERROR    | utils.walk_forward:run_fold:202 - Fold 17 training failed: miopenStatusUnknownError
+2026-02-23 10:08:04.309 | INFO     | utils.walk_forward:run_fold:164 - Fold 18: train=4380 val=660 test=660
+2026-02-23 10:08:04.322 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f18 on cuda — 4368 train samples
+2026-02-23 10:08:05.077 | ERROR    | utils.walk_forward:run_fold:202 - Fold 18 training failed: miopenStatusUnknownError
+2026-02-23 10:08:05.084 | INFO     | utils.walk_forward:run_fold:164 - Fold 19: train=4380 val=660 test=660
+2026-02-23 10:08:05.096 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f19 on cuda — 4368 train samples
+2026-02-23 10:08:05.874 | ERROR    | utils.walk_forward:run_fold:202 - Fold 19 training failed: miopenStatusUnknownError
+2026-02-23 10:08:05.882 | INFO     | utils.walk_forward:run_fold:164 - Fold 20: train=4380 val=660 test=660
+2026-02-23 10:08:05.896 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f20 on cuda — 4368 train samples
+2026-02-23 10:08:06.624 | ERROR    | utils.walk_forward:run_fold:202 - Fold 20 training failed: miopenStatusUnknownError
+2026-02-23 10:08:06.632 | INFO     | utils.walk_forward:run_fold:164 - Fold 21: train=4380 val=660 test=660
+2026-02-23 10:08:06.645 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f21 on cuda — 4368 train samples
+2026-02-23 10:08:07.357 | ERROR    | utils.walk_forward:run_fold:202 - Fold 21 training failed: miopenStatusUnknownError
+2026-02-23 10:08:07.366 | INFO     | utils.walk_forward:run_fold:164 - Fold 22: train=4380 val=660 test=660
+2026-02-23 10:08:07.381 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f22 on cuda — 4368 train samples
+2026-02-23 10:08:08.127 | ERROR    | utils.walk_forward:run_fold:202 - Fold 22 training failed: miopenStatusUnknownError
+2026-02-23 10:08:08.134 | INFO     | utils.walk_forward:run_fold:164 - Fold 23: train=4380 val=660 test=660
+2026-02-23 10:08:08.146 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f23 on cuda — 4368 train samples
+2026-02-23 10:08:08.897 | ERROR    | utils.walk_forward:run_fold:202 - Fold 23 training failed: miopenStatusUnknownError
+2026-02-23 10:08:08.905 | INFO     | utils.walk_forward:run_fold:164 - Fold 24: train=4380 val=660 test=660
+2026-02-23 10:08:08.919 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f24 on cuda — 4368 train samples
+2026-02-23 10:08:09.647 | ERROR    | utils.walk_forward:run_fold:202 - Fold 24 training failed: miopenStatusUnknownError
+2026-02-23 10:08:09.656 | INFO     | utils.walk_forward:run_fold:164 - Fold 25: train=4380 val=660 test=660
+2026-02-23 10:08:09.669 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_2h_f25 on cuda — 4368 train samples
+2026-02-23 10:08:10.441 | ERROR    | utils.walk_forward:run_fold:202 - Fold 25 training failed: miopenStatusUnknownError
+2026-02-23 10:08:10.442 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 10:08:10.444 | INFO     | __main__:main:423 - 
+Processing: LINK/USD [2h]
+2026-02-23 10:08:10.456 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 10:08:10.458 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 10:08:10.459 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: LINK/USD_2h
+============================================================
+2026-02-23 10:08:10.459 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [2h]: train=4380 bars val=660 test=660 step=660
+2026-02-23 10:08:10.460 | INFO     | data.feature_engineer:build_features:283 - Building features for LINK/USD_2h (21896 rows)
+2026-02-23 10:08:10.584 | INFO     | data.feature_engineer:build_features:308 - Dropped 205 NaN/inf rows → 21691 usable rows
+2026-02-23 10:08:10.586 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=9093 NEUTRAL=3538 UP=9060
+2026-02-23 10:08:10.586 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=9194 trending_up=5413 trending_down=7084
+2026-02-23 10:08:10.600 | INFO     | utils.optuna_search:run_optuna_search:207 - Optuna search: LINK/USD_2h [2h] — 30 trials
+2026-02-23 10:08:10.614 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:11.429 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:12.220 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:08:12.994 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:08:13.226 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:08:14.010 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:08:14.773 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:15.530 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:16.317 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:16.554 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:16.805 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:08:17.062 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:17.304 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:18.109 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:18.365 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:19.159 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:08:19.406 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:20.210 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:20.460 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:08:20.712 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:08:21.480 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:21.733 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:08:22.493 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:08:23.266 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:08:24.064 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:08:24.814 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:08:25.547 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:26.325 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:26.565 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:08:27.315 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:08:27.536 | SUCCESS  | utils.optuna_search:run_optuna_search:220 - Optuna [LINK/USD_2h]: best Sharpe=-999.000 after 30 trials
+2026-02-23 10:08:27.541 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-23 10:08:27.548 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=4380 val=660 test=660
+2026-02-23 10:08:27.559 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f1 on cuda — 4368 train samples
+2026-02-23 10:08:28.305 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: miopenStatusUnknownError
+2026-02-23 10:08:28.313 | INFO     | utils.walk_forward:run_fold:164 - Fold 2: train=4380 val=660 test=660
+2026-02-23 10:08:28.326 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f2 on cuda — 4368 train samples
+2026-02-23 10:08:29.077 | ERROR    | utils.walk_forward:run_fold:202 - Fold 2 training failed: miopenStatusUnknownError
+2026-02-23 10:08:29.084 | INFO     | utils.walk_forward:run_fold:164 - Fold 3: train=4380 val=660 test=660
+2026-02-23 10:08:29.095 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f3 on cuda — 4368 train samples
+2026-02-23 10:08:29.823 | ERROR    | utils.walk_forward:run_fold:202 - Fold 3 training failed: miopenStatusUnknownError
+2026-02-23 10:08:29.831 | INFO     | utils.walk_forward:run_fold:164 - Fold 4: train=4380 val=660 test=660
+2026-02-23 10:08:29.844 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f4 on cuda — 4368 train samples
+2026-02-23 10:08:30.555 | ERROR    | utils.walk_forward:run_fold:202 - Fold 4 training failed: miopenStatusUnknownError
+2026-02-23 10:08:30.563 | INFO     | utils.walk_forward:run_fold:164 - Fold 5: train=4380 val=660 test=660
+2026-02-23 10:08:30.576 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f5 on cuda — 4368 train samples
+2026-02-23 10:08:31.316 | ERROR    | utils.walk_forward:run_fold:202 - Fold 5 training failed: miopenStatusUnknownError
+2026-02-23 10:08:31.324 | INFO     | utils.walk_forward:run_fold:164 - Fold 6: train=4380 val=660 test=660
+2026-02-23 10:08:31.335 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f6 on cuda — 4368 train samples
+2026-02-23 10:08:32.083 | ERROR    | utils.walk_forward:run_fold:202 - Fold 6 training failed: miopenStatusUnknownError
+2026-02-23 10:08:32.090 | INFO     | utils.walk_forward:run_fold:164 - Fold 7: train=4380 val=660 test=660
+2026-02-23 10:08:32.102 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f7 on cuda — 4368 train samples
+2026-02-23 10:08:32.831 | ERROR    | utils.walk_forward:run_fold:202 - Fold 7 training failed: miopenStatusUnknownError
+2026-02-23 10:08:32.838 | INFO     | utils.walk_forward:run_fold:164 - Fold 8: train=4380 val=660 test=660
+2026-02-23 10:08:32.850 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f8 on cuda — 4368 train samples
+2026-02-23 10:08:33.544 | ERROR    | utils.walk_forward:run_fold:202 - Fold 8 training failed: miopenStatusUnknownError
+2026-02-23 10:08:33.552 | INFO     | utils.walk_forward:run_fold:164 - Fold 9: train=4380 val=660 test=660
+2026-02-23 10:08:33.566 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f9 on cuda — 4368 train samples
+2026-02-23 10:08:34.315 | ERROR    | utils.walk_forward:run_fold:202 - Fold 9 training failed: miopenStatusUnknownError
+2026-02-23 10:08:34.322 | INFO     | utils.walk_forward:run_fold:164 - Fold 10: train=4380 val=660 test=660
+2026-02-23 10:08:34.335 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f10 on cuda — 4368 train samples
+2026-02-23 10:08:35.067 | ERROR    | utils.walk_forward:run_fold:202 - Fold 10 training failed: miopenStatusUnknownError
+2026-02-23 10:08:35.076 | INFO     | utils.walk_forward:run_fold:164 - Fold 11: train=4380 val=660 test=660
+2026-02-23 10:08:35.087 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f11 on cuda — 4368 train samples
+2026-02-23 10:08:35.820 | ERROR    | utils.walk_forward:run_fold:202 - Fold 11 training failed: miopenStatusUnknownError
+2026-02-23 10:08:35.828 | INFO     | utils.walk_forward:run_fold:164 - Fold 12: train=4380 val=660 test=660
+2026-02-23 10:08:35.840 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f12 on cuda — 4368 train samples
+2026-02-23 10:08:36.578 | ERROR    | utils.walk_forward:run_fold:202 - Fold 12 training failed: miopenStatusUnknownError
+2026-02-23 10:08:36.586 | INFO     | utils.walk_forward:run_fold:164 - Fold 13: train=4380 val=660 test=660
+2026-02-23 10:08:36.599 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f13 on cuda — 4368 train samples
+2026-02-23 10:08:37.331 | ERROR    | utils.walk_forward:run_fold:202 - Fold 13 training failed: miopenStatusUnknownError
+2026-02-23 10:08:37.338 | INFO     | utils.walk_forward:run_fold:164 - Fold 14: train=4380 val=660 test=660
+2026-02-23 10:08:37.351 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f14 on cuda — 4368 train samples
+2026-02-23 10:08:38.086 | ERROR    | utils.walk_forward:run_fold:202 - Fold 14 training failed: miopenStatusUnknownError
+2026-02-23 10:08:38.093 | INFO     | utils.walk_forward:run_fold:164 - Fold 15: train=4380 val=660 test=660
+2026-02-23 10:08:38.105 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f15 on cuda — 4368 train samples
+2026-02-23 10:08:38.815 | ERROR    | utils.walk_forward:run_fold:202 - Fold 15 training failed: miopenStatusUnknownError
+2026-02-23 10:08:38.823 | INFO     | utils.walk_forward:run_fold:164 - Fold 16: train=4380 val=660 test=660
+2026-02-23 10:08:38.835 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f16 on cuda — 4368 train samples
+2026-02-23 10:08:39.523 | ERROR    | utils.walk_forward:run_fold:202 - Fold 16 training failed: miopenStatusUnknownError
+2026-02-23 10:08:39.532 | INFO     | utils.walk_forward:run_fold:164 - Fold 17: train=4380 val=660 test=660
+2026-02-23 10:08:39.545 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f17 on cuda — 4368 train samples
+2026-02-23 10:08:40.311 | ERROR    | utils.walk_forward:run_fold:202 - Fold 17 training failed: miopenStatusUnknownError
+2026-02-23 10:08:40.320 | INFO     | utils.walk_forward:run_fold:164 - Fold 18: train=4380 val=660 test=660
+2026-02-23 10:08:40.332 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f18 on cuda — 4368 train samples
+2026-02-23 10:08:41.058 | ERROR    | utils.walk_forward:run_fold:202 - Fold 18 training failed: miopenStatusUnknownError
+2026-02-23 10:08:41.066 | INFO     | utils.walk_forward:run_fold:164 - Fold 19: train=4380 val=660 test=660
+2026-02-23 10:08:41.079 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f19 on cuda — 4368 train samples
+2026-02-23 10:08:41.797 | ERROR    | utils.walk_forward:run_fold:202 - Fold 19 training failed: miopenStatusUnknownError
+2026-02-23 10:08:41.805 | INFO     | utils.walk_forward:run_fold:164 - Fold 20: train=4380 val=660 test=660
+2026-02-23 10:08:41.819 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f20 on cuda — 4368 train samples
+2026-02-23 10:08:42.526 | ERROR    | utils.walk_forward:run_fold:202 - Fold 20 training failed: miopenStatusUnknownError
+2026-02-23 10:08:42.533 | INFO     | utils.walk_forward:run_fold:164 - Fold 21: train=4380 val=660 test=660
+2026-02-23 10:08:42.545 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f21 on cuda — 4368 train samples
+2026-02-23 10:08:43.260 | ERROR    | utils.walk_forward:run_fold:202 - Fold 21 training failed: miopenStatusUnknownError
+2026-02-23 10:08:43.269 | INFO     | utils.walk_forward:run_fold:164 - Fold 22: train=4380 val=660 test=660
+2026-02-23 10:08:43.283 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f22 on cuda — 4368 train samples
+2026-02-23 10:08:44.023 | ERROR    | utils.walk_forward:run_fold:202 - Fold 22 training failed: miopenStatusUnknownError
+2026-02-23 10:08:44.031 | INFO     | utils.walk_forward:run_fold:164 - Fold 23: train=4380 val=660 test=660
+2026-02-23 10:08:44.042 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f23 on cuda — 4368 train samples
+2026-02-23 10:08:44.764 | ERROR    | utils.walk_forward:run_fold:202 - Fold 23 training failed: miopenStatusUnknownError
+2026-02-23 10:08:44.772 | INFO     | utils.walk_forward:run_fold:164 - Fold 24: train=4380 val=660 test=660
+2026-02-23 10:08:44.786 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f24 on cuda — 4368 train samples
+2026-02-23 10:08:45.500 | ERROR    | utils.walk_forward:run_fold:202 - Fold 24 training failed: miopenStatusUnknownError
+2026-02-23 10:08:45.508 | INFO     | utils.walk_forward:run_fold:164 - Fold 25: train=4380 val=660 test=660
+2026-02-23 10:08:45.519 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_2h_f25 on cuda — 4368 train samples
+2026-02-23 10:08:46.263 | ERROR    | utils.walk_forward:run_fold:202 - Fold 25 training failed: miopenStatusUnknownError
+2026-02-23 10:08:46.265 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 10:08:46.267 | INFO     | __main__:main:423 - 
+Processing: DOGE/USD [2h]
+2026-02-23 10:08:46.280 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 10:08:46.282 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 10:08:46.283 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: DOGE/USD_2h
+============================================================
+2026-02-23 10:08:46.283 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [2h]: train=4380 bars val=660 test=660 step=660
+2026-02-23 10:08:46.283 | INFO     | data.feature_engineer:build_features:283 - Building features for DOGE/USD_2h (21896 rows)
+2026-02-23 10:08:46.402 | INFO     | data.feature_engineer:build_features:308 - Dropped 205 NaN/inf rows → 21691 usable rows
+2026-02-23 10:08:46.403 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=9035 NEUTRAL=4028 UP=8628
+2026-02-23 10:08:46.403 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=8717 trending_up=5796 trending_down=7178
+2026-02-23 10:08:46.419 | INFO     | utils.optuna_search:run_optuna_search:207 - Optuna search: DOGE/USD_2h [2h] — 30 trials
+2026-02-23 10:08:46.434 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:47.197 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:47.949 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:08:48.665 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:08:48.893 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:08:49.611 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:08:50.378 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:51.122 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:51.872 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:52.106 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:52.342 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:08:52.583 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:52.828 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:53.550 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:53.801 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:54.533 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:08:54.781 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:55.523 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:55.778 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:08:56.027 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:08:56.769 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:08:57.003 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:08:57.749 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:08:58.490 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:08:59.242 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:00.000 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:00.766 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:01.498 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:01.739 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:09:02.485 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:02.712 | SUCCESS  | utils.optuna_search:run_optuna_search:220 - Optuna [DOGE/USD_2h]: best Sharpe=-999.000 after 30 trials
+2026-02-23 10:09:02.717 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-23 10:09:02.724 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=4380 val=660 test=660
+2026-02-23 10:09:02.733 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f1 on cuda — 4368 train samples
+2026-02-23 10:09:03.448 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: miopenStatusUnknownError
+2026-02-23 10:09:03.456 | INFO     | utils.walk_forward:run_fold:164 - Fold 2: train=4380 val=660 test=660
+2026-02-23 10:09:03.468 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f2 on cuda — 4368 train samples
+2026-02-23 10:09:04.220 | ERROR    | utils.walk_forward:run_fold:202 - Fold 2 training failed: miopenStatusUnknownError
+2026-02-23 10:09:04.227 | INFO     | utils.walk_forward:run_fold:164 - Fold 3: train=4380 val=660 test=660
+2026-02-23 10:09:04.237 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f3 on cuda — 4368 train samples
+2026-02-23 10:09:04.999 | ERROR    | utils.walk_forward:run_fold:202 - Fold 3 training failed: miopenStatusUnknownError
+2026-02-23 10:09:05.007 | INFO     | utils.walk_forward:run_fold:164 - Fold 4: train=4380 val=660 test=660
+2026-02-23 10:09:05.019 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f4 on cuda — 4368 train samples
+2026-02-23 10:09:05.743 | ERROR    | utils.walk_forward:run_fold:202 - Fold 4 training failed: miopenStatusUnknownError
+2026-02-23 10:09:05.753 | INFO     | utils.walk_forward:run_fold:164 - Fold 5: train=4380 val=660 test=660
+2026-02-23 10:09:05.767 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f5 on cuda — 4368 train samples
+2026-02-23 10:09:06.492 | ERROR    | utils.walk_forward:run_fold:202 - Fold 5 training failed: miopenStatusUnknownError
+2026-02-23 10:09:06.501 | INFO     | utils.walk_forward:run_fold:164 - Fold 6: train=4380 val=660 test=660
+2026-02-23 10:09:06.514 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f6 on cuda — 4368 train samples
+2026-02-23 10:09:07.208 | ERROR    | utils.walk_forward:run_fold:202 - Fold 6 training failed: miopenStatusUnknownError
+2026-02-23 10:09:07.215 | INFO     | utils.walk_forward:run_fold:164 - Fold 7: train=4380 val=660 test=660
+2026-02-23 10:09:07.226 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f7 on cuda — 4368 train samples
+2026-02-23 10:09:07.906 | ERROR    | utils.walk_forward:run_fold:202 - Fold 7 training failed: miopenStatusUnknownError
+2026-02-23 10:09:07.915 | INFO     | utils.walk_forward:run_fold:164 - Fold 8: train=4380 val=660 test=660
+2026-02-23 10:09:07.928 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f8 on cuda — 4368 train samples
+2026-02-23 10:09:08.617 | ERROR    | utils.walk_forward:run_fold:202 - Fold 8 training failed: miopenStatusUnknownError
+2026-02-23 10:09:08.624 | INFO     | utils.walk_forward:run_fold:164 - Fold 9: train=4380 val=660 test=660
+2026-02-23 10:09:08.636 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f9 on cuda — 4368 train samples
+2026-02-23 10:09:09.374 | ERROR    | utils.walk_forward:run_fold:202 - Fold 9 training failed: miopenStatusUnknownError
+2026-02-23 10:09:09.380 | INFO     | utils.walk_forward:run_fold:164 - Fold 10: train=4380 val=660 test=660
+2026-02-23 10:09:09.396 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f10 on cuda — 4368 train samples
+2026-02-23 10:09:10.169 | ERROR    | utils.walk_forward:run_fold:202 - Fold 10 training failed: miopenStatusUnknownError
+2026-02-23 10:09:10.176 | INFO     | utils.walk_forward:run_fold:164 - Fold 11: train=4380 val=660 test=660
+2026-02-23 10:09:10.188 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f11 on cuda — 4368 train samples
+2026-02-23 10:09:10.923 | ERROR    | utils.walk_forward:run_fold:202 - Fold 11 training failed: miopenStatusUnknownError
+2026-02-23 10:09:10.931 | INFO     | utils.walk_forward:run_fold:164 - Fold 12: train=4380 val=660 test=660
+2026-02-23 10:09:10.943 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f12 on cuda — 4368 train samples
+2026-02-23 10:09:11.649 | ERROR    | utils.walk_forward:run_fold:202 - Fold 12 training failed: miopenStatusUnknownError
+2026-02-23 10:09:11.657 | INFO     | utils.walk_forward:run_fold:164 - Fold 13: train=4380 val=660 test=660
+2026-02-23 10:09:11.669 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f13 on cuda — 4368 train samples
+2026-02-23 10:09:12.413 | ERROR    | utils.walk_forward:run_fold:202 - Fold 13 training failed: miopenStatusUnknownError
+2026-02-23 10:09:12.422 | INFO     | utils.walk_forward:run_fold:164 - Fold 14: train=4380 val=660 test=660
+2026-02-23 10:09:12.433 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f14 on cuda — 4368 train samples
+2026-02-23 10:09:13.157 | ERROR    | utils.walk_forward:run_fold:202 - Fold 14 training failed: miopenStatusUnknownError
+2026-02-23 10:09:13.165 | INFO     | utils.walk_forward:run_fold:164 - Fold 15: train=4380 val=660 test=660
+2026-02-23 10:09:13.178 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f15 on cuda — 4368 train samples
+2026-02-23 10:09:13.903 | ERROR    | utils.walk_forward:run_fold:202 - Fold 15 training failed: miopenStatusUnknownError
+2026-02-23 10:09:13.910 | INFO     | utils.walk_forward:run_fold:164 - Fold 16: train=4380 val=660 test=660
+2026-02-23 10:09:13.923 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f16 on cuda — 4368 train samples
+2026-02-23 10:09:14.617 | ERROR    | utils.walk_forward:run_fold:202 - Fold 16 training failed: miopenStatusUnknownError
+2026-02-23 10:09:14.626 | INFO     | utils.walk_forward:run_fold:164 - Fold 17: train=4380 val=660 test=660
+2026-02-23 10:09:14.638 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f17 on cuda — 4368 train samples
+2026-02-23 10:09:15.367 | ERROR    | utils.walk_forward:run_fold:202 - Fold 17 training failed: miopenStatusUnknownError
+2026-02-23 10:09:15.376 | INFO     | utils.walk_forward:run_fold:164 - Fold 18: train=4380 val=660 test=660
+2026-02-23 10:09:15.389 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f18 on cuda — 4368 train samples
+2026-02-23 10:09:16.129 | ERROR    | utils.walk_forward:run_fold:202 - Fold 18 training failed: miopenStatusUnknownError
+2026-02-23 10:09:16.137 | INFO     | utils.walk_forward:run_fold:164 - Fold 19: train=4380 val=660 test=660
+2026-02-23 10:09:16.149 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f19 on cuda — 4368 train samples
+2026-02-23 10:09:16.880 | ERROR    | utils.walk_forward:run_fold:202 - Fold 19 training failed: miopenStatusUnknownError
+2026-02-23 10:09:16.887 | INFO     | utils.walk_forward:run_fold:164 - Fold 20: train=4380 val=660 test=660
+2026-02-23 10:09:16.899 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f20 on cuda — 4368 train samples
+2026-02-23 10:09:17.595 | ERROR    | utils.walk_forward:run_fold:202 - Fold 20 training failed: miopenStatusUnknownError
+2026-02-23 10:09:17.603 | INFO     | utils.walk_forward:run_fold:164 - Fold 21: train=4380 val=660 test=660
+2026-02-23 10:09:17.616 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f21 on cuda — 4368 train samples
+2026-02-23 10:09:18.363 | ERROR    | utils.walk_forward:run_fold:202 - Fold 21 training failed: miopenStatusUnknownError
+2026-02-23 10:09:18.371 | INFO     | utils.walk_forward:run_fold:164 - Fold 22: train=4380 val=660 test=660
+2026-02-23 10:09:18.384 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f22 on cuda — 4368 train samples
+2026-02-23 10:09:19.112 | ERROR    | utils.walk_forward:run_fold:202 - Fold 22 training failed: miopenStatusUnknownError
+2026-02-23 10:09:19.119 | INFO     | utils.walk_forward:run_fold:164 - Fold 23: train=4380 val=660 test=660
+2026-02-23 10:09:19.132 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f23 on cuda — 4368 train samples
+2026-02-23 10:09:19.839 | ERROR    | utils.walk_forward:run_fold:202 - Fold 23 training failed: miopenStatusUnknownError
+2026-02-23 10:09:19.847 | INFO     | utils.walk_forward:run_fold:164 - Fold 24: train=4380 val=660 test=660
+2026-02-23 10:09:19.859 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f24 on cuda — 4368 train samples
+2026-02-23 10:09:20.549 | ERROR    | utils.walk_forward:run_fold:202 - Fold 24 training failed: miopenStatusUnknownError
+2026-02-23 10:09:20.558 | INFO     | utils.walk_forward:run_fold:164 - Fold 25: train=4380 val=660 test=660
+2026-02-23 10:09:20.569 | INFO     | models.tft_model:train:187 - Training TFT for DOGE/USD_2h_f25 on cuda — 4368 train samples
+2026-02-23 10:09:21.270 | ERROR    | utils.walk_forward:run_fold:202 - Fold 25 training failed: miopenStatusUnknownError
+2026-02-23 10:09:21.271 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 10:09:21.274 | INFO     | __main__:main:423 - 
+Processing: OP/USD [2h]
+2026-02-23 10:09:21.283 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 10:09:21.285 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 10:09:21.285 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: OP/USD_2h
+============================================================
+2026-02-23 10:09:21.286 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [2h]: train=4380 bars val=660 test=660 step=660
+2026-02-23 10:09:21.286 | INFO     | data.feature_engineer:build_features:283 - Building features for OP/USD_2h (16358 rows)
+2026-02-23 10:09:21.386 | INFO     | data.feature_engineer:build_features:308 - Dropped 205 NaN/inf rows → 16153 usable rows
+2026-02-23 10:09:21.387 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=7119 NEUTRAL=2295 UP=6739
+2026-02-23 10:09:21.387 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=6752 trending_up=4216 trending_down=5185
+2026-02-23 10:09:21.398 | INFO     | utils.optuna_search:run_optuna_search:207 - Optuna search: OP/USD_2h [2h] — 30 trials
+2026-02-23 10:09:21.412 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:22.140 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:22.856 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:23.537 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:09:23.757 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:09:24.471 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:09:25.184 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:25.885 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:26.584 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:26.801 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:27.028 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:27.249 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:27.477 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:28.194 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:28.420 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:29.126 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:29.349 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:30.069 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:30.293 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:09:30.521 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:31.234 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:31.463 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:32.181 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:32.897 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:33.580 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:34.312 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:35.019 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:35.733 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:35.971 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:09:36.676 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:36.887 | SUCCESS  | utils.optuna_search:run_optuna_search:220 - Optuna [OP/USD_2h]: best Sharpe=-999.000 after 30 trials
+2026-02-23 10:09:36.892 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-23 10:09:36.898 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=4380 val=660 test=660
+2026-02-23 10:09:36.908 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_2h_f1 on cuda — 4368 train samples
+2026-02-23 10:09:37.583 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: miopenStatusUnknownError
+2026-02-23 10:09:37.590 | INFO     | utils.walk_forward:run_fold:164 - Fold 2: train=4380 val=660 test=660
+2026-02-23 10:09:37.600 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_2h_f2 on cuda — 4368 train samples
+2026-02-23 10:09:38.341 | ERROR    | utils.walk_forward:run_fold:202 - Fold 2 training failed: miopenStatusUnknownError
+2026-02-23 10:09:38.349 | INFO     | utils.walk_forward:run_fold:164 - Fold 3: train=4380 val=660 test=660
+2026-02-23 10:09:38.364 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_2h_f3 on cuda — 4368 train samples
+2026-02-23 10:09:39.088 | ERROR    | utils.walk_forward:run_fold:202 - Fold 3 training failed: miopenStatusUnknownError
+2026-02-23 10:09:39.095 | INFO     | utils.walk_forward:run_fold:164 - Fold 4: train=4380 val=660 test=660
+2026-02-23 10:09:39.107 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_2h_f4 on cuda — 4368 train samples
+2026-02-23 10:09:39.818 | ERROR    | utils.walk_forward:run_fold:202 - Fold 4 training failed: miopenStatusUnknownError
+2026-02-23 10:09:39.825 | INFO     | utils.walk_forward:run_fold:164 - Fold 5: train=4380 val=660 test=660
+2026-02-23 10:09:39.838 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_2h_f5 on cuda — 4368 train samples
+2026-02-23 10:09:40.547 | ERROR    | utils.walk_forward:run_fold:202 - Fold 5 training failed: miopenStatusUnknownError
+2026-02-23 10:09:40.553 | INFO     | utils.walk_forward:run_fold:164 - Fold 6: train=4380 val=660 test=660
+2026-02-23 10:09:40.566 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_2h_f6 on cuda — 4368 train samples
+2026-02-23 10:09:41.269 | ERROR    | utils.walk_forward:run_fold:202 - Fold 6 training failed: miopenStatusUnknownError
+2026-02-23 10:09:41.276 | INFO     | utils.walk_forward:run_fold:164 - Fold 7: train=4380 val=660 test=660
+2026-02-23 10:09:41.290 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_2h_f7 on cuda — 4368 train samples
+2026-02-23 10:09:41.984 | ERROR    | utils.walk_forward:run_fold:202 - Fold 7 training failed: miopenStatusUnknownError
+2026-02-23 10:09:41.990 | INFO     | utils.walk_forward:run_fold:164 - Fold 8: train=4380 val=660 test=660
+2026-02-23 10:09:42.002 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_2h_f8 on cuda — 4368 train samples
+2026-02-23 10:09:42.692 | ERROR    | utils.walk_forward:run_fold:202 - Fold 8 training failed: miopenStatusUnknownError
+2026-02-23 10:09:42.699 | INFO     | utils.walk_forward:run_fold:164 - Fold 9: train=4380 val=660 test=660
+2026-02-23 10:09:42.710 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_2h_f9 on cuda — 4368 train samples
+2026-02-23 10:09:43.397 | ERROR    | utils.walk_forward:run_fold:202 - Fold 9 training failed: miopenStatusUnknownError
+2026-02-23 10:09:43.402 | INFO     | utils.walk_forward:run_fold:164 - Fold 10: train=4380 val=660 test=660
+2026-02-23 10:09:43.413 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_2h_f10 on cuda — 4368 train samples
+2026-02-23 10:09:44.114 | ERROR    | utils.walk_forward:run_fold:202 - Fold 10 training failed: miopenStatusUnknownError
+2026-02-23 10:09:44.121 | INFO     | utils.walk_forward:run_fold:164 - Fold 11: train=4380 val=660 test=660
+2026-02-23 10:09:44.133 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_2h_f11 on cuda — 4368 train samples
+2026-02-23 10:09:44.829 | ERROR    | utils.walk_forward:run_fold:202 - Fold 11 training failed: miopenStatusUnknownError
+2026-02-23 10:09:44.835 | INFO     | utils.walk_forward:run_fold:164 - Fold 12: train=4380 val=660 test=660
+2026-02-23 10:09:44.847 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_2h_f12 on cuda — 4368 train samples
+2026-02-23 10:09:45.517 | ERROR    | utils.walk_forward:run_fold:202 - Fold 12 training failed: miopenStatusUnknownError
+2026-02-23 10:09:45.525 | INFO     | utils.walk_forward:run_fold:164 - Fold 13: train=4380 val=660 test=660
+2026-02-23 10:09:45.535 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_2h_f13 on cuda — 4368 train samples
+2026-02-23 10:09:46.279 | ERROR    | utils.walk_forward:run_fold:202 - Fold 13 training failed: miopenStatusUnknownError
+2026-02-23 10:09:46.286 | INFO     | utils.walk_forward:run_fold:164 - Fold 14: train=4380 val=660 test=660
+2026-02-23 10:09:46.298 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_2h_f14 on cuda — 4368 train samples
+2026-02-23 10:09:46.996 | ERROR    | utils.walk_forward:run_fold:202 - Fold 14 training failed: miopenStatusUnknownError
+2026-02-23 10:09:47.002 | INFO     | utils.walk_forward:run_fold:164 - Fold 15: train=4380 val=660 test=660
+2026-02-23 10:09:47.014 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_2h_f15 on cuda — 4368 train samples
+2026-02-23 10:09:47.685 | ERROR    | utils.walk_forward:run_fold:202 - Fold 15 training failed: miopenStatusUnknownError
+2026-02-23 10:09:47.692 | INFO     | utils.walk_forward:run_fold:164 - Fold 16: train=4380 val=660 test=660
+2026-02-23 10:09:47.705 | INFO     | models.tft_model:train:187 - Training TFT for OP/USD_2h_f16 on cuda — 4368 train samples
+2026-02-23 10:09:48.485 | ERROR    | utils.walk_forward:run_fold:202 - Fold 16 training failed: miopenStatusUnknownError
+2026-02-23 10:09:48.486 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 10:09:48.489 | INFO     | __main__:main:423 - 
+Processing: ARB/USD [2h]
+2026-02-23 10:09:48.500 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 10:09:48.501 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 10:09:48.502 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: ARB/USD_2h
+============================================================
+2026-02-23 10:09:48.502 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [2h]: train=4380 bars val=660 test=660 step=660
+2026-02-23 10:09:48.502 | INFO     | data.feature_engineer:build_features:283 - Building features for ARB/USD_2h (12815 rows)
+2026-02-23 10:09:48.586 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 12615 usable rows
+2026-02-23 10:09:48.587 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=5468 NEUTRAL=2122 UP=5025
+2026-02-23 10:09:48.587 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=5471 trending_up=2824 trending_down=4320
+2026-02-23 10:09:48.597 | INFO     | utils.optuna_search:run_optuna_search:207 - Optuna search: ARB/USD_2h [2h] — 30 trials
+2026-02-23 10:09:48.612 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:49.335 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:50.042 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:50.767 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:09:50.987 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:09:51.666 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:09:52.386 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:53.083 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:53.797 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:54.021 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:54.266 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:54.500 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:54.725 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:55.446 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:55.679 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:56.405 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:56.636 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:57.349 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:57.581 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:09:57.817 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:58.528 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:09:58.756 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:09:59.447 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:10:00.178 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:10:00.891 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:10:01.569 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:10:02.290 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:10:03.015 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4368 train samples
+2026-02-23 10:10:03.243 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4356 train samples
+2026-02-23 10:10:03.953 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 4332 train samples
+2026-02-23 10:10:04.170 | SUCCESS  | utils.optuna_search:run_optuna_search:220 - Optuna [ARB/USD_2h]: best Sharpe=-999.000 after 30 trials
+2026-02-23 10:10:04.174 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-23 10:10:04.180 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=4380 val=660 test=660
+2026-02-23 10:10:04.191 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_2h_f1 on cuda — 4368 train samples
+2026-02-23 10:10:04.922 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: miopenStatusUnknownError
+2026-02-23 10:10:04.927 | INFO     | utils.walk_forward:run_fold:164 - Fold 2: train=4380 val=660 test=660
+2026-02-23 10:10:04.939 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_2h_f2 on cuda — 4368 train samples
+2026-02-23 10:10:05.618 | ERROR    | utils.walk_forward:run_fold:202 - Fold 2 training failed: miopenStatusUnknownError
+2026-02-23 10:10:05.624 | INFO     | utils.walk_forward:run_fold:164 - Fold 3: train=4380 val=660 test=660
+2026-02-23 10:10:05.635 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_2h_f3 on cuda — 4368 train samples
+2026-02-23 10:10:06.385 | ERROR    | utils.walk_forward:run_fold:202 - Fold 3 training failed: miopenStatusUnknownError
+2026-02-23 10:10:06.393 | INFO     | utils.walk_forward:run_fold:164 - Fold 4: train=4380 val=660 test=660
+2026-02-23 10:10:06.405 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_2h_f4 on cuda — 4368 train samples
+2026-02-23 10:10:07.099 | ERROR    | utils.walk_forward:run_fold:202 - Fold 4 training failed: miopenStatusUnknownError
+2026-02-23 10:10:07.104 | INFO     | utils.walk_forward:run_fold:164 - Fold 5: train=4380 val=660 test=660
+2026-02-23 10:10:07.115 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_2h_f5 on cuda — 4368 train samples
+2026-02-23 10:10:07.806 | ERROR    | utils.walk_forward:run_fold:202 - Fold 5 training failed: miopenStatusUnknownError
+2026-02-23 10:10:07.813 | INFO     | utils.walk_forward:run_fold:164 - Fold 6: train=4380 val=660 test=660
+2026-02-23 10:10:07.823 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_2h_f6 on cuda — 4368 train samples
+2026-02-23 10:10:08.532 | ERROR    | utils.walk_forward:run_fold:202 - Fold 6 training failed: miopenStatusUnknownError
+2026-02-23 10:10:08.539 | INFO     | utils.walk_forward:run_fold:164 - Fold 7: train=4380 val=660 test=660
+2026-02-23 10:10:08.551 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_2h_f7 on cuda — 4368 train samples
+2026-02-23 10:10:09.255 | ERROR    | utils.walk_forward:run_fold:202 - Fold 7 training failed: miopenStatusUnknownError
+2026-02-23 10:10:09.260 | INFO     | utils.walk_forward:run_fold:164 - Fold 8: train=4380 val=660 test=660
+2026-02-23 10:10:09.272 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_2h_f8 on cuda — 4368 train samples
+2026-02-23 10:10:09.981 | ERROR    | utils.walk_forward:run_fold:202 - Fold 8 training failed: miopenStatusUnknownError
+2026-02-23 10:10:09.987 | INFO     | utils.walk_forward:run_fold:164 - Fold 9: train=4380 val=660 test=660
+2026-02-23 10:10:10.004 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_2h_f9 on cuda — 4368 train samples
+2026-02-23 10:10:10.722 | ERROR    | utils.walk_forward:run_fold:202 - Fold 9 training failed: miopenStatusUnknownError
+2026-02-23 10:10:10.727 | INFO     | utils.walk_forward:run_fold:164 - Fold 10: train=4380 val=660 test=660
+2026-02-23 10:10:10.740 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_2h_f10 on cuda — 4368 train samples
+2026-02-23 10:10:11.423 | ERROR    | utils.walk_forward:run_fold:202 - Fold 10 training failed: miopenStatusUnknownError
+2026-02-23 10:10:11.430 | INFO     | utils.walk_forward:run_fold:164 - Fold 11: train=4380 val=660 test=660
+2026-02-23 10:10:11.443 | INFO     | models.tft_model:train:187 - Training TFT for ARB/USD_2h_f11 on cuda — 4368 train samples
+2026-02-23 10:10:12.128 | ERROR    | utils.walk_forward:run_fold:202 - Fold 11 training failed: miopenStatusUnknownError
+2026-02-23 10:10:12.129 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 10:10:12.131 | INFO     | __main__:main:407 - 
+============================================================
+Timeframe: 4 hours (4h)
+============================================================
+2026-02-23 10:10:12.158 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching INJ/USD [4h] — 1825 days...
+2026-02-23 10:10:17.989 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - INJ/USD 4h: 10950 candles (2021-02-24 -> 2026-02-23)
+2026-02-23 10:10:18.046 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching LINK/USD [4h] — 1825 days...
+2026-02-23 10:10:24.610 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - LINK/USD 4h: 10950 candles (2021-02-24 -> 2026-02-23)
+2026-02-23 10:10:24.668 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching DOGE/USD [4h] — 1825 days...
+2026-02-23 10:10:34.386 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - DOGE/USD 4h: 10950 candles (2021-02-24 -> 2026-02-23)
+2026-02-23 10:10:34.432 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching OP/USD [4h] — 1825 days...
+2026-02-23 10:10:41.277 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - OP/USD 4h: 8179 candles (2022-06-01 -> 2026-02-23)
+2026-02-23 10:10:41.354 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching ARB/USD [4h] — 1825 days...
+2026-02-23 10:10:46.452 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - ARB/USD 4h: 6408 candles (2023-03-23 -> 2026-02-23)
+2026-02-23 10:10:46.495 | INFO     | __main__:main:423 - 
+Processing: INJ/USD [4h]
+2026-02-23 10:10:46.506 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 10:10:46.508 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 10:10:46.508 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: INJ/USD_4h
+============================================================
+2026-02-23 10:10:46.509 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [4h]: train=2190 bars val=330 test=330 step=330
+2026-02-23 10:10:46.509 | INFO     | data.feature_engineer:build_features:283 - Building features for INJ/USD_4h (10950 rows)
+2026-02-23 10:10:46.601 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-02-23 10:10:46.602 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=5051 NEUTRAL=1040 UP=4659
+2026-02-23 10:10:46.602 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=4901 trending_up=3648 trending_down=2201
+2026-02-23 10:10:46.613 | INFO     | utils.optuna_search:run_optuna_search:207 - Optuna search: INJ/USD_4h [4h] — 30 trials
+2026-02-23 10:10:46.629 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:10:47.401 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:10:48.204 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:10:49.000 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2166 train samples
+2026-02-23 10:10:49.230 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2166 train samples
+2026-02-23 10:10:49.989 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2166 train samples
+2026-02-23 10:10:50.780 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:10:51.516 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:10:52.265 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:10:52.509 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:10:52.757 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:10:53.006 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:10:53.243 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:10:54.001 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:10:54.243 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:10:55.028 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:10:55.269 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:10:56.045 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:10:56.290 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2166 train samples
+2026-02-23 10:10:56.565 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:10:57.345 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:10:57.602 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:10:58.357 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:10:59.130 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:10:59.868 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:11:00.630 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:11:01.380 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:11:02.541 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:11:02.783 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2166 train samples
+2026-02-23 10:11:03.522 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:11:03.755 | SUCCESS  | utils.optuna_search:run_optuna_search:220 - Optuna [INJ/USD_4h]: best Sharpe=-999.000 after 30 trials
+2026-02-23 10:11:03.760 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-23 10:11:03.766 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=2190 val=330 test=330
+2026-02-23 10:11:03.777 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f1 on cuda — 2178 train samples
+2026-02-23 10:11:04.500 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: miopenStatusUnknownError
+2026-02-23 10:11:04.507 | INFO     | utils.walk_forward:run_fold:164 - Fold 2: train=2190 val=330 test=330
+2026-02-23 10:11:04.523 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f2 on cuda — 2178 train samples
+2026-02-23 10:11:05.263 | ERROR    | utils.walk_forward:run_fold:202 - Fold 2 training failed: miopenStatusUnknownError
+2026-02-23 10:11:05.268 | INFO     | utils.walk_forward:run_fold:164 - Fold 3: train=2190 val=330 test=330
+2026-02-23 10:11:05.282 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f3 on cuda — 2178 train samples
+2026-02-23 10:11:06.025 | ERROR    | utils.walk_forward:run_fold:202 - Fold 3 training failed: miopenStatusUnknownError
+2026-02-23 10:11:06.031 | INFO     | utils.walk_forward:run_fold:164 - Fold 4: train=2190 val=330 test=330
+2026-02-23 10:11:06.043 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f4 on cuda — 2178 train samples
+2026-02-23 10:11:06.793 | ERROR    | utils.walk_forward:run_fold:202 - Fold 4 training failed: miopenStatusUnknownError
+2026-02-23 10:11:06.799 | INFO     | utils.walk_forward:run_fold:164 - Fold 5: train=2190 val=330 test=330
+2026-02-23 10:11:06.813 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f5 on cuda — 2178 train samples
+2026-02-23 10:11:07.526 | ERROR    | utils.walk_forward:run_fold:202 - Fold 5 training failed: miopenStatusUnknownError
+2026-02-23 10:11:07.532 | INFO     | utils.walk_forward:run_fold:164 - Fold 6: train=2190 val=330 test=330
+2026-02-23 10:11:07.546 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f6 on cuda — 2178 train samples
+2026-02-23 10:11:08.328 | ERROR    | utils.walk_forward:run_fold:202 - Fold 6 training failed: miopenStatusUnknownError
+2026-02-23 10:11:08.335 | INFO     | utils.walk_forward:run_fold:164 - Fold 7: train=2190 val=330 test=330
+2026-02-23 10:11:08.350 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f7 on cuda — 2178 train samples
+2026-02-23 10:11:09.128 | ERROR    | utils.walk_forward:run_fold:202 - Fold 7 training failed: miopenStatusUnknownError
+2026-02-23 10:11:09.133 | INFO     | utils.walk_forward:run_fold:164 - Fold 8: train=2190 val=330 test=330
+2026-02-23 10:11:09.146 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f8 on cuda — 2178 train samples
+2026-02-23 10:11:09.932 | ERROR    | utils.walk_forward:run_fold:202 - Fold 8 training failed: miopenStatusUnknownError
+2026-02-23 10:11:09.938 | INFO     | utils.walk_forward:run_fold:164 - Fold 9: train=2190 val=330 test=330
+2026-02-23 10:11:09.951 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f9 on cuda — 2178 train samples
+2026-02-23 10:11:10.709 | ERROR    | utils.walk_forward:run_fold:202 - Fold 9 training failed: miopenStatusUnknownError
+2026-02-23 10:11:10.715 | INFO     | utils.walk_forward:run_fold:164 - Fold 10: train=2190 val=330 test=330
+2026-02-23 10:11:10.731 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f10 on cuda — 2178 train samples
+2026-02-23 10:11:11.456 | ERROR    | utils.walk_forward:run_fold:202 - Fold 10 training failed: miopenStatusUnknownError
+2026-02-23 10:11:11.463 | INFO     | utils.walk_forward:run_fold:164 - Fold 11: train=2190 val=330 test=330
+2026-02-23 10:11:11.476 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f11 on cuda — 2178 train samples
+2026-02-23 10:11:12.219 | ERROR    | utils.walk_forward:run_fold:202 - Fold 11 training failed: miopenStatusUnknownError
+2026-02-23 10:11:12.225 | INFO     | utils.walk_forward:run_fold:164 - Fold 12: train=2190 val=330 test=330
+2026-02-23 10:11:12.238 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f12 on cuda — 2178 train samples
+2026-02-23 10:11:12.997 | ERROR    | utils.walk_forward:run_fold:202 - Fold 12 training failed: miopenStatusUnknownError
+2026-02-23 10:11:13.003 | INFO     | utils.walk_forward:run_fold:164 - Fold 13: train=2190 val=330 test=330
+2026-02-23 10:11:13.015 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f13 on cuda — 2178 train samples
+2026-02-23 10:11:13.753 | ERROR    | utils.walk_forward:run_fold:202 - Fold 13 training failed: miopenStatusUnknownError
+2026-02-23 10:11:13.759 | INFO     | utils.walk_forward:run_fold:164 - Fold 14: train=2190 val=330 test=330
+2026-02-23 10:11:13.770 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f14 on cuda — 2178 train samples
+2026-02-23 10:11:14.487 | ERROR    | utils.walk_forward:run_fold:202 - Fold 14 training failed: miopenStatusUnknownError
+2026-02-23 10:11:14.492 | INFO     | utils.walk_forward:run_fold:164 - Fold 15: train=2190 val=330 test=330
+2026-02-23 10:11:14.504 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f15 on cuda — 2178 train samples
+2026-02-23 10:11:15.316 | ERROR    | utils.walk_forward:run_fold:202 - Fold 15 training failed: miopenStatusUnknownError
+2026-02-23 10:11:15.322 | INFO     | utils.walk_forward:run_fold:164 - Fold 16: train=2190 val=330 test=330
+2026-02-23 10:11:15.336 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f16 on cuda — 2178 train samples
+2026-02-23 10:11:16.184 | ERROR    | utils.walk_forward:run_fold:202 - Fold 16 training failed: miopenStatusUnknownError
+2026-02-23 10:11:16.190 | INFO     | utils.walk_forward:run_fold:164 - Fold 17: train=2190 val=330 test=330
+2026-02-23 10:11:16.201 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f17 on cuda — 2178 train samples
+2026-02-23 10:11:16.958 | ERROR    | utils.walk_forward:run_fold:202 - Fold 17 training failed: miopenStatusUnknownError
+2026-02-23 10:11:16.965 | INFO     | utils.walk_forward:run_fold:164 - Fold 18: train=2190 val=330 test=330
+2026-02-23 10:11:16.977 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f18 on cuda — 2178 train samples
+2026-02-23 10:11:17.683 | ERROR    | utils.walk_forward:run_fold:202 - Fold 18 training failed: miopenStatusUnknownError
+2026-02-23 10:11:17.688 | INFO     | utils.walk_forward:run_fold:164 - Fold 19: train=2190 val=330 test=330
+2026-02-23 10:11:17.701 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f19 on cuda — 2178 train samples
+2026-02-23 10:11:18.425 | ERROR    | utils.walk_forward:run_fold:202 - Fold 19 training failed: miopenStatusUnknownError
+2026-02-23 10:11:18.431 | INFO     | utils.walk_forward:run_fold:164 - Fold 20: train=2190 val=330 test=330
+2026-02-23 10:11:18.442 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f20 on cuda — 2178 train samples
+2026-02-23 10:11:19.165 | ERROR    | utils.walk_forward:run_fold:202 - Fold 20 training failed: miopenStatusUnknownError
+2026-02-23 10:11:19.169 | INFO     | utils.walk_forward:run_fold:164 - Fold 21: train=2190 val=330 test=330
+2026-02-23 10:11:19.181 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f21 on cuda — 2178 train samples
+2026-02-23 10:11:20.119 | ERROR    | utils.walk_forward:run_fold:202 - Fold 21 training failed: miopenStatusUnknownError
+2026-02-23 10:11:20.124 | INFO     | utils.walk_forward:run_fold:164 - Fold 22: train=2190 val=330 test=330
+2026-02-23 10:11:20.138 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f22 on cuda — 2178 train samples
+2026-02-23 10:11:21.087 | ERROR    | utils.walk_forward:run_fold:202 - Fold 22 training failed: miopenStatusUnknownError
+2026-02-23 10:11:21.094 | INFO     | utils.walk_forward:run_fold:164 - Fold 23: train=2190 val=330 test=330
+2026-02-23 10:11:21.108 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f23 on cuda — 2178 train samples
+2026-02-23 10:11:22.072 | ERROR    | utils.walk_forward:run_fold:202 - Fold 23 training failed: miopenStatusUnknownError
+2026-02-23 10:11:22.081 | INFO     | utils.walk_forward:run_fold:164 - Fold 24: train=2190 val=330 test=330
+2026-02-23 10:11:22.096 | INFO     | models.tft_model:train:187 - Training TFT for INJ/USD_4h_f24 on cuda — 2178 train samples
+2026-02-23 10:11:23.064 | ERROR    | utils.walk_forward:run_fold:202 - Fold 24 training failed: miopenStatusUnknownError
+2026-02-23 10:11:23.065 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 10:11:23.069 | INFO     | __main__:main:423 - 
+Processing: LINK/USD [4h]
+2026-02-23 10:11:23.080 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 10:11:23.082 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 10:11:23.083 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: LINK/USD_4h
+============================================================
+2026-02-23 10:11:23.083 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [4h]: train=2190 bars val=330 test=330 step=330
+2026-02-23 10:11:23.084 | INFO     | data.feature_engineer:build_features:283 - Building features for LINK/USD_4h (10950 rows)
+2026-02-23 10:11:23.186 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-02-23 10:11:23.187 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=4839 NEUTRAL=1179 UP=4732
+2026-02-23 10:11:23.188 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=4243 trending_up=2858 trending_down=3649
+2026-02-23 10:11:23.199 | INFO     | utils.optuna_search:run_optuna_search:207 - Optuna search: LINK/USD_4h [4h] — 30 trials
+2026-02-23 10:11:23.214 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:11:24.108 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:11:24.974 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:11:25.807 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2166 train samples
+2026-02-23 10:11:26.044 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2166 train samples
+2026-02-23 10:11:26.773 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2166 train samples
+2026-02-23 10:11:27.476 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:11:28.197 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:11:28.953 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:11:29.176 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:11:29.417 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:11:29.667 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:11:29.911 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:11:30.706 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:11:30.960 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:11:31.716 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:11:31.958 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:11:32.727 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:11:32.974 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2166 train samples
+2026-02-23 10:11:33.214 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:11:33.966 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:11:34.201 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:11:34.972 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:11:35.734 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:11:36.493 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:11:37.287 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:11:38.085 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:11:38.926 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2178 train samples
+2026-02-23 10:11:39.163 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2166 train samples
+2026-02-23 10:11:39.939 | INFO     | models.tft_model:train:187 - Training TFT for optuna_trial on cuda — 2142 train samples
+2026-02-23 10:11:40.194 | SUCCESS  | utils.optuna_search:run_optuna_search:220 - Optuna [LINK/USD_4h]: best Sharpe=-999.000 after 30 trials
+2026-02-23 10:11:40.202 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-23 10:11:40.208 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=2190 val=330 test=330
+2026-02-23 10:11:40.230 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_4h_f1 on cuda — 2178 train samples
+2026-02-23 10:11:41.232 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: miopenStatusUnknownError
+2026-02-23 10:11:41.237 | INFO     | utils.walk_forward:run_fold:164 - Fold 2: train=2190 val=330 test=330
+2026-02-23 10:11:41.249 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_4h_f2 on cuda — 2178 train samples
+2026-02-23 10:11:42.044 | ERROR    | utils.walk_forward:run_fold:202 - Fold 2 training failed: miopenStatusUnknownError
+2026-02-23 10:11:42.049 | INFO     | utils.walk_forward:run_fold:164 - Fold 3: train=2190 val=330 test=330
+2026-02-23 10:11:42.063 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_4h_f3 on cuda — 2178 train samples
+2026-02-23 10:11:42.841 | ERROR    | utils.walk_forward:run_fold:202 - Fold 3 training failed: miopenStatusUnknownError
+2026-02-23 10:11:42.848 | INFO     | utils.walk_forward:run_fold:164 - Fold 4: train=2190 val=330 test=330
+2026-02-23 10:11:42.864 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_4h_f4 on cuda — 2178 train samples
+2026-02-23 10:11:43.619 | ERROR    | utils.walk_forward:run_fold:202 - Fold 4 training failed: miopenStatusUnknownError
+2026-02-23 10:11:43.624 | INFO     | utils.walk_forward:run_fold:164 - Fold 5: train=2190 val=330 test=330
+2026-02-23 10:11:43.637 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_4h_f5 on cuda — 2178 train samples
+2026-02-23 10:11:44.437 | ERROR    | utils.walk_forward:run_fold:202 - Fold 5 training failed: miopenStatusUnknownError
+2026-02-23 10:11:44.443 | INFO     | utils.walk_forward:run_fold:164 - Fold 6: train=2190 val=330 test=330
+2026-02-23 10:11:44.457 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_4h_f6 on cuda — 2178 train samples
+2026-02-23 10:11:45.254 | ERROR    | utils.walk_forward:run_fold:202 - Fold 6 training failed: miopenStatusUnknownError
+2026-02-23 10:11:45.259 | INFO     | utils.walk_forward:run_fold:164 - Fold 7: train=2190 val=330 test=330
+2026-02-23 10:11:45.274 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_4h_f7 on cuda — 2178 train samples
+2026-02-23 10:11:46.065 | ERROR    | utils.walk_forward:run_fold:202 - Fold 7 training failed: miopenStatusUnknownError
+2026-02-23 10:11:46.070 | INFO     | utils.walk_forward:run_fold:164 - Fold 8: train=2190 val=330 test=330
+2026-02-23 10:11:46.082 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_4h_f8 on cuda — 2178 train samples
+2026-02-23 10:11:46.883 | ERROR    | utils.walk_forward:run_fold:202 - Fold 8 training failed: miopenStatusUnknownError
+2026-02-23 10:11:46.890 | INFO     | utils.walk_forward:run_fold:164 - Fold 9: train=2190 val=330 test=330
+2026-02-23 10:11:46.903 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_4h_f9 on cuda — 2178 train samples
+2026-02-23 10:11:47.660 | ERROR    | utils.walk_forward:run_fold:202 - Fold 9 training failed: miopenStatusUnknownError
+2026-02-23 10:11:47.665 | INFO     | utils.walk_forward:run_fold:164 - Fold 10: train=2190 val=330 test=330
+2026-02-23 10:11:47.679 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_4h_f10 on cuda — 2178 train samples
+2026-02-23 10:11:48.443 | ERROR    | utils.walk_forward:run_fold:202 - Fold 10 training failed: miopenStatusUnknownError
+2026-02-23 10:11:48.448 | INFO     | utils.walk_forward:run_fold:164 - Fold 11: train=2190 val=330 test=330
+2026-02-23 10:11:48.461 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_4h_f11 on cuda — 2178 train samples
+2026-02-23 10:11:49.218 | ERROR    | utils.walk_forward:run_fold:202 - Fold 11 training failed: miopenStatusUnknownError
+2026-02-23 10:11:49.223 | INFO     | utils.walk_forward:run_fold:164 - Fold 12: train=2190 val=330 test=330
+2026-02-23 10:11:49.234 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_4h_f12 on cuda — 2178 train samples
+2026-02-23 10:11:50.023 | ERROR    | utils.walk_forward:run_fold:202 - Fold 12 training failed: miopenStatusUnknownError
+2026-02-23 10:11:50.029 | INFO     | utils.walk_forward:run_fold:164 - Fold 13: train=2190 val=330 test=330
+2026-02-23 10:11:50.044 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_4h_f13 on cuda — 2178 train samples
+2026-02-23 10:11:50.892 | ERROR    | utils.walk_forward:run_fold:202 - Fold 13 training failed: miopenStatusUnknownError
+2026-02-23 10:11:50.898 | INFO     | utils.walk_forward:run_fold:164 - Fold 14: train=2190 val=330 test=330
+2026-02-23 10:11:50.911 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_4h_f14 on cuda — 2178 train samples
+2026-02-23 10:11:51.640 | ERROR    | utils.walk_forward:run_fold:202 - Fold 14 training failed: miopenStatusUnknownError
+2026-02-23 10:11:51.647 | INFO     | utils.walk_forward:run_fold:164 - Fold 15: train=2190 val=330 test=330
+2026-02-23 10:11:51.661 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_4h_f15 on cuda — 2178 train samples
+2026-02-23 10:11:52.408 | ERROR    | utils.walk_forward:run_fold:202 - Fold 15 training failed: miopenStatusUnknownError
+2026-02-23 10:11:52.415 | INFO     | utils.walk_forward:run_fold:164 - Fold 16: train=2190 val=330 test=330
+2026-02-23 10:11:52.427 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_4h_f16 on cuda — 2178 train samples
+2026-02-23 10:11:53.210 | ERROR    | utils.walk_forward:run_fold:202 - Fold 16 training failed: miopenStatusUnknownError
+2026-02-23 10:11:53.215 | INFO     | utils.walk_forward:run_fold:164 - Fold 17: train=2190 val=330 test=330
+2026-02-23 10:11:53.228 | INFO     | models.tft_model:train:187 - Training TFT for LINK/USD_4h_f17 on cuda — 2178 train samples
+2026-02-23 10:11:54.014 | ERROR    | utils.walk_forward:run_fold:202 - Fold 17 training failed: miopenStatusUnknownError
+2026-02-23 10:11:54.019 | INFO     | utils.walk_forward:run_fold:164 - Fold 18: train=2190 val=330 test=330

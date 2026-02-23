@@ -24,7 +24,7 @@ CNN_PARAMS = {
     "num_filters":     64,   # Convolutional filters per layer
     "kernel_size":     3,    # Filter width
     "num_layers":      3,    # Number of conv blocks
-    "dropout":         0.2,
+    "dropout":         0.2,  # nn.Dropout only — no MIOpen kernel issues
     "epochs":          30,
     "batch_size":      128,
     "learning_rate":   0.001,

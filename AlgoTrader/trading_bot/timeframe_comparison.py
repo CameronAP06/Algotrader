@@ -22,8 +22,18 @@ Usage:
   python timeframe_comparison.py --timeframes 1h 4h 1d
 ═══════════════════════════════════════════════════════════════════════════════
 """
-import argparse, os, sys, json, time
+import argparse, os, sys, json, time, ctypes, platform
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from importlib.util import find_spec
+if platform.system() == "Windows":
+    try:
+        if (spec := find_spec("torch")) and spec.origin:
+            dll_path = os.path.join(os.path.dirname(spec.origin), "lib", "c10.dll")
+            if os.path.exists(dll_path):
+                ctypes.CDLL(os.path.normpath(dll_path))
+    except Exception:
+        pass
 
 from loguru import logger
 import pandas as pd
