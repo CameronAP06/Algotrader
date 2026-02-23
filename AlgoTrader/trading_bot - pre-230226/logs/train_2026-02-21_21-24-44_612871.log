@@ -1,0 +1,47 @@
+2026-02-21 21:24:44.625 | INFO     | data.kraken_fetcher:get_exchange:38 - Connected to Binance
+2026-02-21 21:24:44.757 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded BTC/USD from cache (43787 rows)
+2026-02-21 21:24:44.883 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded ETH/USD from cache (43787 rows)
+2026-02-21 21:24:45.017 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded XRP/USD from cache (43787 rows)
+2026-02-21 21:24:45.150 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded SOL/USD from cache (43787 rows)
+2026-02-21 21:24:45.269 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded AVAX/USD from cache (43787 rows)
+2026-02-21 21:24:45.414 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded LINK/USD from cache (43787 rows)
+2026-02-21 21:24:45.502 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded MATIC/USD from cache (31078 rows)
+2026-02-21 21:24:45.657 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded INJ/USD from cache (43787 rows)
+2026-02-21 21:24:45.735 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded ARB/USD from cache (25589 rows)
+2026-02-21 21:24:45.858 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded OP/USD from cache (32676 rows)
+2026-02-21 21:24:45.968 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded FTM/USD from cache (34073 rows)
+2026-02-21 21:24:46.100 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded RUNE/USD from cache (43787 rows)
+2026-02-21 21:24:46.237 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded DOGE/USD from cache (43787 rows)
+2026-02-21 21:24:46.366 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded ADA/USD from cache (43787 rows)
+2026-02-21 21:24:46.366 | SUCCESS  | data.kraken_fetcher:fetch_all_pairs:131 - Loaded 14/14 pairs
+2026-02-21 21:24:46.366 | INFO     | data.alt_data:fetch_all_alt_data:133 - Loaded cached alt data (1825 rows)
+2026-02-21 21:24:46.366 | INFO     | __main__:run_pipeline:57 - 
+============================================================
+Processing: INJ/USD
+============================================================
+2026-02-21 21:24:46.366 | INFO     | data.feature_engineer:build_features:247 - Building features for INJ/USD (43787 rows)
+2026-02-21 21:24:46.534 | INFO     | data.feature_engineer:build_features:271 - Dropped 205 NaN/inf rows → 43582 usable rows
+2026-02-21 21:24:46.534 | INFO     | data.feature_engineer:build_features:274 - Label distribution: DOWN=18136 NEUTRAL=8173 UP=17273
+2026-02-21 21:24:46.536 | INFO     | data.feature_engineer:build_features:281 - Regime: ranging=29304 trending_up=8767 trending_down=5511
+2026-02-21 21:24:46.536 | INFO     | __main__:run_pipeline:62 - Features: 79 columns
+2026-02-21 21:24:46.571 | INFO     | utils.splitter:time_split:37 - Split: train=30507 | val=6537 | test=6538
+2026-02-21 21:24:46.586 | INFO     | utils.splitter:save_scaler:48 - Saved scaler -> models\saved\INJ_USD_scaler.pkl
+2026-02-21 21:24:46.588 | INFO     | models.catboost_model:train:34 - Training CatBoost for INJ/USD...
+2026-02-21 21:24:47.757 | SUCCESS  | models.catboost_model:train:42 - CatBoost val accuracy: 0.4265
+2026-02-21 21:24:47.759 | INFO     | models.catboost_model:save:50 - Saved CatBoost -> models\saved\INJ_USD_catboost.cbm
+2026-02-21 21:24:48.866 | INFO     | models.cnn_model:train:116 - Training 1D CNN for INJ/USD on cuda — 30483 train samples
+2026-02-21 21:24:50.747 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.8759 | val_acc=0.4327
+2026-02-21 21:25:02.397 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-21 21:25:02.397 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.8759
+2026-02-21 21:25:02.407 | INFO     | models.cnn_model:save:173 - Saved 1D CNN -> models\saved\INJ_USD_cnn.pt
+2026-02-21 21:25:02.412 | INFO     | models.lstm_model:train:91 - Training LSTM for INJ/USD on cuda — 30483 train samples
+2026-02-21 21:25:03.841 | INFO     | models.lstm_model:train:122 -   Epoch   0 | val_loss=0.8709 | val_acc=0.4250
+2026-02-21 21:25:13.188 | INFO     | models.lstm_model:train:131 - Early stopping at epoch 7
+2026-02-21 21:25:13.188 | SUCCESS  | models.lstm_model:train:135 - LSTM best val_loss: 0.8709
+2026-02-21 21:25:13.200 | INFO     | models.lstm_model:save:151 - Saved LSTM -> models\saved\INJ_USD_lstm.pt
+2026-02-21 21:25:23.002 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.010 CNN=0.790 LSTM=0.200 | acc=0.4416
+2026-02-21 21:25:23.002 | INFO     | models.ensemble:save_weights:138 - Saved ensemble weights -> models\saved\INJ_USD_ensemble_weights.pkl
+2026-02-21 21:25:32.220 | INFO     | models.ensemble:generate_signals:119 - Signal distribution (threshold=0.34): BUY=76 (1.2%)  SELL=130 (2.0%)  HOLD=6332 (96.8%)
+2026-02-21 21:25:32.220 | INFO     | __main__:run_pipeline:99 - Test accuracy: 0.4087
+2026-02-21 21:25:32.233 | INFO     | backtest.engine:_compute_metrics:200 - INJ/USD Results: Return=-13.72% | Sharpe=-0.62 | MaxDD=-20.34% | WinRate=33.33% | Trades=30 (L:12 S:18)
+2026-02-21 21:25:32.242 | INFO     | backtest.engine:save_results:218 - Results saved -> backtest\results\INJ_USD_backtest.json

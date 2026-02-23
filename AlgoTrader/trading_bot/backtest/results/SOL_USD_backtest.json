@@ -1,12 +1,12 @@
 {
   "symbol": "SOL/USD",
-  "final_equity": 5908.4681068515965,
-  "total_return": -0.40915318931484035,
-  "n_trades": 99,
-  "n_longs": 44,
-  "n_shorts": 55,
-  "win_rate": 0.37373737373737376,
-  "sharpe_ratio": -2.462879081794366,
-  "max_drawdown": -0.4680784507261178,
-  "profit_factor": 0.6904427984453326
+  "final_equity": 9386.968365822084,
+  "total_return": -0.06130316341779162,
+  "n_trades": 143,
+  "n_longs": 64,
+  "n_shorts": 79,
+  "win_rate": 0.4755244755244755,
+  "sharpe_ratio": -0.027030306092429568,
+  "max_drawdown": -0.3223903714946588,
+  "profit_factor": 1.0414898982588543
 }

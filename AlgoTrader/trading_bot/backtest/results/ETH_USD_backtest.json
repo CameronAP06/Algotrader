@@ -1,12 +1,12 @@
 {
   "symbol": "ETH/USD",
-  "final_equity": 8064.833577516965,
-  "total_return": -0.19351664224830348,
-  "n_trades": 60,
-  "n_longs": 39,
-  "n_shorts": 21,
-  "win_rate": 0.4166666666666667,
-  "sharpe_ratio": -0.856842525570251,
-  "max_drawdown": -0.3877702487013483,
-  "profit_factor": 0.9450141710181609
+  "final_equity": 2445.770541482818,
+  "total_return": -0.7554229458517182,
+  "n_trades": 226,
+  "n_longs": 114,
+  "n_shorts": 112,
+  "win_rate": 0.41150442477876104,
+  "sharpe_ratio": -3.0496836704742725,
+  "max_drawdown": -0.7653115443572244,
+  "profit_factor": 0.6893284642688924
 }

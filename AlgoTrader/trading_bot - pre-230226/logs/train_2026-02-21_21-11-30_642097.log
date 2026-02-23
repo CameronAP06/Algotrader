@@ -1,0 +1,158 @@
+2026-02-21 21:11:30.652 | INFO     | data.kraken_fetcher:get_exchange:38 - Connected to Binance
+2026-02-21 21:11:30.796 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded INJ/USD from cache (43787 rows)
+2026-02-21 21:11:30.926 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded LINK/USD from cache (43787 rows)
+2026-02-21 21:11:31.061 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded DOGE/USD from cache (43787 rows)
+2026-02-21 21:11:31.156 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded OP/USD from cache (32676 rows)
+2026-02-21 21:11:31.233 | INFO     | data.kraken_fetcher:fetch_all_pairs:124 - Loaded ARB/USD from cache (25589 rows)
+2026-02-21 21:11:31.234 | SUCCESS  | data.kraken_fetcher:fetch_all_pairs:131 - Loaded 5/5 pairs
+2026-02-21 21:11:31.245 | INFO     | data.alt_data:fetch_all_alt_data:133 - Loaded cached alt data (1825 rows)
+2026-02-21 21:11:31.245 | INFO     | __main__:run_pipeline:57 - 
+============================================================
+Processing: INJ/USD
+============================================================
+2026-02-21 21:11:31.246 | INFO     | data.feature_engineer:build_features:247 - Building features for INJ/USD (43787 rows)
+2026-02-21 21:11:31.425 | INFO     | data.feature_engineer:build_features:271 - Dropped 205 NaN/inf rows → 43582 usable rows
+2026-02-21 21:11:31.426 | INFO     | data.feature_engineer:build_features:274 - Label distribution: DOWN=18136 NEUTRAL=8173 UP=17273
+2026-02-21 21:11:31.427 | INFO     | data.feature_engineer:build_features:281 - Regime: ranging=29304 trending_up=8767 trending_down=5511
+2026-02-21 21:11:31.428 | INFO     | __main__:run_pipeline:62 - Features: 79 columns
+2026-02-21 21:11:31.486 | INFO     | utils.splitter:time_split:37 - Split: train=30507 | val=6537 | test=6538
+2026-02-21 21:11:31.491 | INFO     | utils.splitter:save_scaler:48 - Saved scaler -> models\saved\INJ_USD_scaler.pkl
+2026-02-21 21:11:31.492 | INFO     | models.catboost_model:train:34 - Training CatBoost for INJ/USD...
+2026-02-21 21:11:32.812 | SUCCESS  | models.catboost_model:train:42 - CatBoost val accuracy: 0.4265
+2026-02-21 21:11:32.814 | INFO     | models.catboost_model:save:50 - Saved CatBoost -> models\saved\INJ_USD_catboost.cbm
+2026-02-21 21:11:34.249 | INFO     | models.cnn_model:train:116 - Training 1D CNN for INJ/USD on cuda — 30483 train samples
+2026-02-21 21:11:36.505 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.8736 | val_acc=0.4316
+2026-02-21 21:11:47.649 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-21 21:11:47.649 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.8736
+2026-02-21 21:11:47.658 | INFO     | models.cnn_model:save:173 - Saved 1D CNN -> models\saved\INJ_USD_cnn.pt
+2026-02-21 21:11:47.669 | INFO     | models.lstm_model:train:91 - Training LSTM for INJ/USD on cuda — 30483 train samples
+2026-02-21 21:11:49.034 | INFO     | models.lstm_model:train:122 -   Epoch   0 | val_loss=0.8836 | val_acc=0.4156
+2026-02-21 21:11:58.666 | INFO     | models.lstm_model:train:131 - Early stopping at epoch 8
+2026-02-21 21:11:58.666 | SUCCESS  | models.lstm_model:train:135 - LSTM best val_loss: 0.8832
+2026-02-21 21:11:58.666 | INFO     | models.lstm_model:save:151 - Saved LSTM -> models\saved\INJ_USD_lstm.pt
+2026-02-21 21:12:07.936 | SUCCESS  | models.ensemble:optimise_weights:52 - Optimised weights: LGBM=0.333 XGB=0.333 LSTM=0.333 | acc=0.4312
+2026-02-21 21:12:07.937 | INFO     | models.ensemble:save_weights:104 - Saved ensemble weights -> models\saved\INJ_USD_ensemble_weights.pkl
+2026-02-21 21:12:17.339 | INFO     | models.ensemble:generate_signals:85 - Signal distribution (threshold=0.34): BUY=162 (2.5%)  SELL=18 (0.3%)  HOLD=6358 (97.2%)
+2026-02-21 21:12:17.339 | INFO     | __main__:run_pipeline:99 - Test accuracy: 0.3880
+2026-02-21 21:12:17.349 | INFO     | backtest.engine:_compute_metrics:200 - INJ/USD Results: Return=-9.57% | Sharpe=-0.25 | MaxDD=-33.62% | WinRate=34.88% | Trades=43 (L:38 S:5)
+2026-02-21 21:12:17.358 | INFO     | backtest.engine:save_results:218 - Results saved -> backtest\results\INJ_USD_backtest.json
+2026-02-21 21:12:17.369 | INFO     | __main__:run_pipeline:57 - 
+============================================================
+Processing: LINK/USD
+============================================================
+2026-02-21 21:12:17.369 | INFO     | data.feature_engineer:build_features:247 - Building features for LINK/USD (43787 rows)
+2026-02-21 21:12:17.531 | INFO     | data.feature_engineer:build_features:271 - Dropped 205 NaN/inf rows → 43582 usable rows
+2026-02-21 21:12:17.533 | INFO     | data.feature_engineer:build_features:274 - Label distribution: DOWN=16679 NEUTRAL=10188 UP=16715
+2026-02-21 21:12:17.533 | INFO     | data.feature_engineer:build_features:281 - Regime: ranging=29123 trending_up=6113 trending_down=8346
+2026-02-21 21:12:17.533 | INFO     | __main__:run_pipeline:62 - Features: 79 columns
+2026-02-21 21:12:17.599 | INFO     | utils.splitter:time_split:37 - Split: train=30507 | val=6537 | test=6538
+2026-02-21 21:12:17.602 | INFO     | utils.splitter:save_scaler:48 - Saved scaler -> models\saved\LINK_USD_scaler.pkl
+2026-02-21 21:12:17.602 | INFO     | models.catboost_model:train:34 - Training CatBoost for LINK/USD...
+2026-02-21 21:12:20.819 | SUCCESS  | models.catboost_model:train:42 - CatBoost val accuracy: 0.4222
+2026-02-21 21:12:20.833 | INFO     | models.catboost_model:save:50 - Saved CatBoost -> models\saved\LINK_USD_catboost.cbm
+2026-02-21 21:12:20.839 | INFO     | models.cnn_model:train:116 - Training 1D CNN for LINK/USD on cuda — 30483 train samples
+2026-02-21 21:12:22.623 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.8880 | val_acc=0.4216
+2026-02-21 21:12:32.985 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-21 21:12:32.985 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.8880
+2026-02-21 21:12:32.996 | INFO     | models.cnn_model:save:173 - Saved 1D CNN -> models\saved\LINK_USD_cnn.pt
+2026-02-21 21:12:32.997 | INFO     | models.lstm_model:train:91 - Training LSTM for LINK/USD on cuda — 30483 train samples
+2026-02-21 21:12:34.205 | INFO     | models.lstm_model:train:122 -   Epoch   0 | val_loss=0.8863 | val_acc=0.4139
+2026-02-21 21:12:42.506 | INFO     | models.lstm_model:train:131 - Early stopping at epoch 7
+2026-02-21 21:12:42.506 | SUCCESS  | models.lstm_model:train:135 - LSTM best val_loss: 0.8863
+2026-02-21 21:12:42.506 | INFO     | models.lstm_model:save:151 - Saved LSTM -> models\saved\LINK_USD_lstm.pt
+2026-02-21 21:12:52.639 | SUCCESS  | models.ensemble:optimise_weights:52 - Optimised weights: LGBM=0.333 XGB=0.333 LSTM=0.333 | acc=0.4329
+2026-02-21 21:12:52.642 | INFO     | models.ensemble:save_weights:104 - Saved ensemble weights -> models\saved\LINK_USD_ensemble_weights.pkl
+2026-02-21 21:13:02.458 | INFO     | models.ensemble:generate_signals:85 - Signal distribution (threshold=0.35): BUY=0 (0.0%)  SELL=63 (1.0%)  HOLD=6475 (99.0%)
+2026-02-21 21:13:02.458 | INFO     | __main__:run_pipeline:99 - Test accuracy: 0.3666
+2026-02-21 21:13:02.470 | INFO     | backtest.engine:_compute_metrics:200 - LINK/USD Results: Return=-3.34% | Sharpe=-0.14 | MaxDD=-21.10% | WinRate=35.29% | Trades=17 (L:0 S:17)
+2026-02-21 21:13:02.481 | INFO     | backtest.engine:save_results:218 - Results saved -> backtest\results\LINK_USD_backtest.json
+2026-02-21 21:13:02.487 | INFO     | __main__:run_pipeline:57 - 
+============================================================
+Processing: DOGE/USD
+============================================================
+2026-02-21 21:13:02.487 | INFO     | data.feature_engineer:build_features:247 - Building features for DOGE/USD (43787 rows)
+2026-02-21 21:13:02.647 | INFO     | data.feature_engineer:build_features:271 - Dropped 205 NaN/inf rows → 43582 usable rows
+2026-02-21 21:13:02.647 | INFO     | data.feature_engineer:build_features:274 - Label distribution: DOWN=16167 NEUTRAL=11657 UP=15758
+2026-02-21 21:13:02.647 | INFO     | data.feature_engineer:build_features:281 - Regime: ranging=27637 trending_up=6981 trending_down=8964
+2026-02-21 21:13:02.647 | INFO     | __main__:run_pipeline:62 - Features: 79 columns
+2026-02-21 21:13:02.696 | INFO     | utils.splitter:time_split:37 - Split: train=30507 | val=6537 | test=6538
+2026-02-21 21:13:02.696 | INFO     | utils.splitter:save_scaler:48 - Saved scaler -> models\saved\DOGE_USD_scaler.pkl
+2026-02-21 21:13:02.696 | INFO     | models.catboost_model:train:34 - Training CatBoost for DOGE/USD...
+2026-02-21 21:13:04.985 | SUCCESS  | models.catboost_model:train:42 - CatBoost val accuracy: 0.4094
+2026-02-21 21:13:04.985 | INFO     | models.catboost_model:save:50 - Saved CatBoost -> models\saved\DOGE_USD_catboost.cbm
+2026-02-21 21:13:05.001 | INFO     | models.cnn_model:train:116 - Training 1D CNN for DOGE/USD on cuda — 30483 train samples
+2026-02-21 21:13:06.784 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.9923 | val_acc=0.4006
+2026-02-21 21:13:18.605 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 8
+2026-02-21 21:13:18.615 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.9139
+2026-02-21 21:13:18.622 | INFO     | models.cnn_model:save:173 - Saved 1D CNN -> models\saved\DOGE_USD_cnn.pt
+2026-02-21 21:13:18.628 | INFO     | models.lstm_model:train:91 - Training LSTM for DOGE/USD on cuda — 30483 train samples
+2026-02-21 21:13:19.817 | INFO     | models.lstm_model:train:122 -   Epoch   0 | val_loss=0.8917 | val_acc=0.4115
+2026-02-21 21:13:28.160 | INFO     | models.lstm_model:train:131 - Early stopping at epoch 7
+2026-02-21 21:13:28.160 | SUCCESS  | models.lstm_model:train:135 - LSTM best val_loss: 0.8917
+2026-02-21 21:13:28.170 | INFO     | models.lstm_model:save:151 - Saved LSTM -> models\saved\DOGE_USD_lstm.pt
+2026-02-21 21:13:37.236 | SUCCESS  | models.ensemble:optimise_weights:52 - Optimised weights: LGBM=0.333 XGB=0.333 LSTM=0.333 | acc=0.4167
+2026-02-21 21:13:37.236 | INFO     | models.ensemble:save_weights:104 - Saved ensemble weights -> models\saved\DOGE_USD_ensemble_weights.pkl
+2026-02-21 21:13:46.727 | INFO     | models.ensemble:generate_signals:85 - Signal distribution (threshold=0.35): BUY=32 (0.5%)  SELL=1048 (16.0%)  HOLD=5458 (83.5%)
+2026-02-21 21:13:46.727 | INFO     | __main__:run_pipeline:99 - Test accuracy: 0.3986
+2026-02-21 21:13:46.738 | INFO     | backtest.engine:_compute_metrics:200 - DOGE/USD Results: Return=16.87% | Sharpe=0.67 | MaxDD=-37.55% | WinRate=41.30% | Trades=92 (L:10 S:82)
+2026-02-21 21:13:46.753 | INFO     | backtest.engine:save_results:218 - Results saved -> backtest\results\DOGE_USD_backtest.json
+2026-02-21 21:13:46.757 | INFO     | __main__:run_pipeline:57 - 
+============================================================
+Processing: OP/USD
+============================================================
+2026-02-21 21:13:46.757 | INFO     | data.feature_engineer:build_features:247 - Building features for OP/USD (32676 rows)
+2026-02-21 21:13:46.888 | INFO     | data.feature_engineer:build_features:271 - Dropped 205 NaN/inf rows → 32471 usable rows
+2026-02-21 21:13:46.888 | INFO     | data.feature_engineer:build_features:274 - Label distribution: DOWN=13147 NEUTRAL=6816 UP=12508
+2026-02-21 21:13:46.888 | INFO     | data.feature_engineer:build_features:281 - Regime: ranging=21923 trending_up=4864 trending_down=5684
+2026-02-21 21:13:46.888 | INFO     | __main__:run_pipeline:62 - Features: 79 columns
+2026-02-21 21:13:46.925 | INFO     | utils.splitter:time_split:37 - Split: train=22729 | val=4871 | test=4871
+2026-02-21 21:13:46.927 | INFO     | utils.splitter:save_scaler:48 - Saved scaler -> models\saved\OP_USD_scaler.pkl
+2026-02-21 21:13:46.927 | INFO     | models.catboost_model:train:34 - Training CatBoost for OP/USD...
+2026-02-21 21:13:47.896 | SUCCESS  | models.catboost_model:train:42 - CatBoost val accuracy: 0.4118
+2026-02-21 21:13:47.911 | INFO     | models.catboost_model:save:50 - Saved CatBoost -> models\saved\OP_USD_catboost.cbm
+2026-02-21 21:13:47.921 | INFO     | models.cnn_model:train:116 - Training 1D CNN for OP/USD on cuda — 22705 train samples
+2026-02-21 21:13:49.206 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.8912 | val_acc=0.4046
+2026-02-21 21:13:56.961 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-21 21:13:56.962 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.8912
+2026-02-21 21:13:56.962 | INFO     | models.cnn_model:save:173 - Saved 1D CNN -> models\saved\OP_USD_cnn.pt
+2026-02-21 21:13:56.972 | INFO     | models.lstm_model:train:91 - Training LSTM for OP/USD on cuda — 22705 train samples
+2026-02-21 21:13:57.830 | INFO     | models.lstm_model:train:122 -   Epoch   0 | val_loss=0.8781 | val_acc=0.4267
+2026-02-21 21:14:03.893 | INFO     | models.lstm_model:train:131 - Early stopping at epoch 7
+2026-02-21 21:14:03.902 | SUCCESS  | models.lstm_model:train:135 - LSTM best val_loss: 0.8781
+2026-02-21 21:14:03.902 | INFO     | models.lstm_model:save:151 - Saved LSTM -> models\saved\OP_USD_lstm.pt
+2026-02-21 21:14:10.730 | SUCCESS  | models.ensemble:optimise_weights:52 - Optimised weights: LGBM=0.333 XGB=0.333 LSTM=0.333 | acc=0.4120
+2026-02-21 21:14:10.730 | INFO     | models.ensemble:save_weights:104 - Saved ensemble weights -> models\saved\OP_USD_ensemble_weights.pkl
+2026-02-21 21:14:17.725 | INFO     | models.ensemble:generate_signals:85 - Signal distribution (threshold=0.35): BUY=106 (2.2%)  SELL=0 (0.0%)  HOLD=4765 (97.8%)
+2026-02-21 21:14:17.725 | INFO     | __main__:run_pipeline:99 - Test accuracy: 0.3862
+2026-02-21 21:14:17.730 | INFO     | backtest.engine:_compute_metrics:200 - OP/USD Results: Return=-8.38% | Sharpe=-0.41 | MaxDD=-18.25% | WinRate=33.33% | Trades=24 (L:24 S:0)
+2026-02-21 21:14:17.741 | INFO     | backtest.engine:save_results:218 - Results saved -> backtest\results\OP_USD_backtest.json
+2026-02-21 21:14:17.745 | INFO     | __main__:run_pipeline:57 - 
+============================================================
+Processing: ARB/USD
+============================================================
+2026-02-21 21:14:17.746 | INFO     | data.feature_engineer:build_features:247 - Building features for ARB/USD (25589 rows)
+2026-02-21 21:14:17.858 | INFO     | data.feature_engineer:build_features:271 - Dropped 200 NaN/inf rows → 25389 usable rows
+2026-02-21 21:14:17.858 | INFO     | data.feature_engineer:build_features:274 - Label distribution: DOWN=9960 NEUTRAL=6061 UP=9368
+2026-02-21 21:14:17.858 | INFO     | data.feature_engineer:build_features:281 - Regime: ranging=17103 trending_up=3189 trending_down=5097
+2026-02-21 21:14:17.858 | INFO     | __main__:run_pipeline:62 - Features: 79 columns
+2026-02-21 21:14:17.879 | INFO     | utils.splitter:time_split:37 - Split: train=17772 | val=3808 | test=3809
+2026-02-21 21:14:17.887 | INFO     | utils.splitter:save_scaler:48 - Saved scaler -> models\saved\ARB_USD_scaler.pkl
+2026-02-21 21:14:17.888 | INFO     | models.catboost_model:train:34 - Training CatBoost for ARB/USD...
+2026-02-21 21:14:19.014 | SUCCESS  | models.catboost_model:train:42 - CatBoost val accuracy: 0.4002
+2026-02-21 21:14:19.018 | INFO     | models.catboost_model:save:50 - Saved CatBoost -> models\saved\ARB_USD_catboost.cbm
+2026-02-21 21:14:19.027 | INFO     | models.cnn_model:train:116 - Training 1D CNN for ARB/USD on cuda — 17748 train samples
+2026-02-21 21:14:20.116 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.8986 | val_acc=0.3837
+2026-02-21 21:14:26.083 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-21 21:14:26.089 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.8986
+2026-02-21 21:14:26.096 | INFO     | models.cnn_model:save:173 - Saved 1D CNN -> models\saved\ARB_USD_cnn.pt
+2026-02-21 21:14:26.099 | INFO     | models.lstm_model:train:91 - Training LSTM for ARB/USD on cuda — 17748 train samples
+2026-02-21 21:14:26.775 | INFO     | models.lstm_model:train:122 -   Epoch   0 | val_loss=0.8868 | val_acc=0.4183
+2026-02-21 21:14:31.365 | INFO     | models.lstm_model:train:131 - Early stopping at epoch 7
+2026-02-21 21:14:31.371 | SUCCESS  | models.lstm_model:train:135 - LSTM best val_loss: 0.8868
+2026-02-21 21:14:31.376 | INFO     | models.lstm_model:save:151 - Saved LSTM -> models\saved\ARB_USD_lstm.pt
+2026-02-21 21:14:36.926 | SUCCESS  | models.ensemble:optimise_weights:52 - Optimised weights: LGBM=0.333 XGB=0.333 LSTM=0.333 | acc=0.4149
+2026-02-21 21:14:36.932 | INFO     | models.ensemble:save_weights:104 - Saved ensemble weights -> models\saved\ARB_USD_ensemble_weights.pkl
+2026-02-21 21:14:42.481 | INFO     | models.ensemble:generate_signals:85 - Signal distribution (threshold=0.35): BUY=44 (1.2%)  SELL=1 (0.0%)  HOLD=3764 (98.8%)
+2026-02-21 21:14:42.481 | INFO     | __main__:run_pipeline:99 - Test accuracy: 0.3920
+2026-02-21 21:14:42.486 | INFO     | backtest.engine:_compute_metrics:200 - ARB/USD Results: Return=-11.07% | Sharpe=-1.05 | MaxDD=-14.50% | WinRate=22.22% | Trades=9 (L:8 S:1)
+2026-02-21 21:14:42.492 | INFO     | backtest.engine:save_results:218 - Results saved -> backtest\results\ARB_USD_backtest.json

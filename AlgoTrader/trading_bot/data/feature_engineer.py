@@ -241,6 +241,42 @@ def add_funding_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+
+def add_raw_ohlcv_sequences(df: pd.DataFrame, windows: list = [5, 10, 20]) -> pd.DataFrame:
+    """
+    Add normalised raw OHLCV rolling windows as features.
+
+    Instead of hand-crafting what patterns to look for, we give the models
+    the raw price/volume history and let them discover structure themselves.
+    Each window computes a z-score normalised rolling snapshot:
+      - Prices normalised by the window mean (removes level effect)
+      - Volume normalised by rolling mean
+
+    The TFT's VariableSelectionNetwork will learn which of these windows
+    and which OHLCV dimensions actually matter per symbol.
+    """
+    for w in windows:
+        roll_close = df["close"].rolling(w)
+        roll_vol   = df["volume"].rolling(w)
+
+        mu_c  = roll_close.mean()
+        std_c = roll_close.std().clip(lower=1e-9)
+        mu_v  = roll_vol.mean()
+        std_v = roll_vol.std().clip(lower=1e-9)
+
+        # Normalised OHLCV vs rolling window stats
+        df[f"raw_close_{w}"]  = (df["close"]  - mu_c) / std_c
+        df[f"raw_open_{w}"]   = (df["open"]   - mu_c) / std_c
+        df[f"raw_high_{w}"]   = (df["high"]   - mu_c) / std_c
+        df[f"raw_low_{w}"]    = (df["low"]    - mu_c) / std_c
+        df[f"raw_volume_{w}"] = (df["volume"] - mu_v) / std_v
+
+        # Price range and body within window context
+        df[f"raw_range_{w}"]  = (df["high"] - df["low"]) / (std_c + 1e-9)
+        df[f"raw_body_{w}"]   = (df["close"] - df["open"]) / (std_c + 1e-9)
+
+    return df
+
 # ─── Main Pipeline ───────────────────────────────────────────────────────────
 
 def build_features(df: pd.DataFrame, symbol: str = "") -> pd.DataFrame:
@@ -258,6 +294,7 @@ def build_features(df: pd.DataFrame, symbol: str = "") -> pd.DataFrame:
     df = add_candle_patterns(df)
     df = add_time_features(df)
     df = add_lagged_features(df)
+    df = add_raw_ohlcv_sequences(df)  # B: raw input for self-supervised learning
     df = add_regime_features(df)   # Lever 3
     df = add_funding_features(df)
     df = add_alt_data_features(df)

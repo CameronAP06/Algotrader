@@ -1,0 +1,126 @@
+2026-02-20 20:53:09.081 | INFO     | data.kraken_fetcher:get_exchange:18 - Connected to Kraken
+2026-02-20 20:53:09.081 | INFO     | data.kraken_fetcher:fetch_ohlcv:28 - Fetching BTC/USD [1h] — 1825 days of history...
+2026-02-20 20:53:18.211 | SUCCESS  | data.kraken_fetcher:fetch_ohlcv:69 - BTC/USD: 721 candles (2026-01-21 -> 2026-02-20)
+2026-02-20 20:53:18.221 | INFO     | data.kraken_fetcher:save_data:78 - Saved -> data\raw\BTC_USD_1h.csv
+2026-02-20 20:53:18.222 | INFO     | data.kraken_fetcher:fetch_ohlcv:28 - Fetching ETH/USD [1h] — 1825 days of history...
+2026-02-20 20:53:24.289 | SUCCESS  | data.kraken_fetcher:fetch_ohlcv:69 - ETH/USD: 721 candles (2026-01-21 -> 2026-02-20)
+2026-02-20 20:53:24.296 | INFO     | data.kraken_fetcher:save_data:78 - Saved -> data\raw\ETH_USD_1h.csv
+2026-02-20 20:53:24.297 | INFO     | data.kraken_fetcher:fetch_ohlcv:28 - Fetching SOL/USD [1h] — 1825 days of history...
+2026-02-20 20:53:30.389 | SUCCESS  | data.kraken_fetcher:fetch_ohlcv:69 - SOL/USD: 721 candles (2026-01-21 -> 2026-02-20)
+2026-02-20 20:53:30.396 | INFO     | data.kraken_fetcher:save_data:78 - Saved -> data\raw\SOL_USD_1h.csv
+2026-02-20 20:53:30.396 | INFO     | data.kraken_fetcher:fetch_ohlcv:28 - Fetching XRP/USD [1h] — 1825 days of history...
+2026-02-20 20:53:36.468 | SUCCESS  | data.kraken_fetcher:fetch_ohlcv:69 - XRP/USD: 721 candles (2026-01-21 -> 2026-02-20)
+2026-02-20 20:53:36.474 | INFO     | data.kraken_fetcher:save_data:78 - Saved -> data\raw\XRP_USD_1h.csv
+2026-02-20 20:53:36.475 | SUCCESS  | data.kraken_fetcher:fetch_all_pairs:112 - Loaded 4/4 pairs
+2026-02-20 20:53:36.484 | INFO     | __main__:run_pipeline:53 - 
+============================================================
+Processing: BTC/USD
+============================================================
+2026-02-20 20:53:36.485 | INFO     | data.feature_engineer:build_features:145 - Building features for BTC/USD (721 rows)
+2026-02-20 20:53:36.515 | INFO     | data.feature_engineer:build_features:163 - Dropped 199 NaN rows → 522 usable rows
+2026-02-20 20:53:36.516 | INFO     | data.feature_engineer:build_features:166 - Label distribution: DOWN=193 NEUTRAL=151 UP=178
+2026-02-20 20:53:36.516 | INFO     | __main__:run_pipeline:58 - Features: 69 columns
+2026-02-20 20:53:36.517 | INFO     | utils.splitter:time_split:37 - Split: train=365 | val=78 | test=79
+2026-02-20 20:53:36.519 | INFO     | utils.splitter:save_scaler:48 - Saved scaler -> models\saved\BTC_USD_scaler.pkl
+2026-02-20 20:53:36.519 | INFO     | models.lgbm_model:train:19 - Training LightGBM for BTC/USD...
+2026-02-20 20:53:36.841 | SUCCESS  | models.lgbm_model:train:27 - LightGBM val accuracy: 0.4615
+2026-02-20 20:53:36.889 | INFO     | models.lgbm_model:save:35 - Saved LightGBM -> models\saved\BTC_USD_lgbm.pkl
+2026-02-20 20:53:36.889 | INFO     | models.xgb_model:train:17 - Training XGBoost for BTC/USD...
+2026-02-20 20:53:37.025 | SUCCESS  | models.xgb_model:train:21 - XGBoost val accuracy: 0.4103
+2026-02-20 20:53:37.028 | INFO     | models.xgb_model:save:29 - Saved XGBoost -> models\saved\BTC_USD_xgb.pkl
+2026-02-20 20:53:38.322 | INFO     | models.lstm_model:train:89 - Training LSTM for BTC/USD on cpu — 305 train samples
+2026-02-20 20:53:38.488 | INFO     | models.lstm_model:train:120 -   Epoch   0 | val_loss=1.2909 | val_acc=0.2778
+2026-02-20 20:53:39.743 | INFO     | models.lstm_model:train:120 -   Epoch  10 | val_loss=1.3025 | val_acc=0.4444
+2026-02-20 20:53:39.983 | INFO     | models.lstm_model:train:129 - Early stopping at epoch 12
+2026-02-20 20:53:39.984 | SUCCESS  | models.lstm_model:train:133 - LSTM best val_loss: 1.0769
+2026-02-20 20:53:39.988 | INFO     | models.lstm_model:save:149 - Saved LSTM -> models\saved\BTC_USD_lstm.pt
+2026-02-20 20:53:40.029 | SUCCESS  | models.ensemble:optimise_weights:52 - Optimised weights: LGBM=0.333 XGB=0.333 LSTM=0.333 | acc=0.4487
+2026-02-20 20:53:40.031 | INFO     | models.ensemble:save_weights:101 - Saved ensemble weights -> models\saved\BTC_USD_ensemble_weights.pkl
+2026-02-20 20:53:40.076 | INFO     | models.ensemble:generate_signals:82 - Signal distribution (threshold=0.42): BUY=3 (3.8%)  SELL=1 (1.3%)  HOLD=75 (94.9%)
+2026-02-20 20:53:40.077 | INFO     | __main__:run_pipeline:95 - Test accuracy: 0.4684
+2026-02-20 20:53:40.079 | INFO     | backtest.engine:_compute_metrics:200 - BTC/USD Results: Return=-0.26% | Sharpe=-4.11 | MaxDD=-0.40% | WinRate=0.00% | Trades=2 (L:1 S:1)
+2026-02-20 20:53:40.082 | INFO     | backtest.engine:save_results:218 - Results saved -> backtest\results\BTC_USD_backtest.json
+2026-02-20 20:53:40.084 | INFO     | __main__:run_pipeline:53 - 
+============================================================
+Processing: ETH/USD
+============================================================
+2026-02-20 20:53:40.085 | INFO     | data.feature_engineer:build_features:145 - Building features for ETH/USD (721 rows)
+2026-02-20 20:53:40.128 | INFO     | data.feature_engineer:build_features:163 - Dropped 199 NaN rows → 522 usable rows
+2026-02-20 20:53:40.129 | INFO     | data.feature_engineer:build_features:166 - Label distribution: DOWN=201 NEUTRAL=144 UP=177
+2026-02-20 20:53:40.129 | INFO     | __main__:run_pipeline:58 - Features: 69 columns
+2026-02-20 20:53:40.130 | INFO     | utils.splitter:time_split:37 - Split: train=365 | val=78 | test=79
+2026-02-20 20:53:40.132 | INFO     | utils.splitter:save_scaler:48 - Saved scaler -> models\saved\ETH_USD_scaler.pkl
+2026-02-20 20:53:40.133 | INFO     | models.lgbm_model:train:19 - Training LightGBM for ETH/USD...
+2026-02-20 20:53:40.479 | SUCCESS  | models.lgbm_model:train:27 - LightGBM val accuracy: 0.3205
+2026-02-20 20:53:40.533 | INFO     | models.lgbm_model:save:35 - Saved LightGBM -> models\saved\ETH_USD_lgbm.pkl
+2026-02-20 20:53:40.534 | INFO     | models.xgb_model:train:17 - Training XGBoost for ETH/USD...
+2026-02-20 20:53:40.672 | SUCCESS  | models.xgb_model:train:21 - XGBoost val accuracy: 0.3718
+2026-02-20 20:53:40.675 | INFO     | models.xgb_model:save:29 - Saved XGBoost -> models\saved\ETH_USD_xgb.pkl
+2026-02-20 20:53:40.678 | INFO     | models.lstm_model:train:89 - Training LSTM for ETH/USD on cpu — 305 train samples
+2026-02-20 20:53:40.811 | INFO     | models.lstm_model:train:120 -   Epoch   0 | val_loss=1.0857 | val_acc=0.4444
+2026-02-20 20:53:42.095 | INFO     | models.lstm_model:train:120 -   Epoch  10 | val_loss=1.2702 | val_acc=0.3889
+2026-02-20 20:53:42.214 | INFO     | models.lstm_model:train:129 - Early stopping at epoch 11
+2026-02-20 20:53:42.215 | SUCCESS  | models.lstm_model:train:133 - LSTM best val_loss: 1.0741
+2026-02-20 20:53:42.218 | INFO     | models.lstm_model:save:149 - Saved LSTM -> models\saved\ETH_USD_lstm.pt
+2026-02-20 20:53:42.265 | SUCCESS  | models.ensemble:optimise_weights:52 - Optimised weights: LGBM=0.333 XGB=0.333 LSTM=0.333 | acc=0.3846
+2026-02-20 20:53:42.267 | INFO     | models.ensemble:save_weights:101 - Saved ensemble weights -> models\saved\ETH_USD_ensemble_weights.pkl
+2026-02-20 20:53:42.317 | INFO     | models.ensemble:generate_signals:82 - Signal distribution (threshold=0.42): BUY=12 (15.2%)  SELL=2 (2.5%)  HOLD=65 (82.3%)
+2026-02-20 20:53:42.317 | INFO     | __main__:run_pipeline:95 - Test accuracy: 0.3797
+2026-02-20 20:53:42.319 | INFO     | backtest.engine:_compute_metrics:200 - ETH/USD Results: Return=-6.89% | Sharpe=-19.32 | MaxDD=-7.39% | WinRate=0.00% | Trades=6 (L:4 S:2)
+2026-02-20 20:53:42.322 | INFO     | backtest.engine:save_results:218 - Results saved -> backtest\results\ETH_USD_backtest.json
+2026-02-20 20:53:42.325 | INFO     | __main__:run_pipeline:53 - 
+============================================================
+Processing: SOL/USD
+============================================================
+2026-02-20 20:53:42.325 | INFO     | data.feature_engineer:build_features:145 - Building features for SOL/USD (721 rows)
+2026-02-20 20:53:42.366 | INFO     | data.feature_engineer:build_features:163 - Dropped 199 NaN rows → 522 usable rows
+2026-02-20 20:53:42.368 | INFO     | data.feature_engineer:build_features:166 - Label distribution: DOWN=204 NEUTRAL=126 UP=192
+2026-02-20 20:53:42.368 | INFO     | __main__:run_pipeline:58 - Features: 69 columns
+2026-02-20 20:53:42.370 | INFO     | utils.splitter:time_split:37 - Split: train=365 | val=78 | test=79
+2026-02-20 20:53:42.371 | INFO     | utils.splitter:save_scaler:48 - Saved scaler -> models\saved\SOL_USD_scaler.pkl
+2026-02-20 20:53:42.371 | INFO     | models.lgbm_model:train:19 - Training LightGBM for SOL/USD...
+2026-02-20 20:53:42.763 | SUCCESS  | models.lgbm_model:train:27 - LightGBM val accuracy: 0.3590
+2026-02-20 20:53:42.814 | INFO     | models.lgbm_model:save:35 - Saved LightGBM -> models\saved\SOL_USD_lgbm.pkl
+2026-02-20 20:53:42.815 | INFO     | models.xgb_model:train:17 - Training XGBoost for SOL/USD...
+2026-02-20 20:53:42.976 | SUCCESS  | models.xgb_model:train:21 - XGBoost val accuracy: 0.4103
+2026-02-20 20:53:42.979 | INFO     | models.xgb_model:save:29 - Saved XGBoost -> models\saved\SOL_USD_xgb.pkl
+2026-02-20 20:53:42.981 | INFO     | models.lstm_model:train:89 - Training LSTM for SOL/USD on cpu — 305 train samples
+2026-02-20 20:53:43.127 | INFO     | models.lstm_model:train:120 -   Epoch   0 | val_loss=1.0547 | val_acc=0.5000
+2026-02-20 20:53:44.329 | INFO     | models.lstm_model:train:120 -   Epoch  10 | val_loss=1.1390 | val_acc=0.3889
+2026-02-20 20:53:44.681 | INFO     | models.lstm_model:train:129 - Early stopping at epoch 13
+2026-02-20 20:53:44.681 | SUCCESS  | models.lstm_model:train:133 - LSTM best val_loss: 1.0433
+2026-02-20 20:53:44.685 | INFO     | models.lstm_model:save:149 - Saved LSTM -> models\saved\SOL_USD_lstm.pt
+2026-02-20 20:53:44.724 | SUCCESS  | models.ensemble:optimise_weights:52 - Optimised weights: LGBM=0.333 XGB=0.333 LSTM=0.333 | acc=0.2949
+2026-02-20 20:53:44.725 | INFO     | models.ensemble:save_weights:101 - Saved ensemble weights -> models\saved\SOL_USD_ensemble_weights.pkl
+2026-02-20 20:53:44.764 | INFO     | models.ensemble:generate_signals:82 - Signal distribution (threshold=0.42): BUY=3 (3.8%)  SELL=8 (10.1%)  HOLD=68 (86.1%)
+2026-02-20 20:53:44.765 | INFO     | __main__:run_pipeline:95 - Test accuracy: 0.3418
+2026-02-20 20:53:44.767 | INFO     | backtest.engine:_compute_metrics:200 - SOL/USD Results: Return=-6.10% | Sharpe=-13.67 | MaxDD=-10.11% | WinRate=33.33% | Trades=6 (L:2 S:4)
+2026-02-20 20:53:44.769 | INFO     | backtest.engine:save_results:218 - Results saved -> backtest\results\SOL_USD_backtest.json
+2026-02-20 20:53:44.771 | INFO     | __main__:run_pipeline:53 - 
+============================================================
+Processing: XRP/USD
+============================================================
+2026-02-20 20:53:44.771 | INFO     | data.feature_engineer:build_features:145 - Building features for XRP/USD (721 rows)
+2026-02-20 20:53:44.813 | INFO     | data.feature_engineer:build_features:163 - Dropped 199 NaN rows → 522 usable rows
+2026-02-20 20:53:44.814 | INFO     | data.feature_engineer:build_features:166 - Label distribution: DOWN=223 NEUTRAL=111 UP=188
+2026-02-20 20:53:44.814 | INFO     | __main__:run_pipeline:58 - Features: 69 columns
+2026-02-20 20:53:44.816 | INFO     | utils.splitter:time_split:37 - Split: train=365 | val=78 | test=79
+2026-02-20 20:53:44.818 | INFO     | utils.splitter:save_scaler:48 - Saved scaler -> models\saved\XRP_USD_scaler.pkl
+2026-02-20 20:53:44.818 | INFO     | models.lgbm_model:train:19 - Training LightGBM for XRP/USD...
+2026-02-20 20:53:45.141 | SUCCESS  | models.lgbm_model:train:27 - LightGBM val accuracy: 0.3462
+2026-02-20 20:53:45.193 | INFO     | models.lgbm_model:save:35 - Saved LightGBM -> models\saved\XRP_USD_lgbm.pkl
+2026-02-20 20:53:45.194 | INFO     | models.xgb_model:train:17 - Training XGBoost for XRP/USD...
+2026-02-20 20:53:45.327 | SUCCESS  | models.xgb_model:train:21 - XGBoost val accuracy: 0.3974
+2026-02-20 20:53:45.331 | INFO     | models.xgb_model:save:29 - Saved XGBoost -> models\saved\XRP_USD_xgb.pkl
+2026-02-20 20:53:45.333 | INFO     | models.lstm_model:train:89 - Training LSTM for XRP/USD on cpu — 305 train samples
+2026-02-20 20:53:45.479 | INFO     | models.lstm_model:train:120 -   Epoch   0 | val_loss=1.2389 | val_acc=0.1667
+2026-02-20 20:53:46.741 | INFO     | models.lstm_model:train:120 -   Epoch  10 | val_loss=1.3113 | val_acc=0.3333
+2026-02-20 20:53:47.485 | INFO     | models.lstm_model:train:129 - Early stopping at epoch 16
+2026-02-20 20:53:47.486 | SUCCESS  | models.lstm_model:train:133 - LSTM best val_loss: 1.1554
+2026-02-20 20:53:47.490 | INFO     | models.lstm_model:save:149 - Saved LSTM -> models\saved\XRP_USD_lstm.pt
+2026-02-20 20:53:47.541 | SUCCESS  | models.ensemble:optimise_weights:52 - Optimised weights: LGBM=0.333 XGB=0.333 LSTM=0.333 | acc=0.2564
+2026-02-20 20:53:47.543 | INFO     | models.ensemble:save_weights:101 - Saved ensemble weights -> models\saved\XRP_USD_ensemble_weights.pkl
+2026-02-20 20:53:47.591 | INFO     | models.ensemble:generate_signals:82 - Signal distribution (threshold=0.42): BUY=8 (10.1%)  SELL=10 (12.7%)  HOLD=61 (77.2%)
+2026-02-20 20:53:47.592 | INFO     | __main__:run_pipeline:95 - Test accuracy: 0.3165
+2026-02-20 20:53:47.594 | INFO     | backtest.engine:_compute_metrics:200 - XRP/USD Results: Return=2.95% | Sharpe=6.38 | MaxDD=-4.34% | WinRate=60.00% | Trades=5 (L:2 S:3)
+2026-02-20 20:53:47.596 | INFO     | backtest.engine:save_results:218 - Results saved -> backtest\results\XRP_USD_backtest.json

@@ -1,0 +1,12 @@
+{
+  "symbol": "XRP/USD",
+  "final_equity": 1807.2549184344673,
+  "total_return": -0.8192745081565532,
+  "n_trades": 389,
+  "n_longs": 177,
+  "n_shorts": 212,
+  "win_rate": 0.45758354755784064,
+  "sharpe_ratio": -3.2548574385000917,
+  "max_drawdown": -0.8466997232891749,
+  "profit_factor": 0.712096802436894
+}
