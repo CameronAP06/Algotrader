@@ -113,7 +113,7 @@ class BacktestEngine:
 
         return self._compute_metrics(symbol)
 
-    def _open_long(self, price, idx):
+    def _open_long(self, price, idx, atr=None):
         exec_price       = self._apply_slippage(price, "BUY")
         trade_value      = self.cash * MAX_POSITION_PCT
         fee              = self._apply_fee(trade_value)
@@ -121,8 +121,14 @@ class BacktestEngine:
         self.cash        -= trade_value
         self.entry_price = exec_price
         self.side        = "LONG"
+        if USE_ATR_STOPS and atr is not None and atr > 0:
+            self.stop_price = exec_price - ATR_STOP_MULT * atr
+            self.tp_price   = exec_price + ATR_TP_MULT   * atr
+        else:
+            self.stop_price = exec_price * (1 - STOP_LOSS_PCT)
+            self.tp_price   = exec_price * (1 + TAKE_PROFIT_PCT)
 
-    def _open_short(self, price, idx):
+    def _open_short(self, price, idx, atr=None):
         exec_price        = self._apply_slippage(price, "SELL")
         margin            = self.cash * MAX_POSITION_PCT
         units             = margin / exec_price
@@ -133,6 +139,12 @@ class BacktestEngine:
         self.margin_held  = margin                       # track capital at risk
         self.entry_price  = exec_price
         self.side         = "SHORT"
+        if USE_ATR_STOPS and atr is not None and atr > 0:
+            self.stop_price = exec_price + ATR_STOP_MULT * atr
+            self.tp_price   = exec_price - ATR_TP_MULT   * atr
+        else:
+            self.stop_price = exec_price * (1 + STOP_LOSS_PCT)
+            self.tp_price   = exec_price * (1 - TAKE_PROFIT_PCT)
 
     def _close_position(self, price, idx, reason):
         if self.position > 0:
