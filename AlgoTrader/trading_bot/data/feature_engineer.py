@@ -4,7 +4,7 @@ Builds a rich feature matrix from raw OHLCV data.
 
 Four accuracy levers implemented:
   1. Volatility-adjusted labels  — threshold scales with ATR, not fixed %
-  2. Longer prediction horizon   — controlled via settings.PREDICTION_HORIZON (now 8h)
+  2. Timeframe-aware prediction horizon — always predicts ~24h ahead regardless of bar size
   3. Regime features             — ADX, trend strength, market state classification
   4. Regime-aware label filter   — only label bars where regime is clear
 """
@@ -22,31 +22,82 @@ from config.settings import (
 )
 
 
-# ─── Lever 1 & 2: Volatility-Adjusted Labels ────────────────────────────────
+# ─── Lever 1 & 2: Timeframe-Aware Labels ─────────────────────────────────────
 
-def create_labels(df: pd.DataFrame, horizon: int = PREDICTION_HORIZON,
-                  threshold: float = LABEL_THRESHOLD) -> pd.Series:
+# Bars per hour for each supported timeframe
+_BARS_PER_HOUR = {
+    "15m": 4.0,
+    "1h":  1.0,
+    "2h":  0.5,
+    "4h":  0.25,
+    "8h":  0.125,
+    "1d":  1/24,
+}
+
+def get_label_params(timeframe: str = "1h") -> tuple:
     """
-    Creates 3-class labels using VOLATILITY-ADJUSTED thresholds.
+    Return (horizon_bars, label_threshold) tuned for the given timeframe.
 
-    Instead of a fixed % threshold, we scale the threshold by the current
-    ATR. This means:
-      - In high-volatility periods, a larger move is required to label UP/DOWN
-      - In low-volatility periods, a smaller move counts as directional
-    This produces much cleaner signal — the model isn't trying to learn to
-    predict tiny moves that are just noise.
+    Horizon: targets ~24h of real time ahead so the model always predicts
+    one full day forward regardless of bar size.
+
+    Threshold: scales with typical ATR at each timeframe. Must comfortably
+    exceed fees (0.1% x2) + slippage, and target genuinely tradeable moves.
+    Goal: ~25% UP / ~25% DOWN / ~50% NEUTRAL label split.
+    """
+    bph   = _BARS_PER_HOUR.get(timeframe, 1.0)
+    horizon = max(1, round(24 * bph))   # 24h ahead in bars
+
+    thresholds = {
+        "15m": 0.010,   # 1.0%  — intraday swing worth trading
+        "1h":  0.018,   # 1.8%  — 1h crypto typically moves 0.8-1.5%, need headroom
+        "2h":  0.025,   # 2.5%
+        "4h":  0.035,   # 3.5%  — meaningful 4h move
+        "8h":  0.045,   # 4.5%  — half-day directional move
+        "1d":  0.060,   # 6.0%  — daily candle with real conviction
+    }
+    threshold = thresholds.get(timeframe, 0.012)
+
+    logger.debug(
+        f"Label params [{timeframe}]: horizon={horizon} bars (24h), "
+        f"threshold={threshold:.1%}"
+    )
+    return horizon, threshold
+
+
+def create_labels(df: pd.DataFrame,
+                  horizon: int = PREDICTION_HORIZON,
+                  threshold: float = LABEL_THRESHOLD,
+                  timeframe: str = "1h") -> pd.Series:
+    """
+    Creates 3-class labels using TIMEFRAME-AWARE, VOLATILITY-ADJUSTED thresholds.
+
+    When called with a timeframe, get_label_params() overrides the defaults so
+    that:
+      - horizon always represents ~24h of real time
+      - threshold is calibrated to the typical ATR at that bar size
+
+    ATR-scaling is also applied on top so that in high-vol periods a larger
+    move is needed to classify as UP/DOWN, reducing whipsaw labels.
 
     Labels:
-      2 = UP   (future return > ATR-scaled threshold)
-      0 = DOWN (future return < -ATR-scaled threshold)
+      2 = UP   (future return > dynamic threshold)
+      0 = DOWN (future return < -dynamic threshold)
       1 = NEUTRAL
     """
+    # If timeframe given, override horizon and base threshold
+    if timeframe and timeframe != "1h":
+        horizon, threshold = get_label_params(timeframe)
+    elif timeframe == "1h":
+        horizon, threshold = get_label_params("1h")
+
     future_return = df["close"].pct_change(horizon).shift(-horizon)
 
-    # Compute ATR-based dynamic threshold
+    # ATR-scaling: in high-vol regimes require a larger move to label UP/DOWN
     if "atr_14" in df.columns:
         atr_pct = df["atr_14"] / df["close"]
-        dynamic_threshold = (threshold + atr_pct * 0.5).clip(threshold * 0.5, threshold * 3)
+        # Add 30% of ATR on top of base threshold, capped at 2x threshold
+        dynamic_threshold = (threshold + atr_pct * 0.3).clip(threshold, threshold * 2.5)
     else:
         dynamic_threshold = threshold
 
@@ -279,7 +330,7 @@ def add_raw_ohlcv_sequences(df: pd.DataFrame, windows: list = [5, 10, 20]) -> pd
 
 # ─── Main Pipeline ───────────────────────────────────────────────────────────
 
-def build_features(df: pd.DataFrame, symbol: str = "") -> pd.DataFrame:
+def build_features(df: pd.DataFrame, symbol: str = "", timeframe: str = "1h") -> pd.DataFrame:
     logger.info(f"Building features for {symbol or 'unknown'} ({len(df)} rows)")
 
     df = df.copy()
@@ -299,8 +350,8 @@ def build_features(df: pd.DataFrame, symbol: str = "") -> pd.DataFrame:
     df = add_funding_features(df)
     df = add_alt_data_features(df)
 
-    # Lever 1 + 2: volatility-adjusted labels, longer horizon
-    df["label"] = create_labels(df)
+    # Lever 1 + 2: timeframe-aware, volatility-adjusted labels
+    df["label"] = create_labels(df, timeframe=timeframe)
 
     n_before = len(df)
     df = df.replace([np.inf, -np.inf], np.nan)

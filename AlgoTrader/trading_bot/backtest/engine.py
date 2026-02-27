@@ -46,7 +46,7 @@ class BacktestEngine:
     def _apply_fee(self, trade_value):
         return trade_value * TRADING_FEE
 
-    def run(self, df: pd.DataFrame, signals: dict, symbol: str = "") -> dict:
+    def run(self, df: pd.DataFrame, signals: dict, symbol: str = "", timeframe: str = "1h") -> dict:
         """
         Run backtest over a DataFrame with signals dict from ensemble.generate_signals().
         df must contain 'close', 'high', 'low' columns aligned to signals.
@@ -111,6 +111,7 @@ class BacktestEngine:
         if self.position != 0:
             self._close_position(prices[-1], n-1, "END_OF_PERIOD")
 
+        self._timeframe = timeframe
         return self._compute_metrics(symbol)
 
     def _open_long(self, price, idx, atr=None):
@@ -190,8 +191,11 @@ class BacktestEngine:
         n_longs      = len([t for t in self.trades if t.get("side") == "LONG"])
         n_shorts     = len([t for t in self.trades if t.get("side") == "SHORT"])
 
-        # Sharpe ratio (annualised, hourly bars)
-        sharpe = (returns.mean() / (returns.std() + 1e-9)) * np.sqrt(8760)
+        # Sharpe ratio — annualised correctly per bar frequency
+        _BARS_PER_YEAR = {"15m": 35040, "1h": 8760, "2h": 4380,
+                          "4h": 2190, "8h": 1095, "1d": 365}
+        bars_per_year = _BARS_PER_YEAR.get(getattr(self, "_timeframe", "1h"), 8760)
+        sharpe = (returns.mean() / (returns.std() + 1e-9)) * np.sqrt(bars_per_year)
 
         # Max drawdown
         roll_max  = pd.Series(equity).cummax()

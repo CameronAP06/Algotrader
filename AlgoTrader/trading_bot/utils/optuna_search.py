@@ -106,7 +106,17 @@ def suggest_filter_params(trial: optuna.Trial) -> dict:
 
 
 def suggest_signal_threshold(trial: optuna.Trial) -> float:
-    return trial.suggest_float("signal_thresh", 0.30, 0.50)
+    # Narrower range — wide range was producing extreme signal imbalances
+    return trial.suggest_float("signal_thresh", 0.33, 0.45)
+
+
+def suggest_atr_params(trial: optuna.Trial) -> dict:
+    """Suggest ATR stop/TP multipliers — tighter stops = more trades."""
+    stop_mult = trial.suggest_float("atr_stop_mult", 0.8, 2.0)
+    return {
+        "atr_stop_mult": stop_mult,
+        "atr_tp_mult":   stop_mult * 2.0,  # always maintain 2:1 RR
+    }
 
 
 # ─── Objective ────────────────────────────────────────────────────────────────
@@ -164,27 +174,46 @@ def make_objective(X_train, y_train, X_val, y_val, all_cols,
             s.REGIME_ADX_THRESHOLD  = filter_p["adx_threshold"]
             s.VOLATILITY_FILTER_PCT = filter_p["volatility_pct"]
 
+            # 4b. ATR stop/TP multipliers
+            atr_p = suggest_atr_params(trial)
+            orig_stop_mult = s.ATR_STOP_MULT
+            orig_tp_mult   = s.ATR_TP_MULT
+            s.ATR_STOP_MULT = atr_p["atr_stop_mult"]
+            s.ATR_TP_MULT   = atr_p["atr_tp_mult"]
+
             signals = generate_signals(probs, threshold=threshold)
             filtered = apply_filters(feat_df_val, signals, timeframe=timeframe)
 
-            # Restore filter params
+            # Restore filter + ATR params
             s.VOLUME_FILTER_PCT     = orig_vol
             s.REGIME_ADX_THRESHOLD  = orig_adx
             s.VOLATILITY_FILTER_PCT = orig_volflt
+            s.ATR_STOP_MULT         = orig_stop_mult
+            s.ATR_TP_MULT           = orig_tp_mult
 
             # 5. Backtest on validation bars
             engine  = BacktestEngine()
             metrics = engine.run(feat_df_val, filtered)
 
             n_trades = metrics["n_trades"]
-            if n_trades < 3:
-                return -10.0  # Penalise too-cautious configs
+            if n_trades < 5:
+                return -10.0  # Penalise configs that barely trade
 
-            sharpe = metrics["sharpe_ratio"]
-            # Also reward positive return to avoid Sharpe games
-            bonus  = 2.0 if metrics["total_return"] > 0 else 0.0
+            sharpe   = metrics["sharpe_ratio"]
+            win_rate = metrics["win_rate"]
+            ret      = metrics["total_return"]
 
-            return sharpe + bonus
+            # Composite score rewarding:
+            # 1. Win rate above breakeven (33% at 2:1) — most important
+            # 2. Positive return
+            # 3. Trade count (more trades = more confident signal)
+            # 4. Sharpe as tiebreaker but capped to avoid outlier games
+            wr_bonus      = max(0.0, (win_rate - 0.33) * 10)   # 0 at breakeven, +1 at 43%
+            ret_bonus     = 2.0 if ret > 0 else 0.0
+            count_bonus   = min(2.0, n_trades / 10)             # up to +2 for 20+ trades
+            sharpe_capped = max(-3.0, min(3.0, sharpe))         # cap to ±3 to avoid outliers
+
+            return sharpe_capped + wr_bonus + ret_bonus + count_bonus
 
         except Exception as e:
             logger.debug(f"Trial failed: {e}")
@@ -238,6 +267,10 @@ def run_optuna_search(X_train: np.ndarray, y_train: np.ndarray,
             "volume_pct":    best.params.get("volume_pct",  0.40),
             "adx_threshold": best.params.get("adx_thresh",  18.0),
             "volatility_pct":best.params.get("vol_pct",     0.10),
+        },
+        "atr_params": {
+            "atr_stop_mult": best.params.get("atr_stop_mult", 1.2),
+            "atr_tp_mult":   best.params.get("atr_stop_mult", 1.2) * 2.0,
         },
         "best_sharpe":       best.value,
         "n_trials":          len(study.trials),

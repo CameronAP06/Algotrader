@@ -1,0 +1,61 @@
+2026-02-22 16:27:04.857 | INFO     | __main__:main:387 - Testing 13 symbols x 6 timeframes = 78 combinations
+2026-02-22 16:27:04.859 | INFO     | data.alt_data:fetch_all_alt_data:137 - Fetching alternative data...
+2026-02-22 16:27:05.518 | SUCCESS  | data.alt_data:fetch_fear_greed:44 - Fear & Greed: 1825 records (2021-02-23 -> 2026-02-22)
+2026-02-22 16:27:05.975 | WARNING  | data.alt_data:fetch_btc_dominance:80 - BTC dominance fetch failed: Unexpected response format — will skip
+2026-02-22 16:27:08.287 | SUCCESS  | data.alt_data:fetch_google_trends:111 - Google Trends: 262 records
+2026-02-22 16:27:08.307 | SUCCESS  | data.alt_data:fetch_all_alt_data:173 - Alt data saved: 1825 rows, columns: ['timestamp', 'fear_greed', 'date', 'google_trends_btc']
+2026-02-22 16:27:08.308 | INFO     | __main__:main:397 - 
+============================================================
+Timeframe: 15 minutes (15m)
+============================================================
+2026-02-22 16:27:08.308 | INFO     | __main__:main:400 - 
+Processing: BTC/USD [15m]
+2026-02-22 16:27:09.564 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching BTC/USD [15m] — 365 days...
+2026-02-22 16:27:30.999 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - BTC/USD 15m: 35040 candles (2025-02-22 -> 2026-02-22)
+2026-02-22 16:27:31.106 | INFO     | __main__:log_gpu_temp:113 - GPU: 35C | 0% util | 55/4096 MiB VRAM
+2026-02-22 16:27:31.133 | INFO     | data.alt_data:merge_alt_data:226 - Alt data merged: added 7 new columns
+2026-02-22 16:27:31.133 | INFO     | utils.walk_forward:walk_forward_validate:211 - 
+============================================================
+Walk-Forward Validation: BTC/USD_15m
+============================================================
+2026-02-22 16:27:31.133 | INFO     | utils.walk_forward:walk_forward_validate:212 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-22 16:27:31.133 | INFO     | data.feature_engineer:build_features:247 - Building features for BTC/USD_15m (35040 rows)
+2026-02-22 16:27:31.309 | INFO     | data.feature_engineer:build_features:271 - Dropped 200 NaN/inf rows → 34840 usable rows
+2026-02-22 16:27:31.312 | INFO     | data.feature_engineer:build_features:274 - Label distribution: DOWN=7357 NEUTRAL=20033 UP=7450
+2026-02-22 16:27:31.312 | INFO     | data.feature_engineer:build_features:281 - Regime: ranging=16804 trending_up=8406 trending_down=9630
+2026-02-22 16:27:31.313 | ERROR    | utils.walk_forward:walk_forward_validate:229 - Insufficient data for walk-forward [15m]: 34840 bars available, need 45600 (45600 = 35040 train + 5280 val + 5280 test)
+2026-02-22 16:27:31.314 | INFO     | __main__:main:400 - 
+Processing: ETH/USD [15m]
+2026-02-22 16:27:31.314 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching ETH/USD [15m] — 365 days...
+2026-02-22 16:27:48.947 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - ETH/USD 15m: 35040 candles (2025-02-22 -> 2026-02-22)
+2026-02-22 16:27:49.038 | INFO     | __main__:log_gpu_temp:113 - GPU: 34C | 0% util | 55/4096 MiB VRAM
+2026-02-22 16:27:49.047 | INFO     | data.alt_data:merge_alt_data:226 - Alt data merged: added 7 new columns
+2026-02-22 16:27:49.048 | INFO     | utils.walk_forward:walk_forward_validate:211 - 
+============================================================
+Walk-Forward Validation: ETH/USD_15m
+============================================================
+2026-02-22 16:27:49.048 | INFO     | utils.walk_forward:walk_forward_validate:212 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-22 16:27:49.048 | INFO     | data.feature_engineer:build_features:247 - Building features for ETH/USD_15m (35040 rows)
+2026-02-22 16:27:49.192 | INFO     | data.feature_engineer:build_features:271 - Dropped 200 NaN/inf rows → 34840 usable rows
+2026-02-22 16:27:49.194 | INFO     | data.feature_engineer:build_features:274 - Label distribution: DOWN=9042 NEUTRAL=16295 UP=9503
+2026-02-22 16:27:49.194 | INFO     | data.feature_engineer:build_features:281 - Regime: ranging=14546 trending_up=9295 trending_down=10999
+2026-02-22 16:27:49.195 | ERROR    | utils.walk_forward:walk_forward_validate:229 - Insufficient data for walk-forward [15m]: 34840 bars available, need 45600 (45600 = 35040 train + 5280 val + 5280 test)
+2026-02-22 16:27:49.196 | INFO     | __main__:main:400 - 
+Processing: XRP/USD [15m]
+2026-02-22 16:27:49.197 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching XRP/USD [15m] — 365 days...
+2026-02-22 16:28:05.280 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - XRP/USD 15m: 35040 candles (2025-02-22 -> 2026-02-22)
+2026-02-22 16:28:05.378 | INFO     | __main__:log_gpu_temp:113 - GPU: 34C | 0% util | 55/4096 MiB VRAM
+2026-02-22 16:28:05.387 | INFO     | data.alt_data:merge_alt_data:226 - Alt data merged: added 7 new columns
+2026-02-22 16:28:05.388 | INFO     | utils.walk_forward:walk_forward_validate:211 - 
+============================================================
+Walk-Forward Validation: XRP/USD_15m
+============================================================
+2026-02-22 16:28:05.388 | INFO     | utils.walk_forward:walk_forward_validate:212 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-22 16:28:05.388 | INFO     | data.feature_engineer:build_features:247 - Building features for XRP/USD_15m (35040 rows)
+2026-02-22 16:28:05.534 | INFO     | data.feature_engineer:build_features:271 - Dropped 200 NaN/inf rows → 34840 usable rows
+2026-02-22 16:28:05.537 | INFO     | data.feature_engineer:build_features:274 - Label distribution: DOWN=9944 NEUTRAL=15277 UP=9619
+2026-02-22 16:28:05.537 | INFO     | data.feature_engineer:build_features:281 - Regime: ranging=15998 trending_up=8219 trending_down=10623
+2026-02-22 16:28:05.538 | ERROR    | utils.walk_forward:walk_forward_validate:229 - Insufficient data for walk-forward [15m]: 34840 bars available, need 45600 (45600 = 35040 train + 5280 val + 5280 test)
+2026-02-22 16:28:05.540 | INFO     | __main__:main:400 - 
+Processing: SOL/USD [15m]
+2026-02-22 16:28:05.541 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching SOL/USD [15m] — 365 days...

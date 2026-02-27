@@ -1,0 +1,2 @@
+symbol,timeframe,accuracy,total_return,sharpe_ratio,max_drawdown,win_rate,n_trades,n_bars
+ARB/USD,15m,0.30515617253346555,0.0,0.0,0.0,0.0,0.0,35040

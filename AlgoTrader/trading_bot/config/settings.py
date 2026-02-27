@@ -5,14 +5,39 @@ Edit these values to customise behaviour.
 
 # ── Exchange ──────────────────────────────────────────────────────────────────
 EXCHANGE_ID = "kraken"
-TRADING_PAIRS = ["INJ/USD", "LINK/USD", "DOGE/USD", "OP/USD", "ARB/USD"]
+TRADING_PAIRS = [
+    # Original 5
+    "INJ/USD", "LINK/USD", "DOGE/USD", "OP/USD", "ARB/USD",
+    # Mega caps
+    "BTC/USD", "ETH/USD",
+    # Large cap L1s
+    "SOL/USD", "ADA/USD", "DOT/USD", "AVAX/USD",
+    # Meme / retail momentum
+    "SHIB/USD",
+    # DeFi
+    "UNI/USD", "AAVE/USD",
+    # Payments / long history
+    "XRP/USD", "LTC/USD",
+    # Ecosystem
+    "ATOM/USD", "NEAR/USD",
+    # L2
+    "MATIC/USD",
+    #Other
+    "ALGO/USD", "FTM/USD", "VET/USD", "XLM/USD", "TRX/USD", "FIL/USD", "XTZ/USD",
+     "GRT/USD", "CRV/USD", "SNX/USD", "COMP/USD", "MKR/USD", "ZRX/USD",
+     "1INCH/USD", "KNC/USD", "BAL/USD", "LRC/USD", "RUNE/USD", "CELO/USD",
+    "DASH/USD", "ZEC/USD", "BTG/USD", "ETC/USD", "DCR/USD", "BCH/USD",
+]
 TIMEFRAME = "1h"
 HISTORY_DAYS = 1825
 
 # ── Feature Engineering ───────────────────────────────────────────────────────
 FEATURE_WINDOW_SIZES = [7, 14, 21, 50, 200]
-PREDICTION_HORIZON = 8   # 8h ahead — less noise than 1h or 4h
-LABEL_THRESHOLD = 0.002
+# Prediction horizon and label threshold are now computed per-timeframe
+# in feature_engineer.py via get_label_params(timeframe).
+# These fallback values are kept for any legacy code that imports them directly.
+PREDICTION_HORIZON = 24   # fallback: 24 bars
+LABEL_THRESHOLD    = 0.008  # fallback: 0.8%
 
 # ── Model Training ────────────────────────────────────────────────────────────
 TRAIN_RATIO = 0.70
@@ -65,7 +90,7 @@ SIGNAL_THRESHOLDS = {
     "SOL/USD":  0.36,
     "AVAX/USD": 0.36,
 }
-MAX_POSITION_PCT = 0.95
+MAX_POSITION_PCT = 0.25  # 25% per trade — limits single-trade drawdown to ~2-4%
 
 # ── Risk Management ───────────────────────────────────────────────────────────
 # Fixed % stops — used as fallback when ATR stops are disabled or ATR is unavailable
@@ -80,8 +105,8 @@ MAX_OPEN_TRADES    = 3
 # 2:1 ratio (3.0 TP / 1.5 stop) requires >33% win rate — same as fixed %
 # but stops are proportional to volatility so fewer noise-driven stopouts
 USE_ATR_STOPS   = True
-ATR_STOP_MULT   = 1.5   # stop = 1.5 × ATR from entry
-ATR_TP_MULT     = 3.0   # TP   = 3.0 × ATR from entry  (2:1 reward:risk)
+ATR_STOP_MULT   = 1.2   # stop = 1.2 × ATR from entry
+ATR_TP_MULT     = 2.4   # TP   = 2.4 × ATR from entry  (2:1 reward:risk)
 
 # ── Signal Filters ───────────────────────────────────────────────────────────
 # Each filter can be independently toggled. All default ON.

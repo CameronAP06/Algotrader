@@ -71,8 +71,13 @@ def get_wf_config(timeframe: str = "1h") -> dict:
     test_bars  = max(50,  round(hours_55d      * bph))   # ~55 days
     step_bars  = max(30,  round(hours_55d      * bph))   # ~55 days step
 
-    # Minimum train samples for the neural nets to learn anything
-    min_train = max(500, round(hours_per_year * bph * 0.1))
+    # Minimum train samples: 10% of target train size, but never less than
+    # 2× the sequence length (so the model has enough sequences to learn from).
+    # For 1d: 365 * 0.5 = 182. For 1h: 8760 * 0.1 = 876 → capped at 500 min.
+    min_train = max(
+        round(train_bars * 0.5),   # at least 50% of target train size
+        round(hours_per_year * bph * 0.1),  # at least 10% of a year
+    )
 
     config = {
         "train_bars":    train_bars,
@@ -238,6 +243,16 @@ def run_fold(feat_df: pd.DataFrame, feature_cols: list,
         s.REGIME_ADX_THRESHOLD  = fp.get("adx_threshold", s.REGIME_ADX_THRESHOLD)
         s.VOLATILITY_FILTER_PCT = fp.get("volatility_pct",s.VOLATILITY_FILTER_PCT)
 
+    # Apply Optuna-tuned ATR params if available
+    if optuna_params and "atr_params" in optuna_params:
+        ap = optuna_params["atr_params"]
+        orig_stop_mult = s.ATR_STOP_MULT
+        orig_tp_mult   = s.ATR_TP_MULT
+        s.ATR_STOP_MULT = ap.get("atr_stop_mult", s.ATR_STOP_MULT)
+        s.ATR_TP_MULT   = ap.get("atr_tp_mult",   s.ATR_TP_MULT)
+    else:
+        orig_stop_mult = orig_tp_mult = None
+
     preds    = blended.argmax(axis=1)
     y_test_a = y_test[-len(preds):]
     accuracy = (preds == y_test_a).mean()
@@ -249,9 +264,12 @@ def run_fold(feat_df: pd.DataFrame, feature_cols: list,
         s.VOLUME_FILTER_PCT     = orig_vol
         s.REGIME_ADX_THRESHOLD  = orig_adx
         s.VOLATILITY_FILTER_PCT = orig_volflt
+    if orig_stop_mult is not None:
+        s.ATR_STOP_MULT = orig_stop_mult
+        s.ATR_TP_MULT   = orig_tp_mult
 
     engine  = BacktestEngine()
-    metrics = engine.run(test_df, filtered, symbol)
+    metrics = engine.run(test_df, filtered, symbol, timeframe=config.get("timeframe", "1h"))
 
     result = {
         "fold":         fold_num,
@@ -303,7 +321,7 @@ def walk_forward_validate(raw_df: pd.DataFrame, symbol: str,
         f"step={config['step_bars']}"
     )
 
-    feat_df      = build_features(raw_df, symbol)
+    feat_df      = build_features(raw_df, symbol, timeframe=timeframe)
     feature_cols = get_feature_columns(feat_df)
     n            = len(feat_df)
 

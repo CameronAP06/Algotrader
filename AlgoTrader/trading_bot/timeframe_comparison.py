@@ -22,18 +22,8 @@ Usage:
   python timeframe_comparison.py --timeframes 1h 4h 1d
 ═══════════════════════════════════════════════════════════════════════════════
 """
-import argparse, os, sys, json, time, ctypes, platform
+import argparse, os, sys, json, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-from importlib.util import find_spec
-if platform.system() == "Windows":
-    try:
-        if (spec := find_spec("torch")) and spec.origin:
-            dll_path = os.path.join(os.path.dirname(spec.origin), "lib", "c10.dll")
-            if os.path.exists(dll_path):
-                ctypes.CDLL(os.path.normpath(dll_path))
-    except Exception:
-        pass
 
 from loguru import logger
 import pandas as pd
@@ -63,8 +53,13 @@ def checkpoint_path(symbol: str, timeframe: str) -> Path:
     return Path(RESULTS_DIR) / f"{symbol.replace('/','_')}_{timeframe}_walkforward.csv"
 
 
-def load_checkpoint(symbol: str, timeframe: str):
-    """Load completed walk-forward results if they exist, to skip retraining."""
+def load_checkpoint(symbol: str, timeframe: str, edge_override: dict = None):
+    """
+    Load completed walk-forward results if they exist, to skip retraining.
+    If edge_override is provided, invalidates any checkpoint that was NOT
+    built with matching edge params (horizon/threshold) — forcing a retrain
+    with the correct label configuration.
+    """
     path = checkpoint_path(symbol, timeframe)
     if not path.exists():
         return None
@@ -72,6 +67,32 @@ def load_checkpoint(symbol: str, timeframe: str):
         df = pd.read_csv(path)
         if df.empty or len(df) < 2:
             return None
+
+        # If edge params are specified, check if checkpoint was built with them
+        # We store horizon/threshold in the CSV if present; if not, assume stale
+        if edge_override:
+            if "horizon_bars" in df.columns and "threshold" in df.columns:
+                cp_horizon = float(df["horizon_bars"].iloc[0])
+                cp_thresh  = float(df["threshold"].iloc[0])
+                if (abs(cp_horizon - edge_override["horizon_bars"]) > 0.1 or
+                        abs(cp_thresh - edge_override["threshold"]) > 0.0001):
+                    logger.info(
+                        f"[CHECKPOINT] Invalidating {symbol} {timeframe} -- "
+                        f"edge params changed "
+                        f"(h={cp_horizon:.0f}→{edge_override['horizon_bars']}, "
+                        f"t={cp_thresh:.3f}→{edge_override['threshold']:.3f})"
+                    )
+                    path.unlink()   # delete stale checkpoint
+                    return None
+            else:
+                # Old checkpoint has no edge metadata — always invalidate
+                logger.info(
+                    f"[CHECKPOINT] Invalidating {symbol} {timeframe} -- "
+                    f"no edge metadata in checkpoint, forcing retrain with edge params"
+                )
+                path.unlink()
+                return None
+
         result = {
             "symbol":       symbol,
             "timeframe":    timeframe,
@@ -383,10 +404,25 @@ def main():
                         help="Use walk-forward validation instead of single backtest")
     parser.add_argument("--refresh",    action="store_true",
                         help="Force re-download all data")
+    parser.add_argument("--use-edges",  type=str, default=None,
+                        metavar="PATH",
+                        help="Path to best_edges.json from edge_scanner.py — "
+                             "overrides horizon/threshold per symbol/timeframe")
     args = parser.parse_args()
 
     symbols    = [args.symbol] if args.symbol else TRADING_PAIRS
     timeframes = args.timeframes
+
+    # Load discovered edges if provided
+    edge_configs = {}
+    if args.use_edges:
+        import json
+        with open(args.use_edges) as f:
+            edge_configs = json.load(f)
+        logger.info(
+            f"Loaded {len(edge_configs)} edge configs from {args.use_edges}: "
+            + ", ".join(edge_configs.keys())
+        )
 
     # Validate timeframes
     invalid = [tf for tf in timeframes if tf not in TIMEFRAME_CONFIG]
@@ -423,13 +459,6 @@ def main():
             logger.info(f"\nProcessing: {symbol} [{timeframe}]")
             log_gpu_temp()
 
-            # Resume: skip if already completed
-            if args.walkforward and not args.refresh:
-                cached = load_checkpoint(symbol, timeframe)
-                if cached:
-                    all_results.append(cached)
-                    continue
-
             try:
                 if args.walkforward:
                     from utils.walk_forward import walk_forward_validate, save_wf_results
@@ -445,9 +474,36 @@ def main():
                             enriched["btc_dom_proxy"] = proxy.values
                             enriched["btc_dom_proxy_change"] = enriched["btc_dom_proxy"].diff(24)
                             logger.info(f"Added BTC dominance proxy for {symbol} [{timeframe}]")
+
+                    # Apply discovered edge params if available for this symbol/timeframe
+                    edge_key = f"{symbol}_{timeframe}"
+                    edge_override = edge_configs.get(edge_key)
+                    if edge_override:
+                        import data.feature_engineer as fe
+                        _orig_get_label_params = fe.get_label_params
+                        def _edge_label_params(tf, _h=edge_override["horizon_bars"],
+                                               _t=edge_override["threshold"],
+                                               _orig=_orig_get_label_params):
+                            return _h, _t
+                        fe.get_label_params = _edge_label_params
+                        logger.info(
+                            f"Using discovered edge params for {edge_key}: "
+                            f"horizon={edge_override['horizon_hours']}h "
+                            f"({edge_override['horizon_bars']} bars), "
+                            f"threshold={edge_override['threshold']:.1%}"
+                        )
+
                     wf = walk_forward_validate(enriched, f"{symbol}_{timeframe}", timeframe=timeframe)
+
+                    # Restore original label params
+                    if edge_override:
+                        fe.get_label_params = _orig_get_label_params
                     s.PREDICTION_HORIZON = orig
                     if not wf.empty:
+                        # Tag the results with edge params so checkpoint validation works
+                        if edge_override:
+                            wf["horizon_bars"] = edge_override["horizon_bars"]
+                            wf["threshold"]    = edge_override["threshold"]
                         save_wf_results(wf, f"{symbol}_{timeframe}")
                         all_results.append({
                             "symbol":       symbol,

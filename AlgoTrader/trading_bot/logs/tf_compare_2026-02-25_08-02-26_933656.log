@@ -1,0 +1,434 @@
+2026-02-25 08:02:26.935 | INFO     | __main__:main:397 - Testing 5 symbols x 6 timeframes = 30 combinations
+2026-02-25 08:02:26.936 | INFO     | data.alt_data:fetch_all_alt_data:172 - Fetching alternative data...
+2026-02-25 08:02:27.278 | SUCCESS  | data.alt_data:fetch_fear_greed:44 - Fear & Greed: 1825 records (2021-02-26 -> 2026-02-25)
+2026-02-25 08:02:27.461 | WARNING  | data.alt_data:fetch_btc_dominance:88 - BTC dominance chart endpoint failed: Empty BTC dominance series from chart endpoint — trying /global fallback
+2026-02-25 08:02:27.634 | WARNING  | data.alt_data:fetch_btc_dominance:108 - BTC Dominance: using current-only value (56.1%) — historical chart unavailable. Feature will be constant.
+2026-02-25 08:02:29.118 | SUCCESS  | data.alt_data:fetch_google_trends:146 - Google Trends: 262 records
+2026-02-25 08:02:29.145 | SUCCESS  | data.alt_data:fetch_all_alt_data:208 - Alt data saved: 1825 rows, columns: ['timestamp', 'fear_greed', 'date', 'btc_dominance', 'google_trends_btc']
+2026-02-25 08:02:29.145 | INFO     | __main__:main:407 - 
+============================================================
+Timeframe: 15 minutes (15m)
+============================================================
+2026-02-25 08:02:29.615 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded INJ/USD 15m from cache (35040 rows)
+2026-02-25 08:02:29.648 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded LINK/USD 15m from cache (35040 rows)
+2026-02-25 08:02:29.683 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded DOGE/USD 15m from cache (35040 rows)
+2026-02-25 08:02:29.717 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded OP/USD 15m from cache (35040 rows)
+2026-02-25 08:02:29.760 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded ARB/USD 15m from cache (35040 rows)
+2026-02-25 08:02:29.761 | INFO     | __main__:main:423 - 
+Processing: INJ/USD [15m]
+2026-02-25 08:02:29.779 | INFO     | models.tft_model:<module>:30 - TFT using DirectML (AMD GPU)
+2026-02-25 08:02:29.787 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-25 08:02:29.789 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-25 08:02:29.790 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: INJ/USD_15m
+============================================================
+2026-02-25 08:02:29.790 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-25 08:02:29.791 | INFO     | data.feature_engineer:build_features:283 - Building features for INJ/USD_15m (35040 rows)
+2026-02-25 08:02:29.957 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 34840 usable rows
+2026-02-25 08:02:29.958 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=11728 NEUTRAL=12052 UP=11060
+2026-02-25 08:02:29.959 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=16690 trending_up=9098 trending_down=9052
+2026-02-25 08:02:29.959 | WARNING  | utils.walk_forward:walk_forward_validate:325 - Insufficient data for walk-forward [15m]: 34840/45600 bars — scaling down proportionally (train=26771 val=4034 test=4034)
+2026-02-25 08:02:30.090 | INFO     | utils.optuna_search:run_optuna_search:209 - Optuna search: INJ/USD_15m [15m] — 30 trials
+2026-02-25 08:02:31.187 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:31.228 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:31.257 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:31.281 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:31.301 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:31.325 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:31.380 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:31.412 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:31.431 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:31.451 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:31.481 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:31.511 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:31.541 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:31.567 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:31.598 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:31.627 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:31.655 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:31.683 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:31.717 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:31.743 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:31.773 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:31.806 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:31.846 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:31.873 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:31.904 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:31.932 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:31.960 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:31.994 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:32.020 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:32.050 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:32.063 | SUCCESS  | utils.optuna_search:run_optuna_search:222 - Optuna [INJ/USD_15m]: best Sharpe=-999.000 after 30 trials
+2026-02-25 08:02:32.068 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-25 08:02:32.089 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=26771 val=4034 test=4034
+2026-02-25 08:02:32.099 | INFO     | models.tft_model:train:220 - Training TFT for INJ/USD_15m_f1 on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:32.105 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: Could not run 'aten::_thnn_fused_gru_cell' with arguments from the 'CPU' backend. This could be because the operator doesn't exist for this backend, or was omitted during the selective/custom build process (if using custom build). If you are a Facebook employee using PyTorch on mobile, please visit https://fburl.com/ptmfixes for possible resolutions. 'aten::_thnn_fused_gru_cell' is only available for these backends: [PrivateUse1, Meta, BackendSelect, Python, FuncTorchDynamicLayerBackMode, Functionalize, Named, Conjugate, Negative, ZeroTensor, ADInplaceOrView, AutogradOther, AutogradCPU, AutogradCUDA, AutogradHIP, AutogradXLA, AutogradMPS, AutogradIPU, AutogradXPU, AutogradHPU, AutogradVE, AutogradLazy, AutogradMTIA, AutogradPrivateUse1, AutogradPrivateUse2, AutogradPrivateUse3, AutogradMeta, AutogradNestedTensor, Tracer, AutocastCPU, AutocastXPU, AutocastCUDA, FuncTorchBatched, BatchedNestedTensor, FuncTorchVmapMode, Batched, VmapMode, FuncTorchGradWrapper, PythonTLSSnapshot, FuncTorchDynamicLayerFrontMode, PreDispatch, PythonDispatcher].
+
+PrivateUse1: registered at C:\__w\1\s\pytorch-directml-plugin\torch_directml\csrc\dml\dml_cpu_fallback.cpp:58 [backend fallback]
+Meta: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\MetaFallbackKernel.cpp:23 [backend fallback]
+BackendSelect: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\BackendSelectFallbackKernel.cpp:3 [backend fallback]
+Python: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\PythonFallbackKernel.cpp:153 [backend fallback]
+FuncTorchDynamicLayerBackMode: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\DynamicLayer.cpp:497 [backend fallback]
+Functionalize: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\FunctionalizeFallbackKernel.cpp:349 [backend fallback]
+Named: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\NamedRegistrations.cpp:7 [backend fallback]
+Conjugate: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\ConjugateFallback.cpp:17 [backend fallback]
+Negative: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\native\NegateFallback.cpp:18 [backend fallback]
+ZeroTensor: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\ZeroTensorFallback.cpp:86 [backend fallback]
+ADInplaceOrView: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\VariableFallbackKernel.cpp:86 [backend fallback]
+AutogradOther: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradCPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradCUDA: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradHIP: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradXLA: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradMPS: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradIPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradXPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradHPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradVE: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradLazy: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradMTIA: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradPrivateUse1: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradPrivateUse2: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradPrivateUse3: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradMeta: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradNestedTensor: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+Tracer: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\TraceType_3.cpp:14773 [kernel]
+AutocastCPU: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\autocast_mode.cpp:209 [backend fallback]
+AutocastXPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\autocast_mode.cpp:355 [kernel]
+AutocastCUDA: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\autocast_mode.cpp:169 [kernel]
+FuncTorchBatched: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\LegacyBatchingRegistrations.cpp:731 [backend fallback]
+BatchedNestedTensor: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\LegacyBatchingRegistrations.cpp:758 [backend fallback]
+FuncTorchVmapMode: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\VmapModeRegistrations.cpp:27 [backend fallback]
+Batched: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\LegacyBatchingRegistrations.cpp:1075 [backend fallback]
+VmapMode: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\VmapModeRegistrations.cpp:33 [backend fallback]
+FuncTorchGradWrapper: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\TensorWrapper.cpp:207 [backend fallback]
+PythonTLSSnapshot: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\PythonFallbackKernel.cpp:161 [backend fallback]
+FuncTorchDynamicLayerFrontMode: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\DynamicLayer.cpp:493 [backend fallback]
+PreDispatch: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\PythonFallbackKernel.cpp:165 [backend fallback]
+PythonDispatcher: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\PythonFallbackKernel.cpp:157 [backend fallback]
+
+2026-02-25 08:02:32.107 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-25 08:02:32.108 | INFO     | __main__:main:423 - 
+Processing: LINK/USD [15m]
+2026-02-25 08:02:32.123 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-25 08:02:32.126 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-25 08:02:32.126 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: LINK/USD_15m
+============================================================
+2026-02-25 08:02:32.127 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-25 08:02:32.127 | INFO     | data.feature_engineer:build_features:283 - Building features for LINK/USD_15m (35040 rows)
+2026-02-25 08:02:32.311 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 34840 usable rows
+2026-02-25 08:02:32.311 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=10369 NEUTRAL=14303 UP=10168
+2026-02-25 08:02:32.312 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=16437 trending_up=9340 trending_down=9063
+2026-02-25 08:02:32.312 | WARNING  | utils.walk_forward:walk_forward_validate:325 - Insufficient data for walk-forward [15m]: 34840/45600 bars — scaling down proportionally (train=26771 val=4034 test=4034)
+2026-02-25 08:02:32.359 | INFO     | utils.optuna_search:run_optuna_search:209 - Optuna search: LINK/USD_15m [15m] — 30 trials
+2026-02-25 08:02:32.371 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:32.392 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:32.413 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:32.447 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:32.467 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:32.491 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:32.517 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:32.535 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:32.553 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:32.570 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:32.597 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:32.626 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:32.654 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:32.683 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:32.712 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:32.739 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:32.767 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:32.796 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:32.840 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:32.882 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:32.910 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:32.941 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:32.968 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:32.995 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:33.028 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:33.056 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:33.083 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:33.113 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:33.140 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:33.170 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:33.183 | SUCCESS  | utils.optuna_search:run_optuna_search:222 - Optuna [LINK/USD_15m]: best Sharpe=-999.000 after 30 trials
+2026-02-25 08:02:33.190 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-25 08:02:33.210 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=26771 val=4034 test=4034
+2026-02-25 08:02:33.220 | INFO     | models.tft_model:train:220 - Training TFT for LINK/USD_15m_f1 on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:33.225 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: Could not run 'aten::_thnn_fused_gru_cell' with arguments from the 'CPU' backend. This could be because the operator doesn't exist for this backend, or was omitted during the selective/custom build process (if using custom build). If you are a Facebook employee using PyTorch on mobile, please visit https://fburl.com/ptmfixes for possible resolutions. 'aten::_thnn_fused_gru_cell' is only available for these backends: [PrivateUse1, Meta, BackendSelect, Python, FuncTorchDynamicLayerBackMode, Functionalize, Named, Conjugate, Negative, ZeroTensor, ADInplaceOrView, AutogradOther, AutogradCPU, AutogradCUDA, AutogradHIP, AutogradXLA, AutogradMPS, AutogradIPU, AutogradXPU, AutogradHPU, AutogradVE, AutogradLazy, AutogradMTIA, AutogradPrivateUse1, AutogradPrivateUse2, AutogradPrivateUse3, AutogradMeta, AutogradNestedTensor, Tracer, AutocastCPU, AutocastXPU, AutocastCUDA, FuncTorchBatched, BatchedNestedTensor, FuncTorchVmapMode, Batched, VmapMode, FuncTorchGradWrapper, PythonTLSSnapshot, FuncTorchDynamicLayerFrontMode, PreDispatch, PythonDispatcher].
+
+PrivateUse1: registered at C:\__w\1\s\pytorch-directml-plugin\torch_directml\csrc\dml\dml_cpu_fallback.cpp:58 [backend fallback]
+Meta: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\MetaFallbackKernel.cpp:23 [backend fallback]
+BackendSelect: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\BackendSelectFallbackKernel.cpp:3 [backend fallback]
+Python: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\PythonFallbackKernel.cpp:153 [backend fallback]
+FuncTorchDynamicLayerBackMode: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\DynamicLayer.cpp:497 [backend fallback]
+Functionalize: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\FunctionalizeFallbackKernel.cpp:349 [backend fallback]
+Named: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\NamedRegistrations.cpp:7 [backend fallback]
+Conjugate: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\ConjugateFallback.cpp:17 [backend fallback]
+Negative: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\native\NegateFallback.cpp:18 [backend fallback]
+ZeroTensor: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\ZeroTensorFallback.cpp:86 [backend fallback]
+ADInplaceOrView: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\VariableFallbackKernel.cpp:86 [backend fallback]
+AutogradOther: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradCPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradCUDA: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradHIP: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradXLA: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradMPS: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradIPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradXPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradHPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradVE: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradLazy: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradMTIA: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradPrivateUse1: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradPrivateUse2: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradPrivateUse3: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradMeta: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradNestedTensor: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+Tracer: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\TraceType_3.cpp:14773 [kernel]
+AutocastCPU: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\autocast_mode.cpp:209 [backend fallback]
+AutocastXPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\autocast_mode.cpp:355 [kernel]
+AutocastCUDA: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\autocast_mode.cpp:169 [kernel]
+FuncTorchBatched: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\LegacyBatchingRegistrations.cpp:731 [backend fallback]
+BatchedNestedTensor: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\LegacyBatchingRegistrations.cpp:758 [backend fallback]
+FuncTorchVmapMode: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\VmapModeRegistrations.cpp:27 [backend fallback]
+Batched: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\LegacyBatchingRegistrations.cpp:1075 [backend fallback]
+VmapMode: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\VmapModeRegistrations.cpp:33 [backend fallback]
+FuncTorchGradWrapper: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\TensorWrapper.cpp:207 [backend fallback]
+PythonTLSSnapshot: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\PythonFallbackKernel.cpp:161 [backend fallback]
+FuncTorchDynamicLayerFrontMode: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\DynamicLayer.cpp:493 [backend fallback]
+PreDispatch: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\PythonFallbackKernel.cpp:165 [backend fallback]
+PythonDispatcher: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\PythonFallbackKernel.cpp:157 [backend fallback]
+
+2026-02-25 08:02:33.228 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-25 08:02:33.231 | INFO     | __main__:main:423 - 
+Processing: DOGE/USD [15m]
+2026-02-25 08:02:33.244 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-25 08:02:33.246 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-25 08:02:33.247 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: DOGE/USD_15m
+============================================================
+2026-02-25 08:02:33.248 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-25 08:02:33.248 | INFO     | data.feature_engineer:build_features:283 - Building features for DOGE/USD_15m (35040 rows)
+2026-02-25 08:02:33.421 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 34840 usable rows
+2026-02-25 08:02:33.422 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=10307 NEUTRAL=14407 UP=10126
+2026-02-25 08:02:33.422 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=14355 trending_up=9333 trending_down=11152
+2026-02-25 08:02:33.423 | WARNING  | utils.walk_forward:walk_forward_validate:325 - Insufficient data for walk-forward [15m]: 34840/45600 bars — scaling down proportionally (train=26771 val=4034 test=4034)
+2026-02-25 08:02:33.463 | INFO     | utils.optuna_search:run_optuna_search:209 - Optuna search: DOGE/USD_15m [15m] — 30 trials
+2026-02-25 08:02:33.476 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:33.498 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:33.517 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:33.535 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:33.551 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:33.573 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:33.597 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:33.615 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:33.631 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:33.649 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:33.675 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:33.701 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:33.730 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:33.754 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:33.782 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:33.818 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:33.860 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:33.888 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:33.917 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:33.944 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:33.971 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:34.001 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:34.028 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:34.054 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:34.085 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:34.113 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:34.138 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:34.166 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:34.193 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:34.221 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:34.234 | SUCCESS  | utils.optuna_search:run_optuna_search:222 - Optuna [DOGE/USD_15m]: best Sharpe=-999.000 after 30 trials
+2026-02-25 08:02:34.243 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-25 08:02:34.266 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=26771 val=4034 test=4034
+2026-02-25 08:02:34.277 | INFO     | models.tft_model:train:220 - Training TFT for DOGE/USD_15m_f1 on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:34.281 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: Could not run 'aten::_thnn_fused_gru_cell' with arguments from the 'CPU' backend. This could be because the operator doesn't exist for this backend, or was omitted during the selective/custom build process (if using custom build). If you are a Facebook employee using PyTorch on mobile, please visit https://fburl.com/ptmfixes for possible resolutions. 'aten::_thnn_fused_gru_cell' is only available for these backends: [PrivateUse1, Meta, BackendSelect, Python, FuncTorchDynamicLayerBackMode, Functionalize, Named, Conjugate, Negative, ZeroTensor, ADInplaceOrView, AutogradOther, AutogradCPU, AutogradCUDA, AutogradHIP, AutogradXLA, AutogradMPS, AutogradIPU, AutogradXPU, AutogradHPU, AutogradVE, AutogradLazy, AutogradMTIA, AutogradPrivateUse1, AutogradPrivateUse2, AutogradPrivateUse3, AutogradMeta, AutogradNestedTensor, Tracer, AutocastCPU, AutocastXPU, AutocastCUDA, FuncTorchBatched, BatchedNestedTensor, FuncTorchVmapMode, Batched, VmapMode, FuncTorchGradWrapper, PythonTLSSnapshot, FuncTorchDynamicLayerFrontMode, PreDispatch, PythonDispatcher].
+
+PrivateUse1: registered at C:\__w\1\s\pytorch-directml-plugin\torch_directml\csrc\dml\dml_cpu_fallback.cpp:58 [backend fallback]
+Meta: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\MetaFallbackKernel.cpp:23 [backend fallback]
+BackendSelect: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\BackendSelectFallbackKernel.cpp:3 [backend fallback]
+Python: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\PythonFallbackKernel.cpp:153 [backend fallback]
+FuncTorchDynamicLayerBackMode: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\DynamicLayer.cpp:497 [backend fallback]
+Functionalize: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\FunctionalizeFallbackKernel.cpp:349 [backend fallback]
+Named: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\NamedRegistrations.cpp:7 [backend fallback]
+Conjugate: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\ConjugateFallback.cpp:17 [backend fallback]
+Negative: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\native\NegateFallback.cpp:18 [backend fallback]
+ZeroTensor: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\ZeroTensorFallback.cpp:86 [backend fallback]
+ADInplaceOrView: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\VariableFallbackKernel.cpp:86 [backend fallback]
+AutogradOther: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradCPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradCUDA: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradHIP: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradXLA: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradMPS: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradIPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradXPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradHPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradVE: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradLazy: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradMTIA: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradPrivateUse1: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradPrivateUse2: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradPrivateUse3: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradMeta: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradNestedTensor: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+Tracer: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\TraceType_3.cpp:14773 [kernel]
+AutocastCPU: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\autocast_mode.cpp:209 [backend fallback]
+AutocastXPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\autocast_mode.cpp:355 [kernel]
+AutocastCUDA: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\autocast_mode.cpp:169 [kernel]
+FuncTorchBatched: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\LegacyBatchingRegistrations.cpp:731 [backend fallback]
+BatchedNestedTensor: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\LegacyBatchingRegistrations.cpp:758 [backend fallback]
+FuncTorchVmapMode: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\VmapModeRegistrations.cpp:27 [backend fallback]
+Batched: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\LegacyBatchingRegistrations.cpp:1075 [backend fallback]
+VmapMode: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\VmapModeRegistrations.cpp:33 [backend fallback]
+FuncTorchGradWrapper: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\TensorWrapper.cpp:207 [backend fallback]
+PythonTLSSnapshot: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\PythonFallbackKernel.cpp:161 [backend fallback]
+FuncTorchDynamicLayerFrontMode: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\DynamicLayer.cpp:493 [backend fallback]
+PreDispatch: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\PythonFallbackKernel.cpp:165 [backend fallback]
+PythonDispatcher: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\PythonFallbackKernel.cpp:157 [backend fallback]
+
+2026-02-25 08:02:34.283 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-25 08:02:34.287 | INFO     | __main__:main:423 - 
+Processing: OP/USD [15m]
+2026-02-25 08:02:34.301 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-25 08:02:34.303 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-25 08:02:34.304 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: OP/USD_15m
+============================================================
+2026-02-25 08:02:34.304 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-25 08:02:34.305 | INFO     | data.feature_engineer:build_features:283 - Building features for OP/USD_15m (35040 rows)
+2026-02-25 08:02:34.484 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 34840 usable rows
+2026-02-25 08:02:34.486 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=11398 NEUTRAL=12551 UP=10891
+2026-02-25 08:02:34.486 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=16067 trending_up=9194 trending_down=9579
+2026-02-25 08:02:34.487 | WARNING  | utils.walk_forward:walk_forward_validate:325 - Insufficient data for walk-forward [15m]: 34840/45600 bars — scaling down proportionally (train=26771 val=4034 test=4034)
+2026-02-25 08:02:34.528 | INFO     | utils.optuna_search:run_optuna_search:209 - Optuna search: OP/USD_15m [15m] — 30 trials
+2026-02-25 08:02:34.539 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:34.559 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:34.579 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:34.596 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:34.614 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:34.637 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:34.664 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:34.684 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:34.703 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:34.723 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:34.751 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:34.781 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:34.819 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:34.860 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:34.899 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:34.929 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:34.956 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:34.981 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:35.013 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:35.042 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:35.072 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:35.103 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:35.134 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:35.164 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:35.199 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:35.231 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:35.262 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:35.293 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:35.321 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:35.351 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:35.367 | SUCCESS  | utils.optuna_search:run_optuna_search:222 - Optuna [OP/USD_15m]: best Sharpe=-999.000 after 30 trials
+2026-02-25 08:02:35.372 | SUCCESS  | utils.walk_forward:walk_forward_validate:379 - Optuna complete: 44 features selected, best Sharpe=-999.000
+2026-02-25 08:02:35.395 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=26771 val=4034 test=4034
+2026-02-25 08:02:35.405 | INFO     | models.tft_model:train:220 - Training TFT for OP/USD_15m_f1 on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:35.411 | ERROR    | utils.walk_forward:run_fold:202 - Fold 1 training failed: Could not run 'aten::_thnn_fused_gru_cell' with arguments from the 'CPU' backend. This could be because the operator doesn't exist for this backend, or was omitted during the selective/custom build process (if using custom build). If you are a Facebook employee using PyTorch on mobile, please visit https://fburl.com/ptmfixes for possible resolutions. 'aten::_thnn_fused_gru_cell' is only available for these backends: [PrivateUse1, Meta, BackendSelect, Python, FuncTorchDynamicLayerBackMode, Functionalize, Named, Conjugate, Negative, ZeroTensor, ADInplaceOrView, AutogradOther, AutogradCPU, AutogradCUDA, AutogradHIP, AutogradXLA, AutogradMPS, AutogradIPU, AutogradXPU, AutogradHPU, AutogradVE, AutogradLazy, AutogradMTIA, AutogradPrivateUse1, AutogradPrivateUse2, AutogradPrivateUse3, AutogradMeta, AutogradNestedTensor, Tracer, AutocastCPU, AutocastXPU, AutocastCUDA, FuncTorchBatched, BatchedNestedTensor, FuncTorchVmapMode, Batched, VmapMode, FuncTorchGradWrapper, PythonTLSSnapshot, FuncTorchDynamicLayerFrontMode, PreDispatch, PythonDispatcher].
+
+PrivateUse1: registered at C:\__w\1\s\pytorch-directml-plugin\torch_directml\csrc\dml\dml_cpu_fallback.cpp:58 [backend fallback]
+Meta: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\MetaFallbackKernel.cpp:23 [backend fallback]
+BackendSelect: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\BackendSelectFallbackKernel.cpp:3 [backend fallback]
+Python: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\PythonFallbackKernel.cpp:153 [backend fallback]
+FuncTorchDynamicLayerBackMode: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\DynamicLayer.cpp:497 [backend fallback]
+Functionalize: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\FunctionalizeFallbackKernel.cpp:349 [backend fallback]
+Named: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\NamedRegistrations.cpp:7 [backend fallback]
+Conjugate: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\ConjugateFallback.cpp:17 [backend fallback]
+Negative: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\native\NegateFallback.cpp:18 [backend fallback]
+ZeroTensor: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\ZeroTensorFallback.cpp:86 [backend fallback]
+ADInplaceOrView: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\VariableFallbackKernel.cpp:86 [backend fallback]
+AutogradOther: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradCPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradCUDA: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradHIP: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradXLA: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradMPS: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradIPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradXPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradHPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradVE: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradLazy: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradMTIA: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradPrivateUse1: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradPrivateUse2: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradPrivateUse3: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradMeta: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+AutogradNestedTensor: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\VariableType_3.cpp:19468 [autograd kernel]
+Tracer: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\torch\csrc\autograd\generated\TraceType_3.cpp:14773 [kernel]
+AutocastCPU: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\autocast_mode.cpp:209 [backend fallback]
+AutocastXPU: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\autocast_mode.cpp:355 [kernel]
+AutocastCUDA: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\autocast_mode.cpp:169 [kernel]
+FuncTorchBatched: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\LegacyBatchingRegistrations.cpp:731 [backend fallback]
+BatchedNestedTensor: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\LegacyBatchingRegistrations.cpp:758 [backend fallback]
+FuncTorchVmapMode: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\VmapModeRegistrations.cpp:27 [backend fallback]
+Batched: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\LegacyBatchingRegistrations.cpp:1075 [backend fallback]
+VmapMode: fallthrough registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\VmapModeRegistrations.cpp:33 [backend fallback]
+FuncTorchGradWrapper: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\TensorWrapper.cpp:207 [backend fallback]
+PythonTLSSnapshot: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\PythonFallbackKernel.cpp:161 [backend fallback]
+FuncTorchDynamicLayerFrontMode: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\functorch\DynamicLayer.cpp:493 [backend fallback]
+PreDispatch: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\PythonFallbackKernel.cpp:165 [backend fallback]
+PythonDispatcher: registered at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\core\PythonFallbackKernel.cpp:157 [backend fallback]
+
+2026-02-25 08:02:35.413 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-25 08:02:35.417 | INFO     | __main__:main:423 - 
+Processing: ARB/USD [15m]
+2026-02-25 08:02:35.432 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-25 08:02:35.435 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-25 08:02:35.436 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: ARB/USD_15m
+============================================================
+2026-02-25 08:02:35.436 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-25 08:02:35.436 | INFO     | data.feature_engineer:build_features:283 - Building features for ARB/USD_15m (35040 rows)
+2026-02-25 08:02:35.628 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 34840 usable rows
+2026-02-25 08:02:35.629 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=11375 NEUTRAL=12576 UP=10889
+2026-02-25 08:02:35.630 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=15681 trending_up=8975 trending_down=10184
+2026-02-25 08:02:35.630 | WARNING  | utils.walk_forward:walk_forward_validate:325 - Insufficient data for walk-forward [15m]: 34840/45600 bars — scaling down proportionally (train=26771 val=4034 test=4034)
+2026-02-25 08:02:35.675 | INFO     | utils.optuna_search:run_optuna_search:209 - Optuna search: ARB/USD_15m [15m] — 30 trials
+2026-02-25 08:02:35.688 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:35.711 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:35.732 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:35.752 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:35.771 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:35.794 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:35.823 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:35.847 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:35.884 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:35.911 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:35.947 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:35.980 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:36.014 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:36.040 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:36.071 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:36.101 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:36.130 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:36.157 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26747 train samples
+2026-02-25 08:02:36.188 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:36.213 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26723 train samples
+2026-02-25 08:02:36.242 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples
+2026-02-25 08:02:36.272 | INFO     | models.tft_model:train:220 - Training TFT for optuna_trial on privateuseone:0 — 26759 train samples

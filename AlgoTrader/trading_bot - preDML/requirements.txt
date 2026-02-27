@@ -1,0 +1,31 @@
+# Data & Exchange
+ccxt==4.3.32
+pandas==2.3.2
+numpy>=2.2.6
+requests==2.31.0
+pytrends==4.9.2
+
+# Technical Indicators
+pandas-ta==0.4.71b0
+ta==0.11.0
+
+# ML Models
+lightgbm==4.3.0
+scikit-learn==1.6.1
+xgboost==2.0.3
+catboost==1.2.10
+
+# Deep Learning (LSTM)
+torch
+optuna
+
+# Backtesting
+vectorbt==0.28.4
+
+# Utilities
+python-dotenv==1.0.1
+loguru==0.7.2
+joblib==1.4.2
+matplotlib==3.9.0
+seaborn==0.13.2
+tqdm==4.67.2

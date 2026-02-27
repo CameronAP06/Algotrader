@@ -1,0 +1,1027 @@
+2026-02-23 19:30:42.846 | INFO     | __main__:main:397 - Testing 5 symbols x 6 timeframes = 30 combinations
+2026-02-23 19:30:42.846 | INFO     | data.alt_data:fetch_all_alt_data:172 - Fetching alternative data...
+2026-02-23 19:30:43.532 | SUCCESS  | data.alt_data:fetch_fear_greed:44 - Fear & Greed: 1825 records (2021-02-24 -> 2026-02-23)
+2026-02-23 19:30:43.984 | WARNING  | data.alt_data:fetch_btc_dominance:88 - BTC dominance chart endpoint failed: Empty BTC dominance series from chart endpoint — trying /global fallback
+2026-02-23 19:30:44.605 | WARNING  | data.alt_data:fetch_btc_dominance:108 - BTC Dominance: using current-only value (56.2%) — historical chart unavailable. Feature will be constant.
+2026-02-23 19:30:46.847 | SUCCESS  | data.alt_data:fetch_google_trends:146 - Google Trends: 262 records
+2026-02-23 19:30:46.873 | SUCCESS  | data.alt_data:fetch_all_alt_data:208 - Alt data saved: 1825 rows, columns: ['timestamp', 'fear_greed', 'date', 'btc_dominance', 'google_trends_btc']
+2026-02-23 19:30:46.874 | INFO     | __main__:main:407 - 
+============================================================
+Timeframe: 15 minutes (15m)
+============================================================
+2026-02-23 19:30:47.979 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded INJ/USD 15m from cache (35040 rows)
+2026-02-23 19:30:48.021 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded LINK/USD 15m from cache (35040 rows)
+2026-02-23 19:30:48.067 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded DOGE/USD 15m from cache (35040 rows)
+2026-02-23 19:30:48.105 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded OP/USD 15m from cache (35040 rows)
+2026-02-23 19:30:48.133 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded ARB/USD 15m from cache (35040 rows)
+2026-02-23 19:30:48.133 | INFO     | __main__:main:423 - 
+Processing: INJ/USD [15m]
+2026-02-23 19:30:48.205 | INFO     | __main__:log_gpu_temp:123 - GPU: 47C | 4% util | 322/4096 MiB VRAM
+2026-02-23 19:30:48.220 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:30:48.232 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:30:48.234 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: INJ/USD_15m
+============================================================
+2026-02-23 19:30:48.234 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-23 19:30:48.235 | INFO     | data.feature_engineer:build_features:283 - Building features for INJ/USD_15m (35040 rows)
+2026-02-23 19:30:48.443 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 34840 usable rows
+2026-02-23 19:30:48.447 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=11702 NEUTRAL=12037 UP=11101
+2026-02-23 19:30:48.447 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=16617 trending_up=9176 trending_down=9047
+2026-02-23 19:30:48.447 | WARNING  | utils.walk_forward:walk_forward_validate:325 - Insufficient data for walk-forward [15m]: 34840/45600 bars — scaling down proportionally (train=26771 val=4034 test=4034)
+2026-02-23 19:30:48.452 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:30:48.523 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=26771 val=4034 test=4034
+2026-02-23 19:30:50.000 | INFO     | models.tft_model:train:211 - Training TFT for INJ/USD_15m_f1 on cuda — 26675 train samples
+2026-02-23 19:30:55.043 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.9959 | val_acc=0.3017
+2026-02-23 19:31:17.357 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.3227 | val_acc=0.3083
+2026-02-23 19:31:30.867 | INFO     | models.tft_model:train:251 - Early stopping at epoch 8
+2026-02-23 19:31:30.878 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.9959
+2026-02-23 19:31:30.895 | INFO     | models.cnn_model:train:116 - Training 1D CNN for INJ/USD_15m_f1 on cuda — 26675 train samples
+2026-02-23 19:31:33.698 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.9961 | val_acc=0.3258
+2026-02-23 19:31:50.182 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-23 19:31:50.182 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.9961
+2026-02-23 19:31:50.194 | INFO     | models.lstm_model:train:108 - Training LSTM for INJ/USD_15m_f1 on cuda — 26675 train samples
+2026-02-23 19:31:51.866 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=1.0068 | val_acc=0.2928
+2026-02-23 19:32:03.649 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:32:03.659 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 1.0068
+2026-02-23 19:32:21.737 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.000 CNN=0.860 LSTM=0.140 | acc=0.3324
+2026-02-23 19:32:39.802 | ERROR    | __main__:main:473 - Failed INJ/USD 15m: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:32:39.802 | INFO     | __main__:main:423 - 
+Processing: LINK/USD [15m]
+2026-02-23 19:32:39.851 | INFO     | __main__:log_gpu_temp:123 - GPU: 57C | 29% util | 791/4096 MiB VRAM
+2026-02-23 19:32:39.865 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:32:39.868 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:32:39.869 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: LINK/USD_15m
+============================================================
+2026-02-23 19:32:39.869 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-23 19:32:39.869 | INFO     | data.feature_engineer:build_features:283 - Building features for LINK/USD_15m (35040 rows)
+2026-02-23 19:32:40.049 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 34840 usable rows
+2026-02-23 19:32:40.050 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=10369 NEUTRAL=14274 UP=10197
+2026-02-23 19:32:40.051 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=16442 trending_up=9402 trending_down=8996
+2026-02-23 19:32:40.051 | WARNING  | utils.walk_forward:walk_forward_validate:325 - Insufficient data for walk-forward [15m]: 34840/45600 bars — scaling down proportionally (train=26771 val=4034 test=4034)
+2026-02-23 19:32:40.053 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:32:40.118 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=26771 val=4034 test=4034
+2026-02-23 19:32:40.131 | INFO     | models.tft_model:train:211 - Training TFT for LINK/USD_15m_f1 on cuda — 26675 train samples
+2026-02-23 19:32:44.909 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=1.0657 | val_acc=0.2712
+2026-02-23 19:33:07.614 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.2594 | val_acc=0.2534
+2026-02-23 19:33:21.143 | INFO     | models.tft_model:train:251 - Early stopping at epoch 8
+2026-02-23 19:33:21.143 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 1.0657
+2026-02-23 19:33:21.163 | INFO     | models.cnn_model:train:116 - Training 1D CNN for LINK/USD_15m_f1 on cuda — 26675 train samples
+2026-02-23 19:33:23.600 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=201.9825 | val_acc=0.2664
+2026-02-23 19:33:47.460 | INFO     | models.cnn_model:train:145 -   Epoch  10 | val_loss=1427.4118 | val_acc=0.2605
+2026-02-23 19:33:49.842 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 11
+2026-02-23 19:33:49.842 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 175.1396
+2026-02-23 19:33:49.851 | INFO     | models.lstm_model:train:108 - Training LSTM for LINK/USD_15m_f1 on cuda — 26675 train samples
+2026-02-23 19:33:51.569 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=1.0790 | val_acc=0.2669
+2026-02-23 19:34:03.472 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:34:03.472 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 1.0790
+2026-02-23 19:34:22.317 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.910 CNN=0.060 LSTM=0.030 | acc=0.2868
+2026-02-23 19:34:41.602 | ERROR    | __main__:main:473 - Failed LINK/USD 15m: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:34:41.610 | INFO     | __main__:main:423 - 
+Processing: DOGE/USD [15m]
+2026-02-23 19:34:41.663 | INFO     | __main__:log_gpu_temp:123 - GPU: 62C | 37% util | 793/4096 MiB VRAM
+2026-02-23 19:34:41.672 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:34:41.676 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:34:41.676 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: DOGE/USD_15m
+============================================================
+2026-02-23 19:34:41.677 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-23 19:34:41.677 | INFO     | data.feature_engineer:build_features:283 - Building features for DOGE/USD_15m (35040 rows)
+2026-02-23 19:34:41.857 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 34840 usable rows
+2026-02-23 19:34:41.857 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=10306 NEUTRAL=14367 UP=10167
+2026-02-23 19:34:41.862 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=14366 trending_up=9359 trending_down=11115
+2026-02-23 19:34:41.862 | WARNING  | utils.walk_forward:walk_forward_validate:325 - Insufficient data for walk-forward [15m]: 34840/45600 bars — scaling down proportionally (train=26771 val=4034 test=4034)
+2026-02-23 19:34:41.864 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:34:41.914 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=26771 val=4034 test=4034
+2026-02-23 19:34:41.941 | INFO     | models.tft_model:train:211 - Training TFT for DOGE/USD_15m_f1 on cuda — 26675 train samples
+2026-02-23 19:34:46.566 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=1.0936 | val_acc=0.2613
+2026-02-23 19:35:09.309 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.3409 | val_acc=0.2567
+2026-02-23 19:35:23.195 | INFO     | models.tft_model:train:251 - Early stopping at epoch 8
+2026-02-23 19:35:23.197 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 1.0936
+2026-02-23 19:35:23.216 | INFO     | models.cnn_model:train:116 - Training 1D CNN for DOGE/USD_15m_f1 on cuda — 26675 train samples
+2026-02-23 19:35:25.612 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=1.0705 | val_acc=0.2661
+2026-02-23 19:35:42.280 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-23 19:35:42.280 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 1.0705
+2026-02-23 19:35:42.280 | INFO     | models.lstm_model:train:108 - Training LSTM for DOGE/USD_15m_f1 on cuda — 26675 train samples
+2026-02-23 19:35:44.091 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=1.0664 | val_acc=0.2720
+2026-02-23 19:35:56.269 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:35:56.269 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 1.0664
+2026-02-23 19:36:14.912 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.100 CNN=0.400 LSTM=0.500 | acc=0.2826
+2026-02-23 19:36:33.745 | ERROR    | __main__:main:473 - Failed DOGE/USD 15m: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:36:33.745 | INFO     | __main__:main:423 - 
+Processing: OP/USD [15m]
+2026-02-23 19:36:33.795 | INFO     | __main__:log_gpu_temp:123 - GPU: 63C | 38% util | 793/4096 MiB VRAM
+2026-02-23 19:36:33.805 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:36:33.807 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:36:33.808 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: OP/USD_15m
+============================================================
+2026-02-23 19:36:33.809 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-23 19:36:33.810 | INFO     | data.feature_engineer:build_features:283 - Building features for OP/USD_15m (35040 rows)
+2026-02-23 19:36:33.982 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 34840 usable rows
+2026-02-23 19:36:33.990 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=11390 NEUTRAL=12546 UP=10904
+2026-02-23 19:36:33.990 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=16043 trending_up=9284 trending_down=9513
+2026-02-23 19:36:33.990 | WARNING  | utils.walk_forward:walk_forward_validate:325 - Insufficient data for walk-forward [15m]: 34840/45600 bars — scaling down proportionally (train=26771 val=4034 test=4034)
+2026-02-23 19:36:33.990 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:36:34.046 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=26771 val=4034 test=4034
+2026-02-23 19:36:34.063 | INFO     | models.tft_model:train:211 - Training TFT for OP/USD_15m_f1 on cuda — 26675 train samples
+2026-02-23 19:36:38.676 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=1.0258 | val_acc=0.2925
+2026-02-23 19:37:01.192 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.2978 | val_acc=0.3068
+2026-02-23 19:37:14.804 | INFO     | models.tft_model:train:251 - Early stopping at epoch 8
+2026-02-23 19:37:14.814 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 1.0258
+2026-02-23 19:37:14.826 | INFO     | models.cnn_model:train:116 - Training 1D CNN for OP/USD_15m_f1 on cuda — 26675 train samples
+2026-02-23 19:37:17.225 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=1.0120 | val_acc=0.2933
+2026-02-23 19:37:33.987 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-23 19:37:33.987 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 1.0120
+2026-02-23 19:37:33.998 | INFO     | models.lstm_model:train:108 - Training LSTM for OP/USD_15m_f1 on cuda — 26675 train samples
+2026-02-23 19:37:35.804 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=1.0125 | val_acc=0.3095
+2026-02-23 19:37:48.066 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:37:48.066 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 1.0125
+2026-02-23 19:38:07.793 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.000 CNN=0.110 LSTM=0.890 | acc=0.3156
+2026-02-23 19:38:26.241 | ERROR    | __main__:main:473 - Failed OP/USD 15m: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:38:26.253 | INFO     | __main__:main:423 - 
+Processing: ARB/USD [15m]
+2026-02-23 19:38:26.294 | INFO     | __main__:log_gpu_temp:123 - GPU: 65C | 40% util | 793/4096 MiB VRAM
+2026-02-23 19:38:26.304 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:38:26.313 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:38:26.314 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: ARB/USD_15m
+============================================================
+2026-02-23 19:38:26.315 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [15m]: train=35040 bars val=5280 test=5280 step=5280
+2026-02-23 19:38:26.315 | INFO     | data.feature_engineer:build_features:283 - Building features for ARB/USD_15m (35040 rows)
+2026-02-23 19:38:26.496 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 34840 usable rows
+2026-02-23 19:38:26.496 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=11381 NEUTRAL=12542 UP=10917
+2026-02-23 19:38:26.496 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=15665 trending_up=8996 trending_down=10179
+2026-02-23 19:38:26.496 | WARNING  | utils.walk_forward:walk_forward_validate:325 - Insufficient data for walk-forward [15m]: 34840/45600 bars — scaling down proportionally (train=26771 val=4034 test=4034)
+2026-02-23 19:38:26.503 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:38:26.554 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=26771 val=4034 test=4034
+2026-02-23 19:38:26.572 | INFO     | models.tft_model:train:211 - Training TFT for ARB/USD_15m_f1 on cuda — 26675 train samples
+2026-02-23 19:38:31.357 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=1.0310 | val_acc=0.2925
+2026-02-23 19:38:54.274 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.3556 | val_acc=0.2989
+2026-02-23 19:39:13.460 | INFO     | models.tft_model:train:251 - Early stopping at epoch 9
+2026-02-23 19:39:13.471 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 1.0294
+2026-02-23 19:39:13.486 | INFO     | models.cnn_model:train:116 - Training 1D CNN for ARB/USD_15m_f1 on cuda — 26675 train samples
+2026-02-23 19:39:15.987 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=1.1318 | val_acc=0.2859
+2026-02-23 19:39:36.034 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 8
+2026-02-23 19:39:36.034 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 1.0150
+2026-02-23 19:39:36.049 | INFO     | models.lstm_model:train:108 - Training LSTM for ARB/USD_15m_f1 on cuda — 26675 train samples
+2026-02-23 19:39:38.392 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=1.0266 | val_acc=0.2996
+2026-02-23 19:39:52.896 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:39:52.896 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 1.0266
+2026-02-23 19:40:13.205 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.010 CNN=0.560 LSTM=0.430 | acc=0.3265
+2026-02-23 19:40:33.001 | ERROR    | __main__:main:473 - Failed ARB/USD 15m: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:40:33.011 | INFO     | __main__:main:407 - 
+============================================================
+Timeframe: 1 hour (1h)
+============================================================
+2026-02-23 19:40:33.061 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching INJ/USD [1h] — 1825 days...
+2026-02-23 19:40:56.617 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - INJ/USD 1h: 43787 candles (2021-02-24 -> 2026-02-23)
+2026-02-23 19:40:56.722 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching LINK/USD [1h] — 1825 days...
+2026-02-23 19:41:17.393 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - LINK/USD 1h: 43787 candles (2021-02-24 -> 2026-02-23)
+2026-02-23 19:41:17.483 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching DOGE/USD [1h] — 1825 days...
+2026-02-23 19:41:41.511 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - DOGE/USD 1h: 43787 candles (2021-02-24 -> 2026-02-23)
+2026-02-23 19:41:41.590 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching OP/USD [1h] — 1825 days...
+2026-02-23 19:41:58.059 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - OP/USD 1h: 32723 candles (2022-06-01 -> 2026-02-23)
+2026-02-23 19:41:58.127 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching ARB/USD [1h] — 1825 days...
+2026-02-23 19:42:14.694 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - ARB/USD 1h: 25636 candles (2023-03-23 -> 2026-02-23)
+2026-02-23 19:42:14.728 | INFO     | __main__:main:423 - 
+Processing: INJ/USD [1h]
+2026-02-23 19:42:14.781 | INFO     | __main__:log_gpu_temp:123 - GPU: 55C | 0% util | 811/4096 MiB VRAM
+2026-02-23 19:42:14.792 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:42:14.796 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:42:14.797 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: INJ/USD_1h
+============================================================
+2026-02-23 19:42:14.797 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [1h]: train=8760 bars val=1320 test=1320 step=1320
+2026-02-23 19:42:14.798 | INFO     | data.feature_engineer:build_features:283 - Building features for INJ/USD_1h (43787 rows)
+2026-02-23 19:42:15.014 | INFO     | data.feature_engineer:build_features:308 - Dropped 205 NaN/inf rows → 43582 usable rows
+2026-02-23 19:42:15.015 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=18136 NEUTRAL=8173 UP=17273
+2026-02-23 19:42:15.016 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=18565 trending_up=14344 trending_down=10673
+2026-02-23 19:42:15.017 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:42:15.047 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=8760 val=1320 test=1320
+2026-02-23 19:42:15.052 | INFO     | models.tft_model:train:211 - Training TFT for INJ/USD_1h_f1 on cuda — 8712 train samples
+2026-02-23 19:42:16.429 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.9416 | val_acc=0.3844
+2026-02-23 19:42:21.785 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.1295 | val_acc=0.3420
+2026-02-23 19:42:24.993 | INFO     | models.tft_model:train:251 - Early stopping at epoch 8
+2026-02-23 19:42:24.993 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.9416
+2026-02-23 19:42:25.004 | INFO     | models.cnn_model:train:116 - Training 1D CNN for INJ/USD_1h_f1 on cuda — 8712 train samples
+2026-02-23 19:42:25.508 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.9821 | val_acc=0.3381
+2026-02-23 19:42:28.513 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-23 19:42:28.513 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.9821
+2026-02-23 19:42:28.513 | INFO     | models.lstm_model:train:108 - Training LSTM for INJ/USD_1h_f1 on cuda — 8712 train samples
+2026-02-23 19:42:28.973 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.9656 | val_acc=0.3569
+2026-02-23 19:42:31.847 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:42:31.847 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.9656
+2026-02-23 19:42:38.110 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.700 CNN=0.100 LSTM=0.200 | acc=0.4000
+2026-02-23 19:42:43.742 | ERROR    | __main__:main:473 - Failed INJ/USD 1h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:42:43.743 | INFO     | __main__:main:423 - 
+Processing: LINK/USD [1h]
+2026-02-23 19:42:43.799 | INFO     | __main__:log_gpu_temp:123 - GPU: 63C | 45% util | 796/4096 MiB VRAM
+2026-02-23 19:42:43.812 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:42:43.816 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:42:43.816 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: LINK/USD_1h
+============================================================
+2026-02-23 19:42:43.817 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [1h]: train=8760 bars val=1320 test=1320 step=1320
+2026-02-23 19:42:43.817 | INFO     | data.feature_engineer:build_features:283 - Building features for LINK/USD_1h (43787 rows)
+2026-02-23 19:42:44.034 | INFO     | data.feature_engineer:build_features:308 - Dropped 205 NaN/inf rows → 43582 usable rows
+2026-02-23 19:42:44.035 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=16676 NEUTRAL=10189 UP=16717
+2026-02-23 19:42:44.035 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=18592 trending_up=10900 trending_down=14090
+2026-02-23 19:42:44.037 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:42:44.063 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=8760 val=1320 test=1320
+2026-02-23 19:42:44.079 | INFO     | models.tft_model:train:211 - Training TFT for LINK/USD_1h_f1 on cuda — 8712 train samples
+2026-02-23 19:42:45.326 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.9078 | val_acc=0.3899
+2026-02-23 19:42:50.666 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=0.9823 | val_acc=0.4096
+2026-02-23 19:42:54.932 | INFO     | models.tft_model:train:251 - Early stopping at epoch 9
+2026-02-23 19:42:54.938 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.8910
+2026-02-23 19:42:54.943 | INFO     | models.cnn_model:train:116 - Training 1D CNN for LINK/USD_1h_f1 on cuda — 8712 train samples
+2026-02-23 19:42:55.406 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.9106 | val_acc=0.3836
+2026-02-23 19:42:58.396 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-23 19:42:58.396 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.9106
+2026-02-23 19:42:58.401 | INFO     | models.lstm_model:train:108 - Training LSTM for LINK/USD_1h_f1 on cuda — 8712 train samples
+2026-02-23 19:42:58.850 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.8926 | val_acc=0.4395
+2026-02-23 19:43:01.757 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:43:01.759 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.8926
+2026-02-23 19:43:07.972 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.340 CNN=0.060 LSTM=0.600 | acc=0.4470
+2026-02-23 19:43:13.753 | ERROR    | __main__:main:473 - Failed LINK/USD 1h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:43:13.763 | INFO     | __main__:main:423 - 
+Processing: DOGE/USD [1h]
+2026-02-23 19:43:13.820 | INFO     | __main__:log_gpu_temp:123 - GPU: 65C | 43% util | 796/4096 MiB VRAM
+2026-02-23 19:43:13.831 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:43:13.834 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:43:13.835 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: DOGE/USD_1h
+============================================================
+2026-02-23 19:43:13.835 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [1h]: train=8760 bars val=1320 test=1320 step=1320
+2026-02-23 19:43:13.836 | INFO     | data.feature_engineer:build_features:283 - Building features for DOGE/USD_1h (43787 rows)
+2026-02-23 19:43:14.061 | INFO     | data.feature_engineer:build_features:308 - Dropped 205 NaN/inf rows → 43582 usable rows
+2026-02-23 19:43:14.062 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=16175 NEUTRAL=11648 UP=15759
+2026-02-23 19:43:14.063 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=17119 trending_up=11714 trending_down=14749
+2026-02-23 19:43:14.065 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:43:14.097 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=8760 val=1320 test=1320
+2026-02-23 19:43:14.104 | INFO     | models.tft_model:train:211 - Training TFT for DOGE/USD_1h_f1 on cuda — 8712 train samples
+2026-02-23 19:43:15.366 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.9274 | val_acc=0.3632
+2026-02-23 19:43:20.770 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.1216 | val_acc=0.3860
+2026-02-23 19:43:25.824 | INFO     | models.tft_model:train:251 - Early stopping at epoch 9
+2026-02-23 19:43:25.829 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.9186
+2026-02-23 19:43:25.842 | INFO     | models.cnn_model:train:116 - Training 1D CNN for DOGE/USD_1h_f1 on cuda — 8712 train samples
+2026-02-23 19:43:26.458 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.9333 | val_acc=0.3671
+2026-02-23 19:43:30.199 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-23 19:43:30.199 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.9333
+2026-02-23 19:43:30.209 | INFO     | models.lstm_model:train:108 - Training LSTM for DOGE/USD_1h_f1 on cuda — 8712 train samples
+2026-02-23 19:43:30.784 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.9309 | val_acc=0.4135
+2026-02-23 19:43:34.483 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:43:34.483 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.9309
+2026-02-23 19:43:41.272 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.000 CNN=0.100 LSTM=0.900 | acc=0.4136
+2026-02-23 19:43:48.081 | ERROR    | __main__:main:473 - Failed DOGE/USD 1h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:43:48.100 | INFO     | __main__:main:423 - 
+Processing: OP/USD [1h]
+2026-02-23 19:43:48.168 | INFO     | __main__:log_gpu_temp:123 - GPU: 67C | 37% util | 796/4096 MiB VRAM
+2026-02-23 19:43:48.183 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:43:48.186 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:43:48.187 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: OP/USD_1h
+============================================================
+2026-02-23 19:43:48.188 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [1h]: train=8760 bars val=1320 test=1320 step=1320
+2026-02-23 19:43:48.188 | INFO     | data.feature_engineer:build_features:283 - Building features for OP/USD_1h (32723 rows)
+2026-02-23 19:43:48.393 | INFO     | data.feature_engineer:build_features:308 - Dropped 205 NaN/inf rows → 32518 usable rows
+2026-02-23 19:43:48.393 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=13179 NEUTRAL=6824 UP=12515
+2026-02-23 19:43:48.393 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=14505 trending_up=8308 trending_down=9705
+2026-02-23 19:43:48.402 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:43:48.434 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=8760 val=1320 test=1320
+2026-02-23 19:43:48.447 | INFO     | models.tft_model:train:211 - Training TFT for OP/USD_1h_f1 on cuda — 8712 train samples
+2026-02-23 19:43:49.974 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.9117 | val_acc=0.3561
+2026-02-23 19:43:56.808 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=0.9767 | val_acc=0.4410
+2026-02-23 19:44:01.031 | INFO     | models.tft_model:train:251 - Early stopping at epoch 8
+2026-02-23 19:44:01.031 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.9117
+2026-02-23 19:44:01.043 | INFO     | models.cnn_model:train:116 - Training 1D CNN for OP/USD_1h_f1 on cuda — 8712 train samples
+2026-02-23 19:44:01.640 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.9055 | val_acc=0.4002
+2026-02-23 19:44:05.399 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-23 19:44:05.399 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.9055
+2026-02-23 19:44:05.408 | INFO     | models.lstm_model:train:108 - Training LSTM for OP/USD_1h_f1 on cuda — 8712 train samples
+2026-02-23 19:44:05.947 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.8950 | val_acc=0.4347
+2026-02-23 19:44:09.796 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:44:09.796 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.8950
+2026-02-23 19:44:16.131 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.150 CNN=0.130 LSTM=0.720 | acc=0.4371
+2026-02-23 19:44:22.630 | ERROR    | __main__:main:473 - Failed OP/USD 1h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:44:22.640 | INFO     | __main__:main:423 - 
+Processing: ARB/USD [1h]
+2026-02-23 19:44:22.687 | INFO     | __main__:log_gpu_temp:123 - GPU: 67C | 43% util | 795/4096 MiB VRAM
+2026-02-23 19:44:22.703 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:44:22.707 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:44:22.708 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: ARB/USD_1h
+============================================================
+2026-02-23 19:44:22.709 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [1h]: train=8760 bars val=1320 test=1320 step=1320
+2026-02-23 19:44:22.709 | INFO     | data.feature_engineer:build_features:283 - Building features for ARB/USD_1h (25636 rows)
+2026-02-23 19:44:22.877 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 25436 usable rows
+2026-02-23 19:44:22.878 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=9993 NEUTRAL=6068 UP=9375
+2026-02-23 19:44:22.878 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=10880 trending_up=6059 trending_down=8497
+2026-02-23 19:44:22.878 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:44:22.896 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=8760 val=1320 test=1320
+2026-02-23 19:44:22.917 | INFO     | models.tft_model:train:211 - Training TFT for ARB/USD_1h_f1 on cuda — 8712 train samples
+2026-02-23 19:44:24.341 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.9853 | val_acc=0.3467
+2026-02-23 19:44:30.887 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.1152 | val_acc=0.3436
+2026-02-23 19:44:35.659 | INFO     | models.tft_model:train:251 - Early stopping at epoch 9
+2026-02-23 19:44:35.659 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.9241
+2026-02-23 19:44:35.670 | INFO     | models.cnn_model:train:116 - Training 1D CNN for ARB/USD_1h_f1 on cuda — 8712 train samples
+2026-02-23 19:44:36.170 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.9669 | val_acc=0.3742
+2026-02-23 19:44:39.551 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-23 19:44:39.551 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.9669
+2026-02-23 19:44:39.563 | INFO     | models.lstm_model:train:108 - Training LSTM for ARB/USD_1h_f1 on cuda — 8712 train samples
+2026-02-23 19:44:40.051 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.9373 | val_acc=0.3923
+2026-02-23 19:44:43.138 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:44:43.138 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.9373
+2026-02-23 19:44:49.226 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.870 CNN=0.030 LSTM=0.100 | acc=0.4189
+2026-02-23 19:44:54.797 | ERROR    | __main__:main:473 - Failed ARB/USD 1h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:44:54.808 | INFO     | __main__:main:407 - 
+============================================================
+Timeframe: 2 hours (2h)
+============================================================
+2026-02-23 19:44:54.831 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded INJ/USD 2h from cache (21896 rows)
+2026-02-23 19:44:54.860 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded LINK/USD 2h from cache (21896 rows)
+2026-02-23 19:44:54.890 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded DOGE/USD 2h from cache (21896 rows)
+2026-02-23 19:44:54.911 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded OP/USD 2h from cache (16358 rows)
+2026-02-23 19:44:54.929 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded ARB/USD 2h from cache (12815 rows)
+2026-02-23 19:44:54.930 | INFO     | __main__:main:423 - 
+Processing: INJ/USD [2h]
+2026-02-23 19:44:54.982 | INFO     | __main__:log_gpu_temp:123 - GPU: 63C | 37% util | 876/4096 MiB VRAM
+2026-02-23 19:44:54.987 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:44:54.992 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:44:54.993 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: INJ/USD_2h
+============================================================
+2026-02-23 19:44:54.993 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [2h]: train=4380 bars val=660 test=660 step=660
+2026-02-23 19:44:54.993 | INFO     | data.feature_engineer:build_features:283 - Building features for INJ/USD_2h (21896 rows)
+2026-02-23 19:44:55.126 | INFO     | data.feature_engineer:build_features:308 - Dropped 205 NaN/inf rows → 21691 usable rows
+2026-02-23 19:44:55.126 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=9755 NEUTRAL=2795 UP=9141
+2026-02-23 19:44:55.126 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=9396 trending_up=7567 trending_down=4728
+2026-02-23 19:44:55.126 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:44:55.148 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=4380 val=660 test=660
+2026-02-23 19:44:55.156 | INFO     | models.tft_model:train:211 - Training TFT for INJ/USD_2h_f1 on cuda — 4356 train samples
+2026-02-23 19:44:56.205 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.8513 | val_acc=0.4261
+2026-02-23 19:45:01.372 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.1913 | val_acc=0.3569
+2026-02-23 19:45:04.526 | INFO     | models.tft_model:train:251 - Early stopping at epoch 8
+2026-02-23 19:45:04.537 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.8513
+2026-02-23 19:45:04.537 | INFO     | models.cnn_model:train:116 - Training 1D CNN for INJ/USD_2h_f1 on cuda — 4356 train samples
+2026-02-23 19:45:04.935 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.8969 | val_acc=0.4560
+2026-02-23 19:45:07.408 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-23 19:45:07.408 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.8969
+2026-02-23 19:45:07.414 | INFO     | models.lstm_model:train:108 - Training LSTM for INJ/USD_2h_f1 on cuda — 4356 train samples
+2026-02-23 19:45:07.778 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.8805 | val_acc=0.3852
+2026-02-23 19:45:10.016 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:45:10.016 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.8805
+2026-02-23 19:45:12.861 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.050 CNN=0.900 LSTM=0.050 | acc=0.4455
+2026-02-23 19:45:15.719 | ERROR    | __main__:main:473 - Failed INJ/USD 2h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:45:15.721 | INFO     | __main__:main:423 - 
+Processing: LINK/USD [2h]
+2026-02-23 19:45:15.765 | INFO     | __main__:log_gpu_temp:123 - GPU: 58C | 37% util | 863/4096 MiB VRAM
+2026-02-23 19:45:15.771 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:45:15.776 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:45:15.777 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: LINK/USD_2h
+============================================================
+2026-02-23 19:45:15.777 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [2h]: train=4380 bars val=660 test=660 step=660
+2026-02-23 19:45:15.777 | INFO     | data.feature_engineer:build_features:283 - Building features for LINK/USD_2h (21896 rows)
+2026-02-23 19:45:15.895 | INFO     | data.feature_engineer:build_features:308 - Dropped 205 NaN/inf rows → 21691 usable rows
+2026-02-23 19:45:15.904 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=9093 NEUTRAL=3538 UP=9060
+2026-02-23 19:45:15.904 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=9194 trending_up=5413 trending_down=7084
+2026-02-23 19:45:15.908 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:45:15.922 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=4380 val=660 test=660
+2026-02-23 19:45:15.929 | INFO     | models.tft_model:train:211 - Training TFT for LINK/USD_2h_f1 on cuda — 4356 train samples
+2026-02-23 19:45:17.031 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.8810 | val_acc=0.4151
+2026-02-23 19:45:22.198 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.0367 | val_acc=0.4434
+2026-02-23 19:45:25.212 | INFO     | models.tft_model:train:251 - Early stopping at epoch 8
+2026-02-23 19:45:25.212 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.8810
+2026-02-23 19:45:25.225 | INFO     | models.cnn_model:train:116 - Training 1D CNN for LINK/USD_2h_f1 on cuda — 4356 train samples
+2026-02-23 19:45:25.560 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.9445 | val_acc=0.3758
+2026-02-23 19:45:27.981 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-23 19:45:27.981 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.9445
+2026-02-23 19:45:27.981 | INFO     | models.lstm_model:train:108 - Training LSTM for LINK/USD_2h_f1 on cuda — 4356 train samples
+2026-02-23 19:45:28.335 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.8900 | val_acc=0.3994
+2026-02-23 19:45:30.591 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:45:30.591 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.8900
+2026-02-23 19:45:33.304 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.250 CNN=0.100 LSTM=0.650 | acc=0.4561
+2026-02-23 19:45:36.005 | ERROR    | __main__:main:473 - Failed LINK/USD 2h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:45:36.005 | INFO     | __main__:main:423 - 
+Processing: DOGE/USD [2h]
+2026-02-23 19:45:36.058 | INFO     | __main__:log_gpu_temp:123 - GPU: 55C | 35% util | 863/4096 MiB VRAM
+2026-02-23 19:45:36.070 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:45:36.071 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:45:36.072 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: DOGE/USD_2h
+============================================================
+2026-02-23 19:45:36.072 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [2h]: train=4380 bars val=660 test=660 step=660
+2026-02-23 19:45:36.073 | INFO     | data.feature_engineer:build_features:283 - Building features for DOGE/USD_2h (21896 rows)
+2026-02-23 19:45:36.194 | INFO     | data.feature_engineer:build_features:308 - Dropped 205 NaN/inf rows → 21691 usable rows
+2026-02-23 19:45:36.194 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=9035 NEUTRAL=4028 UP=8628
+2026-02-23 19:45:36.194 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=8717 trending_up=5796 trending_down=7178
+2026-02-23 19:45:36.194 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:45:36.211 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=4380 val=660 test=660
+2026-02-23 19:45:36.223 | INFO     | models.tft_model:train:211 - Training TFT for DOGE/USD_2h_f1 on cuda — 4356 train samples
+2026-02-23 19:45:37.283 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.8469 | val_acc=0.4308
+2026-02-23 19:45:42.393 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=0.9937 | val_acc=0.4513
+2026-02-23 19:45:45.419 | INFO     | models.tft_model:train:251 - Early stopping at epoch 8
+2026-02-23 19:45:45.421 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.8469
+2026-02-23 19:45:45.424 | INFO     | models.cnn_model:train:116 - Training 1D CNN for DOGE/USD_2h_f1 on cuda — 4356 train samples
+2026-02-23 19:45:45.787 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.9279 | val_acc=0.4371
+2026-02-23 19:45:48.568 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 8
+2026-02-23 19:45:48.568 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.9139
+2026-02-23 19:45:48.573 | INFO     | models.lstm_model:train:108 - Training LSTM for DOGE/USD_2h_f1 on cuda — 4356 train samples
+2026-02-23 19:45:48.912 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.9133 | val_acc=0.4355
+2026-02-23 19:45:51.158 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:45:51.158 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.9133
+2026-02-23 19:45:53.957 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.020 CNN=0.370 LSTM=0.610 | acc=0.4379
+2026-02-23 19:45:57.041 | ERROR    | __main__:main:473 - Failed DOGE/USD 2h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:45:57.052 | INFO     | __main__:main:423 - 
+Processing: OP/USD [2h]
+2026-02-23 19:45:57.093 | INFO     | __main__:log_gpu_temp:123 - GPU: 54C | 18% util | 863/4096 MiB VRAM
+2026-02-23 19:45:57.103 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:45:57.107 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:45:57.109 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: OP/USD_2h
+============================================================
+2026-02-23 19:45:57.109 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [2h]: train=4380 bars val=660 test=660 step=660
+2026-02-23 19:45:57.109 | INFO     | data.feature_engineer:build_features:283 - Building features for OP/USD_2h (16358 rows)
+2026-02-23 19:45:57.213 | INFO     | data.feature_engineer:build_features:308 - Dropped 205 NaN/inf rows → 16153 usable rows
+2026-02-23 19:45:57.214 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=7119 NEUTRAL=2295 UP=6739
+2026-02-23 19:45:57.214 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=6752 trending_up=4216 trending_down=5185
+2026-02-23 19:45:57.216 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:45:57.230 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=4380 val=660 test=660
+2026-02-23 19:45:57.234 | INFO     | models.tft_model:train:211 - Training TFT for OP/USD_2h_f1 on cuda — 4356 train samples
+2026-02-23 19:45:58.272 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.8434 | val_acc=0.4324
+2026-02-23 19:46:03.383 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=0.9922 | val_acc=0.4308
+2026-02-23 19:46:06.506 | INFO     | models.tft_model:train:251 - Early stopping at epoch 8
+2026-02-23 19:46:06.506 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.8434
+2026-02-23 19:46:06.519 | INFO     | models.cnn_model:train:116 - Training 1D CNN for OP/USD_2h_f1 on cuda — 4356 train samples
+2026-02-23 19:46:06.873 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.9184 | val_acc=0.4371
+2026-02-23 19:46:10.350 | INFO     | models.cnn_model:train:145 -   Epoch  10 | val_loss=1.1900 | val_acc=0.4057
+2026-02-23 19:46:10.350 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 10
+2026-02-23 19:46:10.350 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.8832
+2026-02-23 19:46:10.350 | INFO     | models.lstm_model:train:108 - Training LSTM for OP/USD_2h_f1 on cuda — 4356 train samples
+2026-02-23 19:46:10.670 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.8445 | val_acc=0.4591
+2026-02-23 19:46:12.910 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:46:12.910 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.8445
+2026-02-23 19:46:15.681 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.200 CNN=0.800 LSTM=0.000 | acc=0.4848
+2026-02-23 19:46:18.482 | ERROR    | __main__:main:473 - Failed OP/USD 2h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:46:18.482 | INFO     | __main__:main:423 - 
+Processing: ARB/USD [2h]
+2026-02-23 19:46:18.532 | INFO     | __main__:log_gpu_temp:123 - GPU: 53C | 34% util | 863/4096 MiB VRAM
+2026-02-23 19:46:18.536 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:46:18.542 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:46:18.542 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: ARB/USD_2h
+============================================================
+2026-02-23 19:46:18.542 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [2h]: train=4380 bars val=660 test=660 step=660
+2026-02-23 19:46:18.543 | INFO     | data.feature_engineer:build_features:283 - Building features for ARB/USD_2h (12815 rows)
+2026-02-23 19:46:18.636 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 12615 usable rows
+2026-02-23 19:46:18.641 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=5468 NEUTRAL=2122 UP=5025
+2026-02-23 19:46:18.641 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=5471 trending_up=2824 trending_down=4320
+2026-02-23 19:46:18.643 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:46:18.654 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=4380 val=660 test=660
+2026-02-23 19:46:18.665 | INFO     | models.tft_model:train:211 - Training TFT for ARB/USD_2h_f1 on cuda — 4356 train samples
+2026-02-23 19:46:19.694 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.8775 | val_acc=0.4009
+2026-02-23 19:46:24.761 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.1080 | val_acc=0.4151
+2026-02-23 19:46:29.872 | INFO     | models.tft_model:train:242 -   Epoch  10 | val_loss=1.5475 | val_acc=0.4057
+2026-02-23 19:46:29.872 | INFO     | models.tft_model:train:251 - Early stopping at epoch 10
+2026-02-23 19:46:29.872 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.8516
+2026-02-23 19:46:29.882 | INFO     | models.cnn_model:train:116 - Training 1D CNN for ARB/USD_2h_f1 on cuda — 4356 train samples
+2026-02-23 19:46:30.240 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=1.0650 | val_acc=0.3522
+2026-02-23 19:46:32.995 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 8
+2026-02-23 19:46:32.995 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 1.0590
+2026-02-23 19:46:33.005 | INFO     | models.lstm_model:train:108 - Training LSTM for ARB/USD_2h_f1 on cuda — 4356 train samples
+2026-02-23 19:46:33.352 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.8973 | val_acc=0.4182
+2026-02-23 19:46:35.604 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:46:35.604 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.8973
+2026-02-23 19:46:38.444 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.970 CNN=0.000 LSTM=0.030 | acc=0.4727
+2026-02-23 19:46:41.114 | ERROR    | __main__:main:473 - Failed ARB/USD 2h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:46:41.114 | INFO     | __main__:main:407 - 
+============================================================
+Timeframe: 4 hours (4h)
+============================================================
+2026-02-23 19:46:41.130 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded INJ/USD 4h from cache (10950 rows)
+2026-02-23 19:46:41.147 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded LINK/USD 4h from cache (10950 rows)
+2026-02-23 19:46:41.161 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded DOGE/USD 4h from cache (10950 rows)
+2026-02-23 19:46:41.175 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded OP/USD 4h from cache (8179 rows)
+2026-02-23 19:46:41.186 | INFO     | __main__:fetch_ohlcv_timeframe:211 - Loaded ARB/USD 4h from cache (6408 rows)
+2026-02-23 19:46:41.186 | INFO     | __main__:main:423 - 
+Processing: INJ/USD [4h]
+2026-02-23 19:46:41.225 | INFO     | __main__:log_gpu_temp:123 - GPU: 52C | 30% util | 861/4096 MiB VRAM
+2026-02-23 19:46:41.226 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:46:41.233 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:46:41.234 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: INJ/USD_4h
+============================================================
+2026-02-23 19:46:41.234 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [4h]: train=2190 bars val=330 test=330 step=330
+2026-02-23 19:46:41.234 | INFO     | data.feature_engineer:build_features:283 - Building features for INJ/USD_4h (10950 rows)
+2026-02-23 19:46:41.325 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-02-23 19:46:41.326 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=5051 NEUTRAL=1040 UP=4659
+2026-02-23 19:46:41.327 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=4901 trending_up=3648 trending_down=2201
+2026-02-23 19:46:41.328 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:46:41.331 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=2190 val=330 test=330
+2026-02-23 19:46:41.344 | INFO     | models.tft_model:train:211 - Training TFT for INJ/USD_4h_f1 on cuda — 2174 train samples
+2026-02-23 19:46:41.876 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.8784 | val_acc=0.2898
+2026-02-23 19:46:44.379 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=0.8675 | val_acc=0.5828
+2026-02-23 19:46:46.907 | INFO     | models.tft_model:train:242 -   Epoch  10 | val_loss=1.1288 | val_acc=0.4968
+2026-02-23 19:46:47.886 | INFO     | models.tft_model:train:251 - Early stopping at epoch 12
+2026-02-23 19:46:47.886 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.8088
+2026-02-23 19:46:47.886 | INFO     | models.cnn_model:train:116 - Training 1D CNN for INJ/USD_4h_f1 on cuda — 2174 train samples
+2026-02-23 19:46:48.079 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.8625 | val_acc=0.4618
+2026-02-23 19:46:49.236 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-23 19:46:49.236 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.8625
+2026-02-23 19:46:49.246 | INFO     | models.lstm_model:train:108 - Training LSTM for INJ/USD_4h_f1 on cuda — 2174 train samples
+2026-02-23 19:46:49.401 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.9120 | val_acc=0.3535
+2026-02-23 19:46:50.627 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 8
+2026-02-23 19:46:50.627 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.9100
+2026-02-23 19:46:52.537 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.670 CNN=0.040 LSTM=0.290 | acc=0.5879
+2026-02-23 19:46:53.984 | ERROR    | __main__:main:473 - Failed INJ/USD 4h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:46:53.994 | INFO     | __main__:main:423 - 
+Processing: LINK/USD [4h]
+2026-02-23 19:46:54.044 | INFO     | __main__:log_gpu_temp:123 - GPU: 52C | 19% util | 861/4096 MiB VRAM
+2026-02-23 19:46:54.052 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:46:54.053 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:46:54.054 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: LINK/USD_4h
+============================================================
+2026-02-23 19:46:54.054 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [4h]: train=2190 bars val=330 test=330 step=330
+2026-02-23 19:46:54.054 | INFO     | data.feature_engineer:build_features:283 - Building features for LINK/USD_4h (10950 rows)
+2026-02-23 19:46:54.143 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-02-23 19:46:54.143 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=4839 NEUTRAL=1179 UP=4732
+2026-02-23 19:46:54.147 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=4243 trending_up=2858 trending_down=3649
+2026-02-23 19:46:54.149 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:46:54.157 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=2190 val=330 test=330
+2026-02-23 19:46:54.164 | INFO     | models.tft_model:train:211 - Training TFT for LINK/USD_4h_f1 on cuda — 2174 train samples
+2026-02-23 19:46:54.679 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.8640 | val_acc=0.3057
+2026-02-23 19:46:57.257 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.3410 | val_acc=0.4299
+2026-02-23 19:46:58.760 | INFO     | models.tft_model:train:251 - Early stopping at epoch 8
+2026-02-23 19:46:58.769 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.8640
+2026-02-23 19:46:58.770 | INFO     | models.cnn_model:train:116 - Training 1D CNN for LINK/USD_4h_f1 on cuda — 2174 train samples
+2026-02-23 19:46:58.955 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=1.0444 | val_acc=0.3057
+2026-02-23 19:47:00.289 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 8
+2026-02-23 19:47:00.289 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.9727
+2026-02-23 19:47:00.289 | INFO     | models.lstm_model:train:108 - Training LSTM for LINK/USD_4h_f1 on cuda — 2174 train samples
+2026-02-23 19:47:00.472 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.9631 | val_acc=0.3153
+2026-02-23 19:47:01.574 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:47:01.574 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.9631
+2026-02-23 19:47:03.083 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.000 CNN=1.000 LSTM=0.000 | acc=0.4697
+2026-02-23 19:47:04.315 | ERROR    | __main__:main:473 - Failed LINK/USD 4h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:47:04.325 | INFO     | __main__:main:423 - 
+Processing: DOGE/USD [4h]
+2026-02-23 19:47:04.376 | INFO     | __main__:log_gpu_temp:123 - GPU: 52C | 34% util | 861/4096 MiB VRAM
+2026-02-23 19:47:04.384 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:47:04.385 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:47:04.386 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: DOGE/USD_4h
+============================================================
+2026-02-23 19:47:04.386 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [4h]: train=2190 bars val=330 test=330 step=330
+2026-02-23 19:47:04.386 | INFO     | data.feature_engineer:build_features:283 - Building features for DOGE/USD_4h (10950 rows)
+2026-02-23 19:47:04.477 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-02-23 19:47:04.478 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=4889 NEUTRAL=1416 UP=4445
+2026-02-23 19:47:04.479 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=4035 trending_up=3012 trending_down=3703
+2026-02-23 19:47:04.481 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:47:04.488 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=2190 val=330 test=330
+2026-02-23 19:47:04.499 | INFO     | models.tft_model:train:211 - Training TFT for DOGE/USD_4h_f1 on cuda — 2174 train samples
+2026-02-23 19:47:05.018 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.8019 | val_acc=0.3439
+2026-02-23 19:47:07.531 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=0.7800 | val_acc=0.5669
+2026-02-23 19:47:10.044 | INFO     | models.tft_model:train:242 -   Epoch  10 | val_loss=1.0767 | val_acc=0.5510
+2026-02-23 19:47:10.046 | INFO     | models.tft_model:train:251 - Early stopping at epoch 10
+2026-02-23 19:47:10.049 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.7222
+2026-02-23 19:47:10.053 | INFO     | models.cnn_model:train:116 - Training 1D CNN for DOGE/USD_4h_f1 on cuda — 2174 train samples
+2026-02-23 19:47:10.239 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.8049 | val_acc=0.5064
+2026-02-23 19:47:11.404 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-23 19:47:11.404 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.8049
+2026-02-23 19:47:11.404 | INFO     | models.lstm_model:train:108 - Training LSTM for DOGE/USD_4h_f1 on cuda — 2174 train samples
+2026-02-23 19:47:11.568 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.8024 | val_acc=0.4618
+2026-02-23 19:47:12.646 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:47:12.646 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.8024
+2026-02-23 19:47:14.277 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.950 CNN=0.000 LSTM=0.050 | acc=0.5939
+2026-02-23 19:47:15.544 | ERROR    | __main__:main:473 - Failed DOGE/USD 4h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:47:15.553 | INFO     | __main__:main:423 - 
+Processing: OP/USD [4h]
+2026-02-23 19:47:15.593 | INFO     | __main__:log_gpu_temp:123 - GPU: 52C | 35% util | 861/4096 MiB VRAM
+2026-02-23 19:47:15.605 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:47:15.607 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:47:15.607 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: OP/USD_4h
+============================================================
+2026-02-23 19:47:15.608 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [4h]: train=2190 bars val=330 test=330 step=330
+2026-02-23 19:47:15.608 | INFO     | data.feature_engineer:build_features:283 - Building features for OP/USD_4h (8179 rows)
+2026-02-23 19:47:15.688 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 7979 usable rows
+2026-02-23 19:47:15.689 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=3744 NEUTRAL=858 UP=3377
+2026-02-23 19:47:15.689 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=3074 trending_up=2207 trending_down=2698
+2026-02-23 19:47:15.691 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:47:15.696 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=2190 val=330 test=330
+2026-02-23 19:47:15.706 | INFO     | models.tft_model:train:211 - Training TFT for OP/USD_4h_f1 on cuda — 2174 train samples
+2026-02-23 19:47:16.208 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.8210 | val_acc=0.3949
+2026-02-23 19:47:18.707 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.1202 | val_acc=0.3662
+2026-02-23 19:47:20.200 | INFO     | models.tft_model:train:251 - Early stopping at epoch 8
+2026-02-23 19:47:20.210 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.8210
+2026-02-23 19:47:20.216 | INFO     | models.cnn_model:train:116 - Training 1D CNN for OP/USD_4h_f1 on cuda — 2174 train samples
+2026-02-23 19:47:20.377 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.8172 | val_acc=0.4427
+2026-02-23 19:47:21.548 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-23 19:47:21.548 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.8172
+2026-02-23 19:47:21.554 | INFO     | models.lstm_model:train:108 - Training LSTM for OP/USD_4h_f1 on cuda — 2174 train samples
+2026-02-23 19:47:21.729 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.8791 | val_acc=0.3981
+2026-02-23 19:47:22.831 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:47:22.831 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.8791
+2026-02-23 19:47:24.169 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.710 CNN=0.290 LSTM=0.000 | acc=0.4515
+2026-02-23 19:47:25.491 | ERROR    | __main__:main:473 - Failed OP/USD 4h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:47:25.491 | INFO     | __main__:main:423 - 
+Processing: ARB/USD [4h]
+2026-02-23 19:47:25.543 | INFO     | __main__:log_gpu_temp:123 - GPU: 51C | 32% util | 861/4096 MiB VRAM
+2026-02-23 19:47:25.555 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:47:25.557 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:47:25.558 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: ARB/USD_4h
+============================================================
+2026-02-23 19:47:25.558 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [4h]: train=2190 bars val=330 test=330 step=330
+2026-02-23 19:47:25.558 | INFO     | data.feature_engineer:build_features:283 - Building features for ARB/USD_4h (6408 rows)
+2026-02-23 19:47:25.632 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 6208 usable rows
+2026-02-23 19:47:25.633 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=2910 NEUTRAL=742 UP=2556
+2026-02-23 19:47:25.633 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=2366 trending_up=1509 trending_down=2333
+2026-02-23 19:47:25.635 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:47:25.642 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=2190 val=330 test=330
+2026-02-23 19:47:25.645 | INFO     | models.tft_model:train:211 - Training TFT for ARB/USD_4h_f1 on cuda — 2174 train samples
+2026-02-23 19:47:26.154 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.8000 | val_acc=0.5510
+2026-02-23 19:47:28.685 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=0.8999 | val_acc=0.4268
+2026-02-23 19:47:30.209 | INFO     | models.tft_model:train:251 - Early stopping at epoch 8
+2026-02-23 19:47:30.209 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.8000
+2026-02-23 19:47:30.209 | INFO     | models.cnn_model:train:116 - Training 1D CNN for ARB/USD_4h_f1 on cuda — 2174 train samples
+2026-02-23 19:47:30.399 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.9306 | val_acc=0.3662
+2026-02-23 19:47:31.606 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-23 19:47:31.606 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.9306
+2026-02-23 19:47:31.616 | INFO     | models.lstm_model:train:108 - Training LSTM for ARB/USD_4h_f1 on cuda — 2174 train samples
+2026-02-23 19:47:31.785 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.8483 | val_acc=0.4745
+2026-02-23 19:47:33.017 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 8
+2026-02-23 19:47:33.017 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.8355
+2026-02-23 19:47:34.348 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.550 CNN=0.260 LSTM=0.190 | acc=0.5455
+2026-02-23 19:47:35.713 | ERROR    | __main__:main:473 - Failed ARB/USD 4h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:47:35.720 | INFO     | __main__:main:407 - 
+============================================================
+Timeframe: 8 hours (8h)
+============================================================
+2026-02-23 19:47:35.729 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching INJ/USD [8h] — 1825 days...
+2026-02-23 19:47:41.135 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - INJ/USD 8h: 5475 candles (2021-02-25 -> 2026-02-23)
+2026-02-23 19:47:41.191 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching LINK/USD [8h] — 1825 days...
+2026-02-23 19:47:46.644 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - LINK/USD 8h: 5475 candles (2021-02-25 -> 2026-02-23)
+2026-02-23 19:47:46.707 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching DOGE/USD [8h] — 1825 days...
+2026-02-23 19:47:51.975 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - DOGE/USD 8h: 5475 candles (2021-02-25 -> 2026-02-23)
+2026-02-23 19:47:52.025 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching OP/USD [8h] — 1825 days...
+2026-02-23 19:47:56.802 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - OP/USD 8h: 4091 candles (2022-06-01 -> 2026-02-23)
+2026-02-23 19:47:56.849 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching ARB/USD [8h] — 1825 days...
+2026-02-23 19:48:01.542 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - ARB/USD 8h: 3206 candles (2023-03-23 -> 2026-02-23)
+2026-02-23 19:48:01.575 | INFO     | __main__:main:423 - 
+Processing: INJ/USD [8h]
+2026-02-23 19:48:01.628 | INFO     | __main__:log_gpu_temp:123 - GPU: 45C | 0% util | 880/4096 MiB VRAM
+2026-02-23 19:48:01.628 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:48:01.640 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:48:01.640 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: INJ/USD_8h
+============================================================
+2026-02-23 19:48:01.640 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [8h]: train=1095 bars val=165 test=165 step=165
+2026-02-23 19:48:01.642 | INFO     | data.feature_engineer:build_features:283 - Building features for INJ/USD_8h (5475 rows)
+2026-02-23 19:48:01.713 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 5275 usable rows
+2026-02-23 19:48:01.713 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=2558 NEUTRAL=309 UP=2408
+2026-02-23 19:48:01.715 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=2511 trending_up=1772 trending_down=992
+2026-02-23 19:48:01.718 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:48:01.721 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=1095 val=165 test=165
+2026-02-23 19:48:01.729 | INFO     | models.tft_model:train:211 - Training TFT for INJ/USD_8h_f1 on cuda — 1085 train samples
+2026-02-23 19:48:02.268 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.8498 | val_acc=0.3548
+2026-02-23 19:48:04.708 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.8065 | val_acc=0.3548
+2026-02-23 19:48:06.156 | INFO     | models.tft_model:train:251 - Early stopping at epoch 8
+2026-02-23 19:48:06.156 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.8498
+2026-02-23 19:48:06.167 | INFO     | models.cnn_model:train:116 - Training 1D CNN for INJ/USD_8h_f1 on cuda — 1085 train samples
+2026-02-23 19:48:06.341 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.9851 | val_acc=0.4323
+2026-02-23 19:48:07.902 | INFO     | models.cnn_model:train:145 -   Epoch  10 | val_loss=0.9464 | val_acc=0.5613
+2026-02-23 19:48:08.056 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 11
+2026-02-23 19:48:08.056 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.7406
+2026-02-23 19:48:08.066 | INFO     | models.lstm_model:train:108 - Training LSTM for INJ/USD_8h_f1 on cuda — 1085 train samples
+2026-02-23 19:48:08.225 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.7768 | val_acc=0.5032
+2026-02-23 19:48:09.247 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:48:09.247 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.7768
+2026-02-23 19:48:10.021 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.200 CNN=0.650 LSTM=0.150 | acc=0.5758
+2026-02-23 19:48:10.794 | ERROR    | __main__:main:473 - Failed INJ/USD 8h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:48:10.795 | INFO     | __main__:main:423 - 
+Processing: LINK/USD [8h]
+2026-02-23 19:48:10.847 | INFO     | __main__:log_gpu_temp:123 - GPU: 47C | 31% util | 866/4096 MiB VRAM
+2026-02-23 19:48:10.857 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:48:10.858 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:48:10.858 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: LINK/USD_8h
+============================================================
+2026-02-23 19:48:10.859 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [8h]: train=1095 bars val=165 test=165 step=165
+2026-02-23 19:48:10.859 | INFO     | data.feature_engineer:build_features:283 - Building features for LINK/USD_8h (5475 rows)
+2026-02-23 19:48:10.925 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 5275 usable rows
+2026-02-23 19:48:10.925 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=2470 NEUTRAL=455 UP=2350
+2026-02-23 19:48:10.932 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=2372 trending_up=1167 trending_down=1736
+2026-02-23 19:48:10.933 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:48:10.938 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=1095 val=165 test=165
+2026-02-23 19:48:10.947 | INFO     | models.tft_model:train:211 - Training TFT for LINK/USD_8h_f1 on cuda — 1085 train samples
+2026-02-23 19:48:11.457 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.7786 | val_acc=0.4258
+2026-02-23 19:48:13.884 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.7316 | val_acc=0.4323
+2026-02-23 19:48:15.311 | INFO     | models.tft_model:train:251 - Early stopping at epoch 8
+2026-02-23 19:48:15.311 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.7786
+2026-02-23 19:48:15.320 | INFO     | models.cnn_model:train:116 - Training 1D CNN for LINK/USD_8h_f1 on cuda — 1085 train samples
+2026-02-23 19:48:15.477 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=2.0279 | val_acc=0.4258
+2026-02-23 19:48:16.735 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 8
+2026-02-23 19:48:16.735 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 1.8618
+2026-02-23 19:48:16.735 | INFO     | models.lstm_model:train:108 - Training LSTM for LINK/USD_8h_f1 on cuda — 1085 train samples
+2026-02-23 19:48:16.888 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.9759 | val_acc=0.4258
+2026-02-23 19:48:17.874 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-02-23 19:48:17.874 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.9759
+2026-02-23 19:48:18.862 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.050 CNN=0.250 LSTM=0.700 | acc=0.4485
+2026-02-23 19:48:19.619 | ERROR    | __main__:main:473 - Failed LINK/USD 8h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:48:19.619 | INFO     | __main__:main:423 - 
+Processing: DOGE/USD [8h]
+2026-02-23 19:48:19.663 | INFO     | __main__:log_gpu_temp:123 - GPU: 48C | 25% util | 861/4096 MiB VRAM
+2026-02-23 19:48:19.669 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:48:19.672 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:48:19.672 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: DOGE/USD_8h
+============================================================
+2026-02-23 19:48:19.673 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [8h]: train=1095 bars val=165 test=165 step=165
+2026-02-23 19:48:19.673 | INFO     | data.feature_engineer:build_features:283 - Building features for DOGE/USD_8h (5475 rows)
+2026-02-23 19:48:19.742 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 5275 usable rows
+2026-02-23 19:48:19.742 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=2567 NEUTRAL=466 UP=2242
+2026-02-23 19:48:19.748 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=1760 trending_up=1574 trending_down=1941
+2026-02-23 19:48:19.750 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:48:19.753 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=1095 val=165 test=165
+2026-02-23 19:48:19.763 | INFO     | models.tft_model:train:211 - Training TFT for DOGE/USD_8h_f1 on cuda — 1085 train samples
+2026-02-23 19:48:20.244 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.7528 | val_acc=0.5742
+2026-02-23 19:48:22.666 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.0226 | val_acc=0.5484
+2026-02-23 19:48:25.036 | INFO     | models.tft_model:train:242 -   Epoch  10 | val_loss=1.7993 | val_acc=0.4645
+2026-02-23 19:48:25.036 | INFO     | models.tft_model:train:251 - Early stopping at epoch 10
+2026-02-23 19:48:25.038 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.7491
+2026-02-23 19:48:25.038 | INFO     | models.cnn_model:train:116 - Training 1D CNN for DOGE/USD_8h_f1 on cuda — 1085 train samples
+2026-02-23 19:48:25.206 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.9517 | val_acc=0.4710
+2026-02-23 19:48:26.315 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-23 19:48:26.324 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.9517
+2026-02-23 19:48:26.324 | INFO     | models.lstm_model:train:108 - Training LSTM for DOGE/USD_8h_f1 on cuda — 1085 train samples
+2026-02-23 19:48:26.480 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.8181 | val_acc=0.4258
+2026-02-23 19:48:27.641 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 8
+2026-02-23 19:48:27.643 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.7576
+2026-02-23 19:48:28.236 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.330 CNN=0.020 LSTM=0.650 | acc=0.5636
+2026-02-23 19:48:28.877 | ERROR    | __main__:main:473 - Failed DOGE/USD 8h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:48:28.879 | INFO     | __main__:main:423 - 
+Processing: OP/USD [8h]
+2026-02-23 19:48:28.928 | INFO     | __main__:log_gpu_temp:123 - GPU: 48C | 33% util | 861/4096 MiB VRAM
+2026-02-23 19:48:28.933 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:48:28.937 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:48:28.937 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: OP/USD_8h
+============================================================
+2026-02-23 19:48:28.938 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [8h]: train=1095 bars val=165 test=165 step=165
+2026-02-23 19:48:28.938 | INFO     | data.feature_engineer:build_features:283 - Building features for OP/USD_8h (4091 rows)
+2026-02-23 19:48:29.006 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 3891 usable rows
+2026-02-23 19:48:29.006 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=1966 NEUTRAL=278 UP=1647
+2026-02-23 19:48:29.006 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=1679 trending_up=939 trending_down=1273
+2026-02-23 19:48:29.009 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:48:29.013 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=1095 val=165 test=165
+2026-02-23 19:48:29.021 | INFO     | models.tft_model:train:211 - Training TFT for OP/USD_8h_f1 on cuda — 1085 train samples
+2026-02-23 19:48:29.504 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.8253 | val_acc=0.4774
+2026-02-23 19:48:31.937 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.0516 | val_acc=0.3032
+2026-02-23 19:48:33.370 | INFO     | models.tft_model:train:251 - Early stopping at epoch 8
+2026-02-23 19:48:33.370 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.8253
+2026-02-23 19:48:33.382 | INFO     | models.cnn_model:train:116 - Training 1D CNN for OP/USD_8h_f1 on cuda — 1085 train samples
+2026-02-23 19:48:33.541 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=0.9335 | val_acc=0.4129
+2026-02-23 19:48:34.651 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-23 19:48:34.651 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 0.9335
+2026-02-23 19:48:34.651 | INFO     | models.lstm_model:train:108 - Training LSTM for OP/USD_8h_f1 on cuda — 1085 train samples
+2026-02-23 19:48:34.787 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.9482 | val_acc=0.3742
+2026-02-23 19:48:35.990 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 8
+2026-02-23 19:48:35.990 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.9442
+2026-02-23 19:48:36.838 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.760 CNN=0.000 LSTM=0.240 | acc=0.5091
+2026-02-23 19:48:37.513 | ERROR    | __main__:main:473 - Failed OP/USD 8h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:48:37.523 | INFO     | __main__:main:423 - 
+Processing: ARB/USD [8h]
+2026-02-23 19:48:37.569 | INFO     | __main__:log_gpu_temp:123 - GPU: 49C | 33% util | 861/4096 MiB VRAM
+2026-02-23 19:48:37.574 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:48:37.576 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:48:37.576 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: ARB/USD_8h
+============================================================
+2026-02-23 19:48:37.577 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [8h]: train=1095 bars val=165 test=165 step=165
+2026-02-23 19:48:37.577 | INFO     | data.feature_engineer:build_features:283 - Building features for ARB/USD_8h (3206 rows)
+2026-02-23 19:48:37.643 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 3006 usable rows
+2026-02-23 19:48:37.644 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=1503 NEUTRAL=246 UP=1257
+2026-02-23 19:48:37.644 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=1024 trending_up=747 trending_down=1235
+2026-02-23 19:48:37.647 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:48:37.649 | INFO     | utils.walk_forward:run_fold:164 - Fold 1: train=1095 val=165 test=165
+2026-02-23 19:48:37.656 | INFO     | models.tft_model:train:211 - Training TFT for ARB/USD_8h_f1 on cuda — 1085 train samples
+2026-02-23 19:48:38.158 | INFO     | models.tft_model:train:242 -   Epoch   0 | val_loss=0.7674 | val_acc=0.5871
+2026-02-23 19:48:40.585 | INFO     | models.tft_model:train:242 -   Epoch   5 | val_loss=1.2735 | val_acc=0.3613
+2026-02-23 19:48:42.077 | INFO     | models.tft_model:train:251 - Early stopping at epoch 8
+2026-02-23 19:48:42.087 | SUCCESS  | models.tft_model:train:255 - TFT best val_loss: 0.7674
+2026-02-23 19:48:42.091 | INFO     | models.cnn_model:train:116 - Training 1D CNN for ARB/USD_8h_f1 on cuda — 1085 train samples
+2026-02-23 19:48:42.232 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=1.0784 | val_acc=0.3355
+2026-02-23 19:48:43.327 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-02-23 19:48:43.327 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 1.0784
+2026-02-23 19:48:43.335 | INFO     | models.lstm_model:train:108 - Training LSTM for ARB/USD_8h_f1 on cuda — 1085 train samples
+2026-02-23 19:48:43.467 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=0.9241 | val_acc=0.3484
+2026-02-23 19:48:44.627 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 8
+2026-02-23 19:48:44.627 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 0.9091
+2026-02-23 19:48:45.230 | SUCCESS  | models.ensemble:optimise_weights:88 - Optimised weights: TFT=0.860 CNN=0.000 LSTM=0.140 | acc=0.5758
+2026-02-23 19:48:46.026 | ERROR    | __main__:main:473 - Failed ARB/USD 8h: '>=' not supported between instances of 'float' and 'NoneType'
+2026-02-23 19:48:46.026 | INFO     | __main__:main:407 - 
+============================================================
+Timeframe: 1 day (1d)
+============================================================
+2026-02-23 19:48:46.032 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching INJ/USD [1d] — 1825 days...
+2026-02-23 19:48:49.580 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - INJ/USD 1d: 1825 candles (2021-02-25 -> 2026-02-23)
+2026-02-23 19:48:49.625 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching LINK/USD [1d] — 1825 days...
+2026-02-23 19:48:53.569 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - LINK/USD 1d: 1825 candles (2021-02-25 -> 2026-02-23)
+2026-02-23 19:48:53.609 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching DOGE/USD [1d] — 1825 days...
+2026-02-23 19:48:57.204 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - DOGE/USD 1d: 1825 candles (2021-02-25 -> 2026-02-23)
+2026-02-23 19:48:57.245 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching OP/USD [1d] — 1825 days...
+2026-02-23 19:49:01.247 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - OP/USD 1d: 1364 candles (2022-06-01 -> 2026-02-23)
+2026-02-23 19:49:01.293 | INFO     | __main__:fetch_ohlcv_timeframe:214 - Fetching ARB/USD [1d] — 1825 days...
+2026-02-23 19:49:05.550 | SUCCESS  | __main__:fetch_ohlcv_timeframe:247 - ARB/USD 1d: 1069 candles (2023-03-23 -> 2026-02-23)
+2026-02-23 19:49:05.590 | INFO     | __main__:main:423 - 
+Processing: INJ/USD [1d]
+2026-02-23 19:49:05.629 | INFO     | __main__:log_gpu_temp:123 - GPU: 44C | 0% util | 880/4096 MiB VRAM
+2026-02-23 19:49:05.635 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:49:05.637 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:49:05.638 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: INJ/USD_1d
+============================================================
+2026-02-23 19:49:05.638 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [1d]: train=365 bars val=55 test=55 step=55
+2026-02-23 19:49:05.639 | INFO     | data.feature_engineer:build_features:283 - Building features for INJ/USD_1d (1825 rows)
+2026-02-23 19:49:05.690 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 1625 usable rows
+2026-02-23 19:49:05.690 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=815 NEUTRAL=57 UP=753
+2026-02-23 19:49:05.703 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=659 trending_up=625 trending_down=341
+2026-02-23 19:49:05.705 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:49:05.706 | WARNING  | utils.walk_forward:run_fold:152 - Fold 1: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.708 | WARNING  | utils.walk_forward:run_fold:152 - Fold 2: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.710 | WARNING  | utils.walk_forward:run_fold:152 - Fold 3: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.711 | WARNING  | utils.walk_forward:run_fold:152 - Fold 4: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.713 | WARNING  | utils.walk_forward:run_fold:152 - Fold 5: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.713 | WARNING  | utils.walk_forward:run_fold:152 - Fold 6: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.715 | WARNING  | utils.walk_forward:run_fold:152 - Fold 7: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.716 | WARNING  | utils.walk_forward:run_fold:152 - Fold 8: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.717 | WARNING  | utils.walk_forward:run_fold:152 - Fold 9: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.718 | WARNING  | utils.walk_forward:run_fold:152 - Fold 10: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.719 | WARNING  | utils.walk_forward:run_fold:152 - Fold 11: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.721 | WARNING  | utils.walk_forward:run_fold:152 - Fold 12: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.722 | WARNING  | utils.walk_forward:run_fold:152 - Fold 13: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.723 | WARNING  | utils.walk_forward:run_fold:152 - Fold 14: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.724 | WARNING  | utils.walk_forward:run_fold:152 - Fold 15: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.726 | WARNING  | utils.walk_forward:run_fold:152 - Fold 16: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.728 | WARNING  | utils.walk_forward:run_fold:152 - Fold 17: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.729 | WARNING  | utils.walk_forward:run_fold:152 - Fold 18: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.730 | WARNING  | utils.walk_forward:run_fold:152 - Fold 19: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.731 | WARNING  | utils.walk_forward:run_fold:152 - Fold 20: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.732 | WARNING  | utils.walk_forward:run_fold:152 - Fold 21: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.732 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 19:49:05.734 | INFO     | __main__:main:423 - 
+Processing: LINK/USD [1d]
+2026-02-23 19:49:05.778 | INFO     | __main__:log_gpu_temp:123 - GPU: 44C | 69% util | 867/4096 MiB VRAM
+2026-02-23 19:49:05.789 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:49:05.791 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:49:05.791 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: LINK/USD_1d
+============================================================
+2026-02-23 19:49:05.792 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [1d]: train=365 bars val=55 test=55 step=55
+2026-02-23 19:49:05.792 | INFO     | data.feature_engineer:build_features:283 - Building features for LINK/USD_1d (1825 rows)
+2026-02-23 19:49:05.843 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 1625 usable rows
+2026-02-23 19:49:05.843 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=813 NEUTRAL=72 UP=740
+2026-02-23 19:49:05.854 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=818 trending_up=338 trending_down=469
+2026-02-23 19:49:05.855 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:49:05.858 | WARNING  | utils.walk_forward:run_fold:152 - Fold 1: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.859 | WARNING  | utils.walk_forward:run_fold:152 - Fold 2: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.861 | WARNING  | utils.walk_forward:run_fold:152 - Fold 3: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.861 | WARNING  | utils.walk_forward:run_fold:152 - Fold 4: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.861 | WARNING  | utils.walk_forward:run_fold:152 - Fold 5: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.861 | WARNING  | utils.walk_forward:run_fold:152 - Fold 6: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.866 | WARNING  | utils.walk_forward:run_fold:152 - Fold 7: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.867 | WARNING  | utils.walk_forward:run_fold:152 - Fold 8: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.868 | WARNING  | utils.walk_forward:run_fold:152 - Fold 9: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.870 | WARNING  | utils.walk_forward:run_fold:152 - Fold 10: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.871 | WARNING  | utils.walk_forward:run_fold:152 - Fold 11: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.872 | WARNING  | utils.walk_forward:run_fold:152 - Fold 12: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.873 | WARNING  | utils.walk_forward:run_fold:152 - Fold 13: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.875 | WARNING  | utils.walk_forward:run_fold:152 - Fold 14: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.876 | WARNING  | utils.walk_forward:run_fold:152 - Fold 15: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.877 | WARNING  | utils.walk_forward:run_fold:152 - Fold 16: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.879 | WARNING  | utils.walk_forward:run_fold:152 - Fold 17: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.881 | WARNING  | utils.walk_forward:run_fold:152 - Fold 18: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.882 | WARNING  | utils.walk_forward:run_fold:152 - Fold 19: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.883 | WARNING  | utils.walk_forward:run_fold:152 - Fold 20: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.884 | WARNING  | utils.walk_forward:run_fold:152 - Fold 21: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:05.884 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 19:49:05.885 | INFO     | __main__:main:423 - 
+Processing: DOGE/USD [1d]
+2026-02-23 19:49:05.925 | INFO     | __main__:log_gpu_temp:123 - GPU: 44C | 69% util | 867/4096 MiB VRAM
+2026-02-23 19:49:05.925 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:49:05.939 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:49:05.940 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: DOGE/USD_1d
+============================================================
+2026-02-23 19:49:05.940 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [1d]: train=365 bars val=55 test=55 step=55
+2026-02-23 19:49:05.940 | INFO     | data.feature_engineer:build_features:283 - Building features for DOGE/USD_1d (1825 rows)
+2026-02-23 19:49:05.996 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 1625 usable rows
+2026-02-23 19:49:05.996 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=837 NEUTRAL=96 UP=692
+2026-02-23 19:49:05.996 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=608 trending_up=426 trending_down=591
+2026-02-23 19:49:05.996 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:49:05.996 | WARNING  | utils.walk_forward:run_fold:152 - Fold 1: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.005 | WARNING  | utils.walk_forward:run_fold:152 - Fold 2: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.006 | WARNING  | utils.walk_forward:run_fold:152 - Fold 3: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.008 | WARNING  | utils.walk_forward:run_fold:152 - Fold 4: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.010 | WARNING  | utils.walk_forward:run_fold:152 - Fold 5: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.011 | WARNING  | utils.walk_forward:run_fold:152 - Fold 6: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.013 | WARNING  | utils.walk_forward:run_fold:152 - Fold 7: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.014 | WARNING  | utils.walk_forward:run_fold:152 - Fold 8: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.016 | WARNING  | utils.walk_forward:run_fold:152 - Fold 9: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.017 | WARNING  | utils.walk_forward:run_fold:152 - Fold 10: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.017 | WARNING  | utils.walk_forward:run_fold:152 - Fold 11: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.018 | WARNING  | utils.walk_forward:run_fold:152 - Fold 12: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.020 | WARNING  | utils.walk_forward:run_fold:152 - Fold 13: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.021 | WARNING  | utils.walk_forward:run_fold:152 - Fold 14: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.022 | WARNING  | utils.walk_forward:run_fold:152 - Fold 15: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.024 | WARNING  | utils.walk_forward:run_fold:152 - Fold 16: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.025 | WARNING  | utils.walk_forward:run_fold:152 - Fold 17: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.028 | WARNING  | utils.walk_forward:run_fold:152 - Fold 18: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.029 | WARNING  | utils.walk_forward:run_fold:152 - Fold 19: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.031 | WARNING  | utils.walk_forward:run_fold:152 - Fold 20: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.032 | WARNING  | utils.walk_forward:run_fold:152 - Fold 21: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.032 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 19:49:06.033 | INFO     | __main__:main:423 - 
+Processing: OP/USD [1d]
+2026-02-23 19:49:06.075 | INFO     | __main__:log_gpu_temp:123 - GPU: 44C | 69% util | 867/4096 MiB VRAM
+2026-02-23 19:49:06.075 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:49:06.089 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:49:06.090 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: OP/USD_1d
+============================================================
+2026-02-23 19:49:06.090 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [1d]: train=365 bars val=55 test=55 step=55
+2026-02-23 19:49:06.090 | INFO     | data.feature_engineer:build_features:283 - Building features for OP/USD_1d (1364 rows)
+2026-02-23 19:49:06.146 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 1164 usable rows
+2026-02-23 19:49:06.146 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=605 NEUTRAL=48 UP=511
+2026-02-23 19:49:06.146 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=467 trending_up=233 trending_down=464
+2026-02-23 19:49:06.146 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:49:06.146 | WARNING  | utils.walk_forward:run_fold:152 - Fold 1: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.146 | WARNING  | utils.walk_forward:run_fold:152 - Fold 2: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.156 | WARNING  | utils.walk_forward:run_fold:152 - Fold 3: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.157 | WARNING  | utils.walk_forward:run_fold:152 - Fold 4: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.158 | WARNING  | utils.walk_forward:run_fold:152 - Fold 5: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.159 | WARNING  | utils.walk_forward:run_fold:152 - Fold 6: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.159 | WARNING  | utils.walk_forward:run_fold:152 - Fold 7: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.160 | WARNING  | utils.walk_forward:run_fold:152 - Fold 8: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.161 | WARNING  | utils.walk_forward:run_fold:152 - Fold 9: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.162 | WARNING  | utils.walk_forward:run_fold:152 - Fold 10: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.163 | WARNING  | utils.walk_forward:run_fold:152 - Fold 11: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.164 | WARNING  | utils.walk_forward:run_fold:152 - Fold 12: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.165 | WARNING  | utils.walk_forward:run_fold:152 - Fold 13: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.165 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed
+2026-02-23 19:49:06.166 | INFO     | __main__:main:423 - 
+Processing: ARB/USD [1d]
+2026-02-23 19:49:06.214 | INFO     | __main__:log_gpu_temp:123 - GPU: 44C | 69% util | 867/4096 MiB VRAM
+2026-02-23 19:49:06.214 | WARNING  | data.alt_data:merge_alt_data:299 - btc_dominance is constant (API fallback) — dropping feature to avoid feeding noise to the model. Will use BTC proxy instead.
+2026-02-23 19:49:06.222 | INFO     | data.alt_data:merge_alt_data:312 - Alt data merged: added 7 new columns
+2026-02-23 19:49:06.222 | INFO     | utils.walk_forward:walk_forward_validate:299 - 
+============================================================
+Walk-Forward Validation: ARB/USD_1d
+============================================================
+2026-02-23 19:49:06.224 | INFO     | utils.walk_forward:walk_forward_validate:300 - Config [1d]: train=365 bars val=55 test=55 step=55
+2026-02-23 19:49:06.224 | INFO     | data.feature_engineer:build_features:283 - Building features for ARB/USD_1d (1069 rows)
+2026-02-23 19:49:06.280 | INFO     | data.feature_engineer:build_features:308 - Dropped 200 NaN/inf rows → 869 usable rows
+2026-02-23 19:49:06.280 | INFO     | data.feature_engineer:build_features:311 - Label distribution: DOWN=473 NEUTRAL=38 UP=358
+2026-02-23 19:49:06.280 | INFO     | data.feature_engineer:build_features:318 - Regime: ranging=167 trending_up=250 trending_down=452
+2026-02-23 19:49:06.280 | WARNING  | utils.walk_forward:walk_forward_validate:384 - Optuna search failed (No module named 'optuna') — using default params
+2026-02-23 19:49:06.280 | WARNING  | utils.walk_forward:run_fold:152 - Fold 1: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.280 | WARNING  | utils.walk_forward:run_fold:152 - Fold 2: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.280 | WARNING  | utils.walk_forward:run_fold:152 - Fold 3: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.289 | WARNING  | utils.walk_forward:run_fold:152 - Fold 4: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.290 | WARNING  | utils.walk_forward:run_fold:152 - Fold 5: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.291 | WARNING  | utils.walk_forward:run_fold:152 - Fold 6: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.292 | WARNING  | utils.walk_forward:run_fold:152 - Fold 7: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.293 | WARNING  | utils.walk_forward:run_fold:152 - Fold 8: skipping — train=365 (need 500), test=55
+2026-02-23 19:49:06.293 | ERROR    | utils.walk_forward:walk_forward_validate:410 - No valid folds completed

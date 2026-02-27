@@ -1,0 +1,139 @@
+2026-02-27 16:00:05.588 | INFO     | __main__:main:391 - Loaded 19 edge configs from backtest/results/best_edges.json: OP/USD_2h, DOGE/USD_8h, LINK/USD_8h, OP/USD_1h, DOGE/USD_4h, INJ/USD_1h, LINK/USD_2h, DOGE/USD_1d, ARB/USD_8h, ARB/USD_1h, OP/USD_8h, INJ/USD_2h, LINK/USD_4h, DOGE/USD_2h, ARB/USD_1d, ARB/USD_2h, ARB/USD_4h, LINK/USD_1h, INJ/USD_4h
+2026-02-27 16:00:05.588 | INFO     | __main__:main:402 - Testing 5 symbols x 5 timeframes = 25 combinations
+2026-02-27 16:00:05.603 | INFO     | data.alt_data:fetch_all_alt_data:168 - Loaded cached alt data (1825 rows)
+2026-02-27 16:00:05.603 | INFO     | __main__:main:412 - 
+============================================================
+Timeframe: 1 hour (1h)
+============================================================
+2026-02-27 16:00:06.025 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching INJ/USD [1h] — 1825 days...
+2026-02-27 16:00:24.855 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - INJ/USD 1h: 43787 candles (2021-02-28 -> 2026-02-27)
+2026-02-27 16:00:24.928 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching LINK/USD [1h] — 1825 days...
+2026-02-27 16:00:42.921 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - LINK/USD 1h: 43787 candles (2021-02-28 -> 2026-02-27)
+2026-02-27 16:00:42.996 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching DOGE/USD [1h] — 1825 days...
+2026-02-27 16:01:04.441 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - DOGE/USD 1h: 43787 candles (2021-02-28 -> 2026-02-27)
+2026-02-27 16:01:04.507 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching OP/USD [1h] — 1825 days...
+2026-02-27 16:01:20.275 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - OP/USD 1h: 32816 candles (2022-06-01 -> 2026-02-27)
+2026-02-27 16:01:20.333 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching ARB/USD [1h] — 1825 days...
+2026-02-27 16:01:32.423 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - ARB/USD 1h: 25729 candles (2023-03-23 -> 2026-02-27)
+2026-02-27 16:01:32.456 | INFO     | __main__:main:428 - 
+Processing: INJ/USD [1h]
+2026-02-27 16:01:32.468 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping INJ/USD 1h -- already done (25 folds, acc=40.5%, ret=0.00%)
+2026-02-27 16:01:32.468 | INFO     | __main__:main:428 - 
+Processing: LINK/USD [1h]
+2026-02-27 16:01:32.478 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping LINK/USD 1h -- already done (25 folds, acc=37.6%, ret=-1.26%)
+2026-02-27 16:01:32.479 | INFO     | __main__:main:428 - 
+Processing: DOGE/USD [1h]
+2026-02-27 16:01:32.490 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping DOGE/USD 1h -- already done (25 folds, acc=36.8%, ret=-0.89%)
+2026-02-27 16:01:32.490 | INFO     | __main__:main:428 - 
+Processing: OP/USD [1h]
+2026-02-27 16:01:32.501 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping OP/USD 1h -- already done (17 folds, acc=40.5%, ret=-1.38%)
+2026-02-27 16:01:32.501 | INFO     | __main__:main:428 - 
+Processing: ARB/USD [1h]
+2026-02-27 16:01:32.510 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping ARB/USD 1h -- already done (11 folds, acc=40.2%, ret=0.00%)
+2026-02-27 16:01:32.511 | INFO     | __main__:main:412 - 
+============================================================
+Timeframe: 2 hours (2h)
+============================================================
+2026-02-27 16:01:32.533 | INFO     | __main__:fetch_ohlcv_timeframe:201 - Loaded INJ/USD 2h from cache (21896 rows)
+2026-02-27 16:01:32.555 | INFO     | __main__:fetch_ohlcv_timeframe:201 - Loaded LINK/USD 2h from cache (21896 rows)
+2026-02-27 16:01:32.578 | INFO     | __main__:fetch_ohlcv_timeframe:201 - Loaded DOGE/USD 2h from cache (21896 rows)
+2026-02-27 16:01:32.594 | INFO     | __main__:fetch_ohlcv_timeframe:201 - Loaded OP/USD 2h from cache (16401 rows)
+2026-02-27 16:01:32.608 | INFO     | __main__:fetch_ohlcv_timeframe:201 - Loaded ARB/USD 2h from cache (12858 rows)
+2026-02-27 16:01:32.609 | INFO     | __main__:main:428 - 
+Processing: INJ/USD [2h]
+2026-02-27 16:01:32.619 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping INJ/USD 2h -- already done (25 folds, acc=43.0%, ret=0.00%)
+2026-02-27 16:01:32.619 | INFO     | __main__:main:428 - 
+Processing: LINK/USD [2h]
+2026-02-27 16:01:32.630 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping LINK/USD 2h -- already done (25 folds, acc=40.9%, ret=-0.78%)
+2026-02-27 16:01:32.630 | INFO     | __main__:main:428 - 
+Processing: DOGE/USD [2h]
+2026-02-27 16:01:32.640 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping DOGE/USD 2h -- already done (25 folds, acc=42.0%, ret=0.00%)
+2026-02-27 16:01:32.641 | INFO     | __main__:main:428 - 
+Processing: OP/USD [2h]
+2026-02-27 16:01:32.651 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping OP/USD 2h -- already done (16 folds, acc=42.0%, ret=-1.78%)
+2026-02-27 16:01:32.651 | INFO     | __main__:main:428 - 
+Processing: ARB/USD [2h]
+2026-02-27 16:01:32.661 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping ARB/USD 2h -- already done (11 folds, acc=41.7%, ret=0.00%)
+2026-02-27 16:01:32.661 | INFO     | __main__:main:412 - 
+============================================================
+Timeframe: 4 hours (4h)
+============================================================
+2026-02-27 16:01:32.674 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching INJ/USD [4h] — 1825 days...
+2026-02-27 16:01:38.794 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - INJ/USD 4h: 10950 candles (2021-02-28 -> 2026-02-27)
+2026-02-27 16:01:38.838 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching LINK/USD [4h] — 1825 days...
+2026-02-27 16:01:44.608 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - LINK/USD 4h: 10950 candles (2021-02-28 -> 2026-02-27)
+2026-02-27 16:01:44.654 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching DOGE/USD [4h] — 1825 days...
+2026-02-27 16:01:50.736 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - DOGE/USD 4h: 10950 candles (2021-02-28 -> 2026-02-27)
+2026-02-27 16:01:50.779 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching OP/USD [4h] — 1825 days...
+2026-02-27 16:01:56.099 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - OP/USD 4h: 8205 candles (2022-06-01 -> 2026-02-27)
+2026-02-27 16:01:56.140 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching ARB/USD [4h] — 1825 days...
+2026-02-27 16:02:02.678 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - ARB/USD 4h: 6434 candles (2023-03-23 -> 2026-02-27)
+2026-02-27 16:02:02.712 | INFO     | __main__:main:428 - 
+Processing: INJ/USD [4h]
+2026-02-27 16:02:02.724 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping INJ/USD 4h -- already done (24 folds, acc=42.1%, ret=0.00%)
+2026-02-27 16:02:02.724 | INFO     | __main__:main:428 - 
+Processing: LINK/USD [4h]
+2026-02-27 16:02:02.735 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping LINK/USD 4h -- already done (24 folds, acc=43.2%, ret=-0.56%)
+2026-02-27 16:02:02.735 | INFO     | __main__:main:428 - 
+Processing: DOGE/USD [4h]
+2026-02-27 16:02:02.746 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping DOGE/USD 4h -- already done (24 folds, acc=44.5%, ret=-0.95%)
+2026-02-27 16:02:02.746 | INFO     | __main__:main:428 - 
+Processing: OP/USD [4h]
+2026-02-27 16:02:02.757 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping OP/USD 4h -- already done (16 folds, acc=40.2%, ret=-2.44%)
+2026-02-27 16:02:02.757 | INFO     | __main__:main:428 - 
+Processing: ARB/USD [4h]
+2026-02-27 16:02:02.767 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping ARB/USD 4h -- already done (11 folds, acc=44.8%, ret=-1.77%)
+2026-02-27 16:02:02.768 | INFO     | __main__:main:412 - 
+============================================================
+Timeframe: 8 hours (8h)
+============================================================
+2026-02-27 16:02:02.776 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching INJ/USD [8h] — 1825 days...
+2026-02-27 16:02:08.361 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - INJ/USD 8h: 5475 candles (2021-03-01 -> 2026-02-27)
+2026-02-27 16:02:08.402 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching LINK/USD [8h] — 1825 days...
+2026-02-27 16:02:13.971 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - LINK/USD 8h: 5475 candles (2021-03-01 -> 2026-02-27)
+2026-02-27 16:02:14.013 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching DOGE/USD [8h] — 1825 days...
+2026-02-27 16:02:18.605 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - DOGE/USD 8h: 5475 candles (2021-03-01 -> 2026-02-27)
+2026-02-27 16:02:18.645 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching OP/USD [8h] — 1825 days...
+2026-02-27 16:02:22.895 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - OP/USD 8h: 4103 candles (2022-06-01 -> 2026-02-27)
+2026-02-27 16:02:22.934 | INFO     | __main__:fetch_ohlcv_timeframe:204 - Fetching ARB/USD [8h] — 1825 days...
+2026-02-27 16:02:26.383 | SUCCESS  | __main__:fetch_ohlcv_timeframe:237 - ARB/USD 8h: 3218 candles (2023-03-23 -> 2026-02-27)
+2026-02-27 16:02:26.417 | INFO     | __main__:main:428 - 
+Processing: INJ/USD [8h]
+2026-02-27 16:02:26.429 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping INJ/USD 8h -- already done (24 folds, acc=40.6%, ret=-3.46%)
+2026-02-27 16:02:26.430 | INFO     | __main__:main:428 - 
+Processing: LINK/USD [8h]
+2026-02-27 16:02:26.440 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping LINK/USD 8h -- already done (24 folds, acc=45.5%, ret=0.00%)
+2026-02-27 16:02:26.441 | INFO     | __main__:main:428 - 
+Processing: DOGE/USD [8h]
+2026-02-27 16:02:26.451 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping DOGE/USD 8h -- already done (24 folds, acc=43.3%, ret=-0.77%)
+2026-02-27 16:02:26.451 | INFO     | __main__:main:428 - 
+Processing: OP/USD [8h]
+2026-02-27 16:02:26.461 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping OP/USD 8h -- already done (16 folds, acc=41.5%, ret=-2.94%)
+2026-02-27 16:02:26.462 | INFO     | __main__:main:428 - 
+Processing: ARB/USD [8h]
+2026-02-27 16:02:26.473 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping ARB/USD 8h -- already done (10 folds, acc=40.0%, ret=0.00%)
+2026-02-27 16:02:26.473 | INFO     | __main__:main:412 - 
+============================================================
+Timeframe: 1 day (1d)
+============================================================
+2026-02-27 16:02:26.477 | INFO     | __main__:fetch_ohlcv_timeframe:201 - Loaded INJ/USD 1d from cache (1825 rows)
+2026-02-27 16:02:26.480 | INFO     | __main__:fetch_ohlcv_timeframe:201 - Loaded LINK/USD 1d from cache (1825 rows)
+2026-02-27 16:02:26.484 | INFO     | __main__:fetch_ohlcv_timeframe:201 - Loaded DOGE/USD 1d from cache (1825 rows)
+2026-02-27 16:02:26.487 | INFO     | __main__:fetch_ohlcv_timeframe:201 - Loaded OP/USD 1d from cache (1368 rows)
+2026-02-27 16:02:26.490 | INFO     | __main__:fetch_ohlcv_timeframe:201 - Loaded ARB/USD 1d from cache (1073 rows)
+2026-02-27 16:02:26.490 | INFO     | __main__:main:428 - 
+Processing: INJ/USD [1d]
+2026-02-27 16:02:26.500 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping INJ/USD 1d -- already done (21 folds, acc=38.2%, ret=0.00%)
+2026-02-27 16:02:26.500 | INFO     | __main__:main:428 - 
+Processing: LINK/USD [1d]
+2026-02-27 16:02:26.511 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping LINK/USD 1d -- already done (21 folds, acc=38.2%, ret=0.00%)
+2026-02-27 16:02:26.511 | INFO     | __main__:main:428 - 
+Processing: DOGE/USD [1d]
+2026-02-27 16:02:26.522 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping DOGE/USD 1d -- already done (21 folds, acc=38.2%, ret=0.00%)
+2026-02-27 16:02:26.522 | INFO     | __main__:main:428 - 
+Processing: OP/USD [1d]
+2026-02-27 16:02:26.532 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping OP/USD 1d -- already done (13 folds, acc=41.8%, ret=0.63%)
+2026-02-27 16:02:26.532 | INFO     | __main__:main:428 - 
+Processing: ARB/USD [1d]
+2026-02-27 16:02:26.543 | INFO     | __main__:load_checkpoint:79 - [CHECKPOINT] Skipping ARB/USD 1d -- already done (8 folds, acc=42.7%, ret=-0.42%)
+2026-02-27 16:02:26.551 | INFO     | __main__:print_comparison:361 - Comparison saved -> backtest\results\timeframe_comparison.csv
