@@ -22,10 +22,10 @@ TRADING_PAIRS = [
     "ATOM/USD", "NEAR/USD",
     # L2
     "MATIC/USD",
-    #Other
+    # Extended scan
     "ALGO/USD", "FTM/USD", "VET/USD", "XLM/USD", "TRX/USD", "FIL/USD", "XTZ/USD",
-     "GRT/USD", "CRV/USD", "SNX/USD", "COMP/USD", "MKR/USD", "ZRX/USD",
-     "1INCH/USD", "KNC/USD", "BAL/USD", "LRC/USD", "RUNE/USD", "CELO/USD",
+    "GRT/USD", "CRV/USD", "SNX/USD", "COMP/USD", "MKR/USD", "ZRX/USD",
+    "1INCH/USD", "KNC/USD", "BAL/USD", "LRC/USD", "RUNE/USD", "CELO/USD",
     "DASH/USD", "ZEC/USD", "BTG/USD", "ETC/USD", "DCR/USD", "BCH/USD",
 ]
 TIMEFRAME = "1h"
@@ -119,7 +119,7 @@ USE_TREND_FILTER      = False   # SMA alignment — disabled: hurts at longer TF
 USE_VOLATILITY_FILTER = True    # Skip very low ATR bars
 USE_VOLUME_FILTER     = True    # Require minimum volume
 USE_FUNDING_FILTER    = False   # Funding rate extremes (Binance perp only)
-USE_REGIME_FILTER     = True    # ADX regime detection
+USE_REGIME_FILTER     = False   # ADX regime detection — disabled: edge scanner validated signals without it
 
 # Volatility filter: skip bars in bottom X% of ATR distribution
 # Was 0.20 (bottom 20%) — lowered to bottom 10%
