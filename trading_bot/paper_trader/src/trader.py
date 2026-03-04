@@ -1,19 +1,11 @@
 """
 src/trader.py
 ─────────────
-Core paper trading logic.
-
-Each run (every 4h):
-  1. Fetch latest DOGE/USD 4h candles from Kraken
-  2. Engineer features (same pipeline as training)
-  3. Load frozen LSTM, run inference
-  4. Check if signal fires on the latest bar
-  5. If open position, check if it should be closed
-  6. Log everything to trades.csv
+Paper trading logic for multiple symbols.
+Each 4h cycle runs independently for each symbol.
 """
 
-import os
-import csv
+import os, csv, json
 import numpy as np
 import pandas as pd
 import torch
@@ -21,37 +13,40 @@ import torch.nn as nn
 import ccxt
 import joblib
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from loguru import logger
 
-from src.features import build_features, get_feature_columns, fit_scaler, apply_scaler
+from src.feature_engineer import build_features, get_feature_columns
+from sklearn.preprocessing import StandardScaler
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
-SYMBOL        = "DOGE/USD"
+SYMBOLS       = ["DOGE/USD", "LINK/USD"]
 TIMEFRAME     = "4h"
-HISTORY_DAYS  = 60          # enough for feature engineering (200 bars needed)
+HISTORY_DAYS  = 60
 SEQ_LEN       = 24
 TOP_PCT       = 0.15
-STOP_LOSS     = 0.05        # 5% stop loss on paper positions
-TAKE_PROFIT   = 0.10        # 10% take profit
-FEE_RATE      = 0.001       # 0.1% per side (Kraken taker)
-INITIAL_CAPITAL = 1000.0    # paper money starting balance
+STOP_LOSS     = 0.05
+TAKE_PROFIT   = 0.10
+FEE_RATE      = 0.001
+INITIAL_CAPITAL = 1000.0
 
-DATA_DIR      = Path("data")
-MODEL_DIR     = Path("models")
-TRADES_CSV    = DATA_DIR / "trades.csv"
-STATE_FILE    = DATA_DIR / "state.json"
+DATA_DIR  = Path("data")
+MODEL_DIR = Path("models")
 
 TRADES_HEADER = [
-    "timestamp", "action", "price", "signal", "confidence",
+    "timestamp", "symbol", "action", "price", "signal", "confidence",
     "up_prob", "down_prob", "position_pnl_pct", "portfolio_value",
     "hold_bars", "reason"
 ]
 
-# ── LSTM Model Definition ─────────────────────────────────────────────────────
-# Must match the architecture used during training exactly
+
+def safe_name(symbol: str) -> str:
+    return symbol.replace("/", "_").lower()
+
+
+# ── LSTM Architecture ─────────────────────────────────────────────────────────
 
 class MIOpenSafeLayerNorm(nn.Module):
     def __init__(self, normalized_shape, eps=1e-5):
@@ -63,8 +58,7 @@ class MIOpenSafeLayerNorm(nn.Module):
     def forward(self, x):
         mean  = x.mean(dim=-1, keepdim=True)
         var   = x.var(dim=-1, keepdim=True, unbiased=False)
-        x_norm = (x - mean) / torch.sqrt(var + self.eps)
-        return self.weight * x_norm + self.bias
+        return self.weight * (x - mean) / torch.sqrt(var + self.eps) + self.bias
 
 
 class LSTMClassifier(nn.Module):
@@ -78,51 +72,41 @@ class LSTMClassifier(nn.Module):
 
     def forward(self, x):
         out, _ = self.lstm(x)
-        out    = self.norm(out[:, -1, :])
-        out    = self.dropout(out)
-        return self.fc(out)
+        return self.fc(self.dropout(self.norm(out[:, -1, :])))
 
 
-# ── Data Fetching ─────────────────────────────────────────────────────────────
+# ── Data ──────────────────────────────────────────────────────────────────────
 
-def fetch_candles() -> pd.DataFrame:
-    """Fetch recent DOGE/USD 4h candles from Kraken."""
+def fetch_candles(symbol: str) -> pd.DataFrame:
     exchange = ccxt.kraken({"enableRateLimit": True})
-    from datetime import timedelta
     since_ms = int((datetime.utcnow() - timedelta(days=HISTORY_DAYS)).timestamp() * 1000)
-
     all_candles = []
     while True:
-        candles = exchange.fetch_ohlcv(SYMBOL, TIMEFRAME, since=since_ms, limit=720)
+        candles = exchange.fetch_ohlcv(symbol, TIMEFRAME, since=since_ms, limit=720)
         if not candles:
             break
         all_candles.extend(candles)
-        last_ts = candles[-1][0]
-        # Stop when we reach near-current time
-        if last_ts >= int((datetime.utcnow() - timedelta(hours=5)).timestamp() * 1000):
+        if candles[-1][0] >= int((datetime.utcnow() - timedelta(hours=5)).timestamp() * 1000):
             break
-        since_ms = last_ts + 1
+        since_ms = candles[-1][0] + 1
 
     if not all_candles:
-        raise RuntimeError(f"No candles returned for {SYMBOL}")
+        raise RuntimeError(f"No candles returned for {symbol}")
 
-    df = pd.DataFrame(all_candles,
-                      columns=["timestamp", "open", "high", "low", "close", "volume"])
+    df = pd.DataFrame(all_candles, columns=["timestamp","open","high","low","close","volume"])
     df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True)
     df = df.drop_duplicates("timestamp").sort_values("timestamp").reset_index(drop=True)
-    logger.info(f"Fetched {len(df)} candles "
-                f"({df['timestamp'].iloc[0].date()} → {df['timestamp'].iloc[-1].date()})")
+    logger.info(f"{symbol}: {len(df)} candles fetched")
     return df
 
 
-# ── Model Loading ─────────────────────────────────────────────────────────────
+# ── Model ─────────────────────────────────────────────────────────────────────
 
-def load_model() -> tuple:
-    """Load frozen LSTM + scaler + feature info."""
-    device = torch.device("cpu")  # Cloud inference on CPU
-
-    info   = joblib.load(MODEL_DIR / "lstm_info.pkl")
-    scaler = joblib.load(MODEL_DIR / "scaler.pkl")
+def load_model(symbol: str):
+    name   = safe_name(symbol)
+    device = torch.device("cpu")
+    info   = joblib.load(MODEL_DIR / f"lstm_{name}_info.pkl")
+    scaler = joblib.load(MODEL_DIR / f"scaler_{name}.pkl")
 
     model = LSTMClassifier(
         input_size  = info["input_size"],
@@ -131,249 +115,169 @@ def load_model() -> tuple:
         num_classes = 3,
         dropout     = info["dropout"],
     ).to(device)
-
-    model.load_state_dict(
-        torch.load(MODEL_DIR / "lstm_doge.pt", map_location=device)
-    )
+    model.load_state_dict(torch.load(MODEL_DIR / f"lstm_{name}.pt", map_location=device))
     model.eval()
-    logger.info(f"Loaded LSTM: input={info['input_size']} hidden={info['hidden_size']}")
     return model, scaler, device
 
 
-# ── Inference ─────────────────────────────────────────────────────────────────
-
-def get_latest_signal(model, scaler, device, df: pd.DataFrame) -> dict:
-    """
-    Run inference on the latest bar only.
-    Returns dict with signal, confidence, up_prob, down_prob.
-    """
+def get_signal(model, scaler, device, df: pd.DataFrame) -> dict:
     feat_df   = build_features(df, timeframe=TIMEFRAME)
     feat_cols = get_feature_columns(feat_df)
-    X = feat_df[feat_cols].values.astype(np.float32)
-    X = apply_scaler(scaler, X)
+    X = scaler.transform(feat_df[feat_cols].values.astype(np.float32))
 
     if len(X) < SEQ_LEN:
         return {"signal": "HOLD", "confidence": 0.0, "up_prob": 0.0, "down_prob": 0.0}
 
-    # Only run inference on last bar — no need to score entire history
-    seq = torch.FloatTensor(X[-SEQ_LEN:]).unsqueeze(0).to(device)
-    with torch.no_grad():
-        logits = model(seq)
-        probs  = torch.softmax(logits, dim=1).cpu().numpy()[0]
-
-    down_p, neutral_p, up_p = float(probs[0]), float(probs[1]), float(probs[2])
-    best_p = max(up_p, down_p)
-
-    # Use same top-15% percentile logic as training, approximated for single bar:
-    # We need a reference distribution — score last 200 bars to find percentile threshold
-    all_probs = []
+    # Score recent bars to find percentile threshold
+    all_best = []
     n = min(len(X), 300)
     for i in range(SEQ_LEN, n + 1):
-        s = torch.FloatTensor(X[i-SEQ_LEN:i]).unsqueeze(0).to(device)
+        seq = torch.FloatTensor(X[i-SEQ_LEN:i]).unsqueeze(0).to(device)
         with torch.no_grad():
-            p = torch.softmax(model(s), dim=1).cpu().numpy()[0]
-        all_probs.append(max(p[0], p[2]))
+            p = torch.softmax(model(seq), dim=1).cpu().numpy()[0]
+        all_best.append(max(p[0], p[2]))
 
-    candidates = [p for p in all_probs if p > 0.34]
-    if len(candidates) >= 5:
-        threshold = max(float(np.percentile(candidates, (1 - TOP_PCT) * 100)), 0.34)
-    else:
-        threshold = 0.40
+    candidates = [p for p in all_best if p > 0.34]
+    threshold  = max(float(np.percentile(candidates, (1-TOP_PCT)*100)), 0.34) \
+                 if len(candidates) >= 5 else 0.40
 
-    if up_p >= threshold:
-        signal = "BUY"
-    elif down_p >= threshold:
-        signal = "SELL"
-    else:
-        signal = "HOLD"
+    # Latest bar signal
+    seq = torch.FloatTensor(X[-SEQ_LEN:]).unsqueeze(0).to(device)
+    with torch.no_grad():
+        probs = torch.softmax(model(seq), dim=1).cpu().numpy()[0]
 
-    latest_ts = feat_df.index[-1] if isinstance(feat_df.index, pd.DatetimeIndex) \
-                else feat_df["timestamp"].iloc[-1] if "timestamp" in feat_df.columns \
-                else "unknown"
+    down_p, up_p = float(probs[0]), float(probs[2])
 
-    logger.info(f"Signal: {signal} | up={up_p:.3f} down={down_p:.3f} "
-                f"neutral={neutral_p:.3f} | threshold={threshold:.3f} | bar={latest_ts}")
+    if up_p >= threshold:      signal = "BUY"
+    elif down_p >= threshold:  signal = "SELL"
+    else:                      signal = "HOLD"
 
-    return {
-        "signal":     signal,
-        "confidence": best_p,
-        "up_prob":    up_p,
-        "down_prob":  down_p,
-        "threshold":  threshold,
-    }
+    logger.info(f"Signal: {signal} | up={up_p:.3f} down={down_p:.3f} threshold={threshold:.3f}")
+    return {"signal": signal, "confidence": max(up_p, down_p),
+            "up_prob": up_p, "down_prob": down_p}
 
 
-# ── State Management ──────────────────────────────────────────────────────────
+# ── State & Logging ───────────────────────────────────────────────────────────
 
-def load_state() -> dict:
-    import json
-    if STATE_FILE.exists():
-        with open(STATE_FILE) as f:
+def load_state(symbol: str) -> dict:
+    path = DATA_DIR / f"state_{safe_name(symbol)}.json"
+    if path.exists():
+        with open(path) as f:
             return json.load(f)
-    return {
-        "position":        None,   # None | "LONG" | "SHORT"
-        "entry_price":     None,
-        "entry_time":      None,
-        "hold_bars":       0,
-        "portfolio_value": INITIAL_CAPITAL,
-        "total_trades":    0,
-        "winning_trades":  0,
-    }
+    return {"position": None, "entry_price": None, "entry_time": None,
+            "hold_bars": 0, "portfolio_value": INITIAL_CAPITAL,
+            "total_trades": 0, "winning_trades": 0}
 
 
-def save_state(state: dict):
-    import json
+def save_state(symbol: str, state: dict):
     DATA_DIR.mkdir(exist_ok=True)
-    with open(STATE_FILE, "w") as f:
+    with open(DATA_DIR / f"state_{safe_name(symbol)}.json", "w") as f:
         json.dump(state, f, indent=2, default=str)
 
 
-# ── Trade Logging ─────────────────────────────────────────────────────────────
-
 def log_trade(row: dict):
     DATA_DIR.mkdir(exist_ok=True)
-    write_header = not TRADES_CSV.exists()
-    with open(TRADES_CSV, "a", newline="", encoding="utf-8-sig") as f:
+    path = DATA_DIR / "trades.csv"
+    write_header = not path.exists()
+    with open(path, "a", newline="", encoding="utf-8-sig") as f:
         w = csv.DictWriter(f, fieldnames=TRADES_HEADER)
         if write_header:
             w.writeheader()
         w.writerow({k: row.get(k, "") for k in TRADES_HEADER})
 
 
-# ── Core Logic ────────────────────────────────────────────────────────────────
+# ── Core ──────────────────────────────────────────────────────────────────────
 
-def run_paper_trade() -> dict | None:
-    """
-    Main function called every 4h.
-    Returns a dict describing what happened (for Telegram notification),
-    or None if nothing notable occurred (HOLD with no open position).
-    """
-    DATA_DIR.mkdir(exist_ok=True)
+def run_symbol(symbol: str) -> dict | None:
+    df             = fetch_candles(symbol)
+    model, scaler, device = load_model(symbol)
+    sig            = get_signal(model, scaler, device, df)
+    state          = load_state(symbol)
+    current_price  = float(df["close"].iloc[-1])
+    now            = datetime.now(timezone.utc).isoformat()
+    signal         = sig["signal"]
+    event          = None
 
-    # 1. Fetch data + run model
-    df     = fetch_candles()
-    model, scaler, device = load_model()
-    sig    = get_latest_signal(model, scaler, device, df)
-    state  = load_state()
+    def _log(action, pnl="", reason=""):
+        log_trade({
+            "timestamp": now, "symbol": symbol, "action": action,
+            "price": current_price, "signal": signal,
+            "confidence": round(sig["confidence"], 4),
+            "up_prob": round(sig["up_prob"], 4),
+            "down_prob": round(sig["down_prob"], 4),
+            "position_pnl_pct": pnl,
+            "portfolio_value": round(state["portfolio_value"], 2),
+            "hold_bars": state.get("hold_bars", 0),
+            "reason": reason,
+        })
 
-    current_price = float(df["close"].iloc[-1])
-    now           = datetime.now(timezone.utc).isoformat()
-    signal        = sig["signal"]
-    event         = None   # Will be populated if something happens
-
-    # 2. Check existing position for exit conditions
-    if state["position"] is not None:
-        entry   = state["entry_price"]
-        pos     = state["position"]
-        bars    = state["hold_bars"] + 1
+    # Check open position for exit
+    if state["position"]:
+        pos   = state["position"]
+        entry = state["entry_price"]
+        bars  = state["hold_bars"] + 1
         state["hold_bars"] = bars
 
-        if pos == "LONG":
-            pnl_pct = (current_price - entry) / entry
-        else:  # SHORT
-            pnl_pct = (entry - current_price) / entry
+        pnl_pct = (current_price - entry) / entry if pos == "LONG" \
+                  else (entry - current_price) / entry
 
-        # Determine exit reason
         exit_reason = None
         if pnl_pct <= -STOP_LOSS:
             exit_reason = f"STOP_LOSS ({pnl_pct:+.1%})"
         elif pnl_pct >= TAKE_PROFIT:
             exit_reason = f"TAKE_PROFIT ({pnl_pct:+.1%})"
         elif pos == "LONG"  and signal == "SELL":
-            exit_reason = f"SIGNAL_REVERSAL → SELL ({pnl_pct:+.1%})"
+            exit_reason = f"SIGNAL_REVERSAL ({pnl_pct:+.1%})"
         elif pos == "SHORT" and signal == "BUY":
-            exit_reason = f"SIGNAL_REVERSAL → BUY ({pnl_pct:+.1%})"
+            exit_reason = f"SIGNAL_REVERSAL ({pnl_pct:+.1%})"
 
         if exit_reason:
-            # Close position — apply fees both ways
-            net_pnl   = pnl_pct - 2 * FEE_RATE
-            old_val   = state["portfolio_value"]
-            new_val   = old_val * (1 + net_pnl)
-            state["portfolio_value"] = new_val
-            state["total_trades"]   += 1
+            net_pnl = pnl_pct - 2 * FEE_RATE
+            state["portfolio_value"] *= (1 + net_pnl)
+            state["total_trades"]    += 1
             if net_pnl > 0:
                 state["winning_trades"] += 1
 
-            log_trade({
-                "timestamp":       now,
-                "action":          f"CLOSE_{pos}",
-                "price":           current_price,
-                "signal":          signal,
-                "confidence":      round(sig["confidence"], 4),
-                "up_prob":         round(sig["up_prob"], 4),
-                "down_prob":       round(sig["down_prob"], 4),
-                "position_pnl_pct":round(net_pnl * 100, 2),
-                "portfolio_value": round(new_val, 2),
-                "hold_bars":       bars,
-                "reason":          exit_reason,
-            })
+            _log(f"CLOSE_{pos}", round(net_pnl * 100, 2), exit_reason)
+            event = {"type": "CLOSE", "symbol": symbol, "position": pos,
+                     "entry": entry, "exit": current_price,
+                     "pnl_pct": net_pnl * 100,
+                     "portfolio": state["portfolio_value"],
+                     "reason": exit_reason,
+                     "total_trades": state["total_trades"],
+                     "win_rate": state["winning_trades"] / state["total_trades"] * 100}
 
-            wr = state["winning_trades"] / state["total_trades"] * 100
-            event = {
-                "type":       "CLOSE",
-                "position":   pos,
-                "entry":      entry,
-                "exit":       current_price,
-                "pnl_pct":    net_pnl * 100,
-                "portfolio":  new_val,
-                "reason":     exit_reason,
-                "total_trades": state["total_trades"],
-                "win_rate":   wr,
-            }
+            state.update({"position": None, "entry_price": None,
+                          "entry_time": None, "hold_bars": 0})
 
-            state["position"]    = None
-            state["entry_price"] = None
-            state["entry_time"]  = None
-            state["hold_bars"]   = 0
-
-    # 3. Open new position if signal fires and no existing position
+    # Open new position
     if state["position"] is None and signal in ("BUY", "SELL"):
         pos_type = "LONG" if signal == "BUY" else "SHORT"
-        state["position"]    = pos_type
-        state["entry_price"] = current_price
-        state["entry_time"]  = now
-        state["hold_bars"]   = 0
+        state.update({"position": pos_type, "entry_price": current_price,
+                      "entry_time": now, "hold_bars": 0})
+        _log(f"OPEN_{pos_type}", reason=f"{signal} conf={sig['confidence']:.3f}")
+        event = {"type": "OPEN", "symbol": symbol, "position": pos_type,
+                 "signal": signal, "price": current_price,
+                 "portfolio": state["portfolio_value"],
+                 "confidence": sig["confidence"],
+                 "up_prob": sig["up_prob"], "down_prob": sig["down_prob"]}
+    else:
+        _log("HOLD", reason="No signal")
 
-        log_trade({
-            "timestamp":       now,
-            "action":          f"OPEN_{pos_type}",
-            "price":           current_price,
-            "signal":          signal,
-            "confidence":      round(sig["confidence"], 4),
-            "up_prob":         round(sig["up_prob"], 4),
-            "down_prob":       round(sig["down_prob"], 4),
-            "position_pnl_pct": 0.0,
-            "portfolio_value": round(state["portfolio_value"], 2),
-            "hold_bars":       0,
-            "reason":          f"Signal {signal} conf={sig['confidence']:.3f}",
-        })
-
-        event = {
-            "type":      "OPEN",
-            "position":  pos_type,
-            "signal":    signal,
-            "price":     current_price,
-            "portfolio": state["portfolio_value"],
-            "confidence":sig["confidence"],
-            "up_prob":   sig["up_prob"],
-            "down_prob": sig["down_prob"],
-        }
-
-    # 4. Periodic status log even on HOLD (every 6 bars = 24h)
-    elif signal == "HOLD":
-        log_trade({
-            "timestamp":       now,
-            "action":          "HOLD",
-            "price":           current_price,
-            "signal":          "HOLD",
-            "confidence":      round(sig["confidence"], 4),
-            "up_prob":         round(sig["up_prob"], 4),
-            "down_prob":       round(sig["down_prob"], 4),
-            "position_pnl_pct":"",
-            "portfolio_value": round(state["portfolio_value"], 2),
-            "hold_bars":       state.get("hold_bars", 0),
-            "reason":          "No signal",
-        })
-
-    save_state(state)
+    save_state(symbol, state)
     return event
+
+
+def run_paper_trade() -> list:
+    """Run one cycle for all symbols. Returns list of events (may be empty)."""
+    DATA_DIR.mkdir(exist_ok=True)
+    events = []
+    for symbol in SYMBOLS:
+        try:
+            event = run_symbol(symbol)
+            if event:
+                events.append(event)
+        except Exception as e:
+            logger.error(f"{symbol} cycle failed: {e}")
+            events.append({"type": "ERROR", "symbol": symbol, "error": str(e)})
+    return events

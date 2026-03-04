@@ -1,15 +1,7 @@
-# Core
-torch==2.2.2+cpu --extra-index-url https://download.pytorch.org/whl/cpu
 numpy==1.26.4
 pandas==2.2.2
-scikit-learn==1.4.2
+scikit-learn==1.6.1
 joblib==1.4.2
-
-# Data
 ccxt==4.3.56
-
-# Notifications
 requests==2.31.0
-
-# Logging
 loguru==0.7.2
