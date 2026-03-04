@@ -1,0 +1,130 @@
+2026-03-04 10:17:07.655 | INFO     | __main__:main:283 - [1/6] DOGE/USD
+2026-03-04 10:17:08.050 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:232 - Loaded DOGE/USD 4h from cache (10950 rows)
+2026-03-04 10:17:08.050 | INFO     | data.feature_engineer:build_features:334 - Building features for unknown (10950 rows)
+2026-03-04 10:17:08.148 | INFO     | data.feature_engineer:build_features:359 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-03-04 10:17:08.149 | INFO     | data.feature_engineer:build_features:362 - Label distribution: DOWN=1423 NEUTRAL=7859 UP=1468
+2026-03-04 10:17:08.150 | INFO     | data.feature_engineer:build_features:369 - Regime: ranging=4061 trending_up=2982 trending_down=3707
+2026-03-04 10:17:09.355 | INFO     | models.lstm_model:train:118 - Training LSTM for DOGE/USD on cuda — 6426 train samples
+2026-03-04 10:17:09.926 | INFO     | models.lstm_model:train:148 -   Epoch   0 | val_loss=1.1328 | val_acc=0.4887 | lr=0.000976
+2026-03-04 10:17:10.185 | INFO     | models.lstm_model:train:148 -   Epoch   1 | val_loss=1.1356 | val_acc=0.5212 | lr=0.000905
+2026-03-04 10:17:10.456 | INFO     | models.lstm_model:train:148 -   Epoch   2 | val_loss=1.1956 | val_acc=0.4055 | lr=0.000794
+2026-03-04 10:17:10.714 | INFO     | models.lstm_model:train:148 -   Epoch   3 | val_loss=1.2029 | val_acc=0.4694 | lr=0.000655
+2026-03-04 10:17:10.964 | INFO     | models.lstm_model:train:148 -   Epoch   4 | val_loss=1.2843 | val_acc=0.4647 | lr=0.000501
+2026-03-04 10:17:11.225 | INFO     | models.lstm_model:train:148 -   Epoch   5 | val_loss=1.3202 | val_acc=0.4897 | lr=0.000346
+2026-03-04 10:17:11.495 | INFO     | models.lstm_model:train:148 -   Epoch   6 | val_loss=1.3474 | val_acc=0.4873 | lr=0.000207
+2026-03-04 10:17:11.753 | INFO     | models.lstm_model:train:148 -   Epoch   7 | val_loss=1.3445 | val_acc=0.5019 | lr=0.000096
+2026-03-04 10:17:11.753 | INFO     | models.lstm_model:train:157 - Early stopping at epoch 7
+2026-03-04 10:17:11.753 | SUCCESS  | models.lstm_model:train:161 - LSTM best val_loss: 1.1328
+2026-03-04 10:17:12.964 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.4927421882748604): BUY=16 (0.7%)  SELL=213 (9.9%)  HOLD=1921 (89.3%)
+2026-03-04 10:17:12.969 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 14/229 removed (94% survive) — trend=0 vol=12 volume=2 funding=0 regime=0
+2026-03-04 10:17:12.974 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=6.79% | Sharpe=0.63 | MaxDD=-9.67% | WinRate=43.33% | Trades=60 (L:4 S:56)
+2026-03-04 10:17:12.974 | ERROR    | __main__:run_symbol:188 - DOGE/USD failed: name 'gross' is not defined
+2026-03-04 10:17:12.976 | INFO     | __main__:main:283 - [2/6] BTC/USD
+2026-03-04 10:17:12.993 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:232 - Loaded BTC/USD 4h from cache (10950 rows)
+2026-03-04 10:17:12.993 | INFO     | data.feature_engineer:build_features:334 - Building features for unknown (10950 rows)
+2026-03-04 10:17:13.096 | INFO     | data.feature_engineer:build_features:359 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-03-04 10:17:13.096 | INFO     | data.feature_engineer:build_features:362 - Label distribution: DOWN=662 NEUTRAL=9326 UP=762
+2026-03-04 10:17:13.096 | INFO     | data.feature_engineer:build_features:369 - Regime: ranging=4760 trending_up=2769 trending_down=3221
+2026-03-04 10:17:13.125 | INFO     | models.lstm_model:train:118 - Training LSTM for BTC/USD on cuda — 6426 train samples
+2026-03-04 10:17:13.399 | INFO     | models.lstm_model:train:148 -   Epoch   0 | val_loss=0.9490 | val_acc=0.8457 | lr=0.000976
+2026-03-04 10:17:13.672 | INFO     | models.lstm_model:train:148 -   Epoch   1 | val_loss=1.0303 | val_acc=0.5908 | lr=0.000905
+2026-03-04 10:17:13.927 | INFO     | models.lstm_model:train:148 -   Epoch   2 | val_loss=1.0825 | val_acc=0.4619 | lr=0.000794
+2026-03-04 10:17:14.183 | INFO     | models.lstm_model:train:148 -   Epoch   3 | val_loss=0.9933 | val_acc=0.6397 | lr=0.000655
+2026-03-04 10:17:14.450 | INFO     | models.lstm_model:train:148 -   Epoch   4 | val_loss=1.0104 | val_acc=0.6345 | lr=0.000501
+2026-03-04 10:17:14.698 | INFO     | models.lstm_model:train:148 -   Epoch   5 | val_loss=1.0879 | val_acc=0.5419 | lr=0.000346
+2026-03-04 10:17:14.963 | INFO     | models.lstm_model:train:148 -   Epoch   6 | val_loss=1.1065 | val_acc=0.5024 | lr=0.000207
+2026-03-04 10:17:15.218 | INFO     | models.lstm_model:train:148 -   Epoch   7 | val_loss=1.1729 | val_acc=0.4341 | lr=0.000096
+2026-03-04 10:17:15.218 | INFO     | models.lstm_model:train:157 - Early stopping at epoch 7
+2026-03-04 10:17:15.218 | SUCCESS  | models.lstm_model:train:161 - LSTM best val_loss: 0.9490
+2026-03-04 10:17:16.420 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.3934976875782013): BUY=3 (0.1%)  SELL=47 (2.2%)  HOLD=2100 (97.7%)
+2026-03-04 10:17:16.423 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 1/50 removed (98% survive) — trend=0 vol=1 volume=0 funding=0 regime=0
+2026-03-04 10:17:16.423 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=-3.77% | Sharpe=-0.82 | MaxDD=-6.24% | WinRate=30.00% | Trades=20 (L:2 S:18)
+2026-03-04 10:17:16.423 | ERROR    | __main__:run_symbol:188 - BTC/USD failed: name 'gross' is not defined
+2026-03-04 10:17:16.428 | INFO     | __main__:main:283 - [3/6] ETH/USD
+2026-03-04 10:17:16.443 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:232 - Loaded ETH/USD 4h from cache (10950 rows)
+2026-03-04 10:17:16.443 | INFO     | data.feature_engineer:build_features:334 - Building features for unknown (10950 rows)
+2026-03-04 10:17:16.534 | INFO     | data.feature_engineer:build_features:359 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-03-04 10:17:16.534 | INFO     | data.feature_engineer:build_features:362 - Label distribution: DOWN=1082 NEUTRAL=8479 UP=1189
+2026-03-04 10:17:16.540 | INFO     | data.feature_engineer:build_features:369 - Regime: ranging=4259 trending_up=2765 trending_down=3726
+2026-03-04 10:17:16.563 | INFO     | models.lstm_model:train:118 - Training LSTM for ETH/USD on cuda — 6426 train samples
+2026-03-04 10:17:16.821 | INFO     | models.lstm_model:train:148 -   Epoch   0 | val_loss=1.0455 | val_acc=0.7380 | lr=0.000976
+2026-03-04 10:17:17.085 | INFO     | models.lstm_model:train:148 -   Epoch   1 | val_loss=1.0723 | val_acc=0.7846 | lr=0.000905
+2026-03-04 10:17:17.340 | INFO     | models.lstm_model:train:148 -   Epoch   2 | val_loss=1.0835 | val_acc=0.7738 | lr=0.000794
+2026-03-04 10:17:17.605 | INFO     | models.lstm_model:train:148 -   Epoch   3 | val_loss=1.1244 | val_acc=0.7846 | lr=0.000655
+2026-03-04 10:17:17.864 | INFO     | models.lstm_model:train:148 -   Epoch   4 | val_loss=1.1752 | val_acc=0.7846 | lr=0.000501
+2026-03-04 10:17:18.117 | INFO     | models.lstm_model:train:148 -   Epoch   5 | val_loss=1.2116 | val_acc=0.7794 | lr=0.000346
+2026-03-04 10:17:18.380 | INFO     | models.lstm_model:train:148 -   Epoch   6 | val_loss=1.2322 | val_acc=0.7803 | lr=0.000207
+2026-03-04 10:17:18.634 | INFO     | models.lstm_model:train:148 -   Epoch   7 | val_loss=1.2514 | val_acc=0.7756 | lr=0.000096
+2026-03-04 10:17:18.634 | INFO     | models.lstm_model:train:157 - Early stopping at epoch 7
+2026-03-04 10:17:18.634 | SUCCESS  | models.lstm_model:train:161 - LSTM best val_loss: 1.0455
+2026-03-04 10:17:19.847 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.46306743621826163): BUY=31 (1.4%)  SELL=23 (1.1%)  HOLD=2096 (97.5%)
+2026-03-04 10:17:19.847 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 1/54 removed (98% survive) — trend=0 vol=0 volume=1 funding=0 regime=0
+2026-03-04 10:17:19.854 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=-1.24% | Sharpe=-0.16 | MaxDD=-4.95% | WinRate=35.71% | Trades=14 (L:7 S:7)
+2026-03-04 10:17:19.854 | ERROR    | __main__:run_symbol:188 - ETH/USD failed: name 'gross' is not defined
+2026-03-04 10:17:19.856 | INFO     | __main__:main:283 - [4/6] SOL/USD
+2026-03-04 10:17:19.871 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:232 - Loaded SOL/USD 4h from cache (10950 rows)
+2026-03-04 10:17:19.872 | INFO     | data.feature_engineer:build_features:334 - Building features for unknown (10950 rows)
+2026-03-04 10:17:19.966 | INFO     | data.feature_engineer:build_features:359 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-03-04 10:17:19.967 | INFO     | data.feature_engineer:build_features:362 - Label distribution: DOWN=1624 NEUTRAL=7313 UP=1813
+2026-03-04 10:17:19.968 | INFO     | data.feature_engineer:build_features:369 - Regime: ranging=4071 trending_up=3228 trending_down=3451
+2026-03-04 10:17:19.992 | INFO     | models.lstm_model:train:118 - Training LSTM for SOL/USD on cuda — 6426 train samples
+2026-03-04 10:17:20.287 | INFO     | models.lstm_model:train:148 -   Epoch   0 | val_loss=1.1054 | val_acc=0.4454 | lr=0.000976
+2026-03-04 10:17:20.552 | INFO     | models.lstm_model:train:148 -   Epoch   1 | val_loss=1.1033 | val_acc=0.4685 | lr=0.000905
+2026-03-04 10:17:20.804 | INFO     | models.lstm_model:train:148 -   Epoch   2 | val_loss=1.1023 | val_acc=0.4078 | lr=0.000794
+2026-03-04 10:17:21.056 | INFO     | models.lstm_model:train:148 -   Epoch   3 | val_loss=1.1407 | val_acc=0.4671 | lr=0.000655
+2026-03-04 10:17:21.312 | INFO     | models.lstm_model:train:148 -   Epoch   4 | val_loss=1.1675 | val_acc=0.4313 | lr=0.000501
+2026-03-04 10:17:21.571 | INFO     | models.lstm_model:train:148 -   Epoch   5 | val_loss=1.2124 | val_acc=0.4812 | lr=0.000346
+2026-03-04 10:17:21.832 | INFO     | models.lstm_model:train:148 -   Epoch   6 | val_loss=1.2122 | val_acc=0.4741 | lr=0.000207
+2026-03-04 10:17:22.090 | INFO     | models.lstm_model:train:148 -   Epoch   7 | val_loss=1.2263 | val_acc=0.4793 | lr=0.000096
+2026-03-04 10:17:22.348 | INFO     | models.lstm_model:train:148 -   Epoch   8 | val_loss=1.2197 | val_acc=0.4878 | lr=0.000025
+2026-03-04 10:17:22.609 | INFO     | models.lstm_model:train:148 -   Epoch   9 | val_loss=1.2284 | val_acc=0.4770 | lr=0.001000
+2026-03-04 10:17:22.609 | INFO     | models.lstm_model:train:157 - Early stopping at epoch 9
+2026-03-04 10:17:22.609 | SUCCESS  | models.lstm_model:train:161 - LSTM best val_loss: 1.1023
+2026-03-04 10:17:23.849 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.5147862553596496): BUY=146 (6.8%)  SELL=65 (3.0%)  HOLD=1939 (90.2%)
+2026-03-04 10:17:23.856 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 18/211 removed (91% survive) — trend=0 vol=17 volume=1 funding=0 regime=0
+2026-03-04 10:17:23.864 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=3.38% | Sharpe=0.36 | MaxDD=-8.97% | WinRate=42.37% | Trades=59 (L:38 S:21)
+2026-03-04 10:17:23.864 | ERROR    | __main__:run_symbol:188 - SOL/USD failed: name 'gross' is not defined
+2026-03-04 10:17:23.866 | INFO     | __main__:main:283 - [5/6] LINK/USD
+2026-03-04 10:17:23.880 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:232 - Loaded LINK/USD 4h from cache (10950 rows)
+2026-03-04 10:17:23.880 | INFO     | data.feature_engineer:build_features:334 - Building features for unknown (10950 rows)
+2026-03-04 10:17:23.971 | INFO     | data.feature_engineer:build_features:359 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-03-04 10:17:23.971 | INFO     | data.feature_engineer:build_features:362 - Label distribution: DOWN=1524 NEUTRAL=7568 UP=1658
+2026-03-04 10:17:23.976 | INFO     | data.feature_engineer:build_features:369 - Regime: ranging=4295 trending_up=2816 trending_down=3639
+2026-03-04 10:17:23.996 | INFO     | models.lstm_model:train:118 - Training LSTM for LINK/USD on cuda — 6426 train samples
+2026-03-04 10:17:24.253 | INFO     | models.lstm_model:train:148 -   Epoch   0 | val_loss=1.0962 | val_acc=0.4097 | lr=0.000976
+2026-03-04 10:17:24.523 | INFO     | models.lstm_model:train:148 -   Epoch   1 | val_loss=1.0957 | val_acc=0.5240 | lr=0.000905
+2026-03-04 10:17:24.789 | INFO     | models.lstm_model:train:148 -   Epoch   2 | val_loss=1.1025 | val_acc=0.4939 | lr=0.000794
+2026-03-04 10:17:25.048 | INFO     | models.lstm_model:train:148 -   Epoch   3 | val_loss=1.1252 | val_acc=0.5094 | lr=0.000655
+2026-03-04 10:17:25.299 | INFO     | models.lstm_model:train:148 -   Epoch   4 | val_loss=1.1464 | val_acc=0.4967 | lr=0.000501
+2026-03-04 10:17:25.567 | INFO     | models.lstm_model:train:148 -   Epoch   5 | val_loss=1.1682 | val_acc=0.4699 | lr=0.000346
+2026-03-04 10:17:25.831 | INFO     | models.lstm_model:train:148 -   Epoch   6 | val_loss=1.1935 | val_acc=0.4925 | lr=0.000207
+2026-03-04 10:17:26.092 | INFO     | models.lstm_model:train:148 -   Epoch   7 | val_loss=1.2112 | val_acc=0.4849 | lr=0.000096
+2026-03-04 10:17:26.349 | INFO     | models.lstm_model:train:148 -   Epoch   8 | val_loss=1.2209 | val_acc=0.4901 | lr=0.000025
+2026-03-04 10:17:26.349 | INFO     | models.lstm_model:train:157 - Early stopping at epoch 8
+2026-03-04 10:17:26.349 | SUCCESS  | models.lstm_model:train:161 - LSTM best val_loss: 1.0957
+2026-03-04 10:17:27.623 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.48304957747459415): BUY=136 (6.3%)  SELL=41 (1.9%)  HOLD=1973 (91.8%)
+2026-03-04 10:17:27.634 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 1/177 removed (99% survive) — trend=0 vol=0 volume=1 funding=0 regime=0
+2026-03-04 10:17:27.637 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=-10.80% | Sharpe=-1.04 | MaxDD=-15.73% | WinRate=31.67% | Trades=60 (L:42 S:18)
+2026-03-04 10:17:27.637 | ERROR    | __main__:run_symbol:188 - LINK/USD failed: name 'gross' is not defined
+2026-03-04 10:17:27.639 | INFO     | __main__:main:283 - [6/6] ARB/USD
+2026-03-04 10:17:27.647 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:232 - Loaded ARB/USD 4h from cache (6462 rows)
+2026-03-04 10:17:27.647 | INFO     | data.feature_engineer:build_features:334 - Building features for unknown (6462 rows)
+2026-03-04 10:17:27.725 | INFO     | data.feature_engineer:build_features:359 - Dropped 200 NaN/inf rows → 6262 usable rows
+2026-03-04 10:17:27.727 | INFO     | data.feature_engineer:build_features:362 - Label distribution: DOWN=937 NEUTRAL=4501 UP=824
+2026-03-04 10:17:27.728 | INFO     | data.feature_engineer:build_features:369 - Regime: ranging=2367 trending_up=1541 trending_down=2354
+2026-03-04 10:17:27.738 | INFO     | models.lstm_model:train:118 - Training LSTM for ARB/USD on cuda — 3733 train samples
+2026-03-04 10:17:27.899 | INFO     | models.lstm_model:train:148 -   Epoch   0 | val_loss=1.1386 | val_acc=0.3412 | lr=0.000976
+2026-03-04 10:17:28.059 | INFO     | models.lstm_model:train:148 -   Epoch   1 | val_loss=1.1201 | val_acc=0.3746 | lr=0.000905
+2026-03-04 10:17:28.216 | INFO     | models.lstm_model:train:148 -   Epoch   2 | val_loss=1.1614 | val_acc=0.3029 | lr=0.000794
+2026-03-04 10:17:28.376 | INFO     | models.lstm_model:train:148 -   Epoch   3 | val_loss=1.1942 | val_acc=0.3249 | lr=0.000655
+2026-03-04 10:17:28.529 | INFO     | models.lstm_model:train:148 -   Epoch   4 | val_loss=1.2478 | val_acc=0.2907 | lr=0.000501
+2026-03-04 10:17:28.673 | INFO     | models.lstm_model:train:148 -   Epoch   5 | val_loss=1.2713 | val_acc=0.3103 | lr=0.000346
+2026-03-04 10:17:28.832 | INFO     | models.lstm_model:train:148 -   Epoch   6 | val_loss=1.2908 | val_acc=0.3371 | lr=0.000207
+2026-03-04 10:17:28.989 | INFO     | models.lstm_model:train:148 -   Epoch   7 | val_loss=1.3155 | val_acc=0.3086 | lr=0.000096
+2026-03-04 10:17:29.142 | INFO     | models.lstm_model:train:148 -   Epoch   8 | val_loss=1.3271 | val_acc=0.3306 | lr=0.000025
+2026-03-04 10:17:29.142 | INFO     | models.lstm_model:train:157 - Early stopping at epoch 8
+2026-03-04 10:17:29.142 | SUCCESS  | models.lstm_model:train:161 - LSTM best val_loss: 1.1201
+2026-03-04 10:17:29.850 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.5517438113689422): BUY=141 (11.3%)  SELL=7 (0.6%)  HOLD=1105 (88.2%)
+2026-03-04 10:17:29.861 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 17/148 removed (89% survive) — trend=0 vol=11 volume=6 funding=0 regime=0
+2026-03-04 10:17:29.865 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=-8.92% | Sharpe=-1.00 | MaxDD=-12.28% | WinRate=25.64% | Trades=39 (L:35 S:4)
+2026-03-04 10:17:29.865 | ERROR    | __main__:run_symbol:188 - ARB/USD failed: name 'gross' is not defined

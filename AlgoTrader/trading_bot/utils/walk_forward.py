@@ -229,8 +229,10 @@ def run_fold(feat_df: pd.DataFrame, feature_cols: list,
     sig_thresh = None
     if optuna_params and "signal_threshold" in optuna_params:
         sig_thresh = optuna_params["signal_threshold"]
+    top_pct = optuna_params.get("top_pct", 0.15) if optuna_params else 0.15
     signals = generate_signals(blended, symbol=symbol.split('_')[0] + '/USD',
-                               threshold=sig_thresh)
+                               threshold=sig_thresh,
+                               use_percentile=True, top_pct=top_pct)
 
     # Apply Optuna-tuned filter params if available
     import config.settings as s

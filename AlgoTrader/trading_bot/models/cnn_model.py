@@ -17,7 +17,13 @@ from loguru import logger
 import joblib
 from config.settings import MODEL_DIR, LSTM_PARAMS
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+try:
+    import torch_directml
+    DEVICE = torch_directml.device()
+    logger.info("CNN using DirectML (AMD GPU)")
+except ImportError:
+    DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    logger.info(f"CNN using {DEVICE}")
 
 CNN_PARAMS = {
     "sequence_length": 24,   # Look-back window in hours
@@ -60,7 +66,7 @@ class CNNClassifier(nn.Module):
         layers = []
         in_channels = input_size
         for i in range(num_layers):
-            out_channels = num_filters * (2 ** min(i, 2))  # 64 -> 128 -> 256
+            out_channels = num_filters * (2 ** min(i, 1))  # 64 -> 128 -> 128 (cap at 2x)
             layers += [
                 nn.Conv1d(in_channels, out_channels, kernel_size, padding=kernel_size // 2),
                 nn.BatchNorm1d(out_channels),
@@ -70,12 +76,17 @@ class CNNClassifier(nn.Module):
             in_channels = out_channels
 
         self.conv_layers = nn.Sequential(*layers)
-        self.pool        = nn.AdaptiveAvgPool1d(1)   # Global average pooling
-        self.fc          = nn.Linear(in_channels, num_classes)
+        self.avg_pool    = nn.AdaptiveAvgPool1d(1)   # Average across time
+        self.max_pool    = nn.AdaptiveMaxPool1d(1)   # Peak activation across time
+        # Concat avg+max doubles channels into classifier — captures both
+        # mean trend strength and maximum pattern response
+        self.fc          = nn.Linear(in_channels * 2, num_classes)
 
     def forward(self, x):
-        x = self.conv_layers(x)   # (batch, channels, seq_len)
-        x = self.pool(x).squeeze(-1)   # (batch, channels)
+        x = self.conv_layers(x)              # (batch, channels, seq_len)
+        avg = self.avg_pool(x).squeeze(-1)   # (batch, channels)
+        mx  = self.max_pool(x).squeeze(-1)   # (batch, channels)
+        x   = torch.cat([avg, mx], dim=1)    # (batch, channels * 2)
         return self.fc(x)
 
 
@@ -103,9 +114,10 @@ def train(X_train: np.ndarray, y_train: np.ndarray,
         dropout     = p["dropout"],
     ).to(DEVICE)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=p["learning_rate"])
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=3, factor=0.5)
-    # Weight UP/DOWN classes 4x higher than NEUTRAL to counter class imbalance
+    optimizer = torch.optim.AdamW(model.parameters(), lr=p["learning_rate"], weight_decay=1e-4)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+        optimizer, T_0=10, T_mult=2, eta_min=1e-6
+    )
     class_weights = torch.FloatTensor([2.0, 0.5, 2.0]).to(DEVICE)
     criterion = nn.CrossEntropyLoss(weight=class_weights)
 
@@ -139,10 +151,9 @@ def train(X_train: np.ndarray, y_train: np.ndarray,
 
         val_loss /= len(val_dl)
         val_acc   = correct / total
-        scheduler.step(val_loss)
+        scheduler.step()
 
-        if epoch % 10 == 0:
-            logger.info(f"  Epoch {epoch:3d} | val_loss={val_loss:.4f} | val_acc={val_acc:.4f}")
+        logger.info(f"  Epoch {epoch:3d} | val_loss={val_loss:.4f} | val_acc={val_acc:.4f} | lr={optimizer.param_groups[0]['lr']:.6f}")
 
         if val_loss < best_val_loss:
             best_val_loss    = val_loss

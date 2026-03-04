@@ -1,0 +1,65 @@
+2026-03-04 09:50:36.862 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:232 - Loaded LINK/USD 2h from cache (21896 rows)
+2026-03-04 09:50:36.863 | INFO     | data.feature_engineer:build_features:334 - Building features for LINK/USD (21896 rows)
+2026-03-04 09:50:36.994 | INFO     | data.feature_engineer:build_features:359 - Dropped 205 NaN/inf rows → 21691 usable rows
+2026-03-04 09:50:37.004 | INFO     | data.feature_engineer:build_features:362 - Label distribution: DOWN=4668 NEUTRAL=12240 UP=4783
+2026-03-04 09:50:37.006 | INFO     | data.feature_engineer:build_features:369 - Regime: ranging=9244 trending_up=5411 trending_down=7036
+2026-03-04 09:50:37.028 | INFO     | __main__:main:235 - Data split — Train: 13014, Val: 4338, Test: 4339
+2026-03-04 09:50:37.028 | INFO     | __main__:main:242 - 
+──────────────────────────────────────── LightGBM ────────────────────────────────────────
+2026-03-04 09:50:37.269 | INFO     | models.lgbm_model:train:55 - Training LightGBM for LINK/USD — 13014 train samples, 4338 val samples, 100 features
+2026-03-04 09:50:37.269 | INFO     | models.lgbm_model:train:61 -   Train label dist: class0=2775 class1=7257 class2=2982
+2026-03-04 09:50:38.584 | SUCCESS  | models.lgbm_model:train:83 - LightGBM val_acc=0.4025 | best_iter=178 | pred_dist: DOWN=1053 NEUTRAL=1416 UP=1869
+2026-03-04 09:50:38.607 | INFO     | __main__:main:251 - Top 20 features: adx(686), sma_200(604), obv(599), hurst_approx(596), close_vs_sma_200(516), vol_regime(475), ema_200(444), minus_di(417), vol_sma_21(366), plus_di(315), sma_50(312), vol_sma_14(290), macd_signal(284), dayofweek(281), atr_pct_14(280), bb_width_20(277), atr_14(261), di_diff(260), close_vs_sma_50(253), macd_hist(241)
+2026-03-04 09:50:38.609 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.6109964603577133): BUY=128 (2.9%)  SELL=460 (10.6%)  HOLD=3751 (86.4%)
+2026-03-04 09:50:38.637 | INFO     | backtest.filters:apply_filters:120 - Filters [2h] 63/588 removed (89% survive) — trend=0 vol=43 volume=20 funding=0 regime=0
+2026-03-04 09:50:38.645 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=-7.04% | Sharpe=-0.50 | MaxDD=-13.62% | WinRate=35.57% | Trades=149 (L:35 S:114)
+2026-03-04 09:50:38.646 | INFO     | __main__:main:257 - 
+──────────────────────────────────────── LSTM ────────────────────────────────────────
+2026-03-04 09:50:39.881 | INFO     | models.lstm_model:train:118 - Training LSTM for LINK/USD on cuda — 12990 train samples
+2026-03-04 09:50:40.630 | INFO     | models.lstm_model:train:148 -   Epoch   0 | val_loss=1.0797 | val_acc=0.3540 | lr=0.000976
+2026-03-04 09:50:41.191 | INFO     | models.lstm_model:train:148 -   Epoch   1 | val_loss=1.1010 | val_acc=0.3581 | lr=0.000905
+2026-03-04 09:50:41.748 | INFO     | models.lstm_model:train:148 -   Epoch   2 | val_loss=1.1862 | val_acc=0.3500 | lr=0.000794
+2026-03-04 09:50:42.339 | INFO     | models.lstm_model:train:148 -   Epoch   3 | val_loss=1.2820 | val_acc=0.3408 | lr=0.000655
+2026-03-04 09:50:42.887 | INFO     | models.lstm_model:train:148 -   Epoch   4 | val_loss=1.3728 | val_acc=0.3394 | lr=0.000501
+2026-03-04 09:50:43.450 | INFO     | models.lstm_model:train:148 -   Epoch   5 | val_loss=1.4787 | val_acc=0.3343 | lr=0.000346
+2026-03-04 09:50:44.017 | INFO     | models.lstm_model:train:148 -   Epoch   6 | val_loss=1.5532 | val_acc=0.3396 | lr=0.000207
+2026-03-04 09:50:44.576 | INFO     | models.lstm_model:train:148 -   Epoch   7 | val_loss=1.5967 | val_acc=0.3533 | lr=0.000096
+2026-03-04 09:50:44.587 | INFO     | models.lstm_model:train:157 - Early stopping at epoch 7
+2026-03-04 09:50:44.587 | SUCCESS  | models.lstm_model:train:161 - LSTM best val_loss: 1.0797
+2026-03-04 09:50:47.276 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.5433182120323181): BUY=118 (2.7%)  SELL=517 (11.9%)  HOLD=3704 (85.4%)
+2026-03-04 09:50:47.294 | INFO     | backtest.filters:apply_filters:120 - Filters [2h] 66/635 removed (90% survive) — trend=0 vol=37 volume=29 funding=0 regime=0
+2026-03-04 09:50:47.298 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=-14.64% | Sharpe=-1.20 | MaxDD=-15.83% | WinRate=33.54% | Trades=164 (L:36 S:128)
+2026-03-04 09:50:47.298 | INFO     | __main__:main:266 - 
+──────────────────────────────────────── CNN ────────────────────────────────────────
+2026-03-04 09:50:47.309 | INFO     | models.cnn_model:train:128 - Training 1D CNN for LINK/USD on cuda — 12990 train samples
+2026-03-04 09:50:48.250 | INFO     | models.cnn_model:train:156 -   Epoch   0 | val_loss=1.0947 | val_acc=0.3018 | lr=0.000976
+2026-03-04 09:50:48.943 | INFO     | models.cnn_model:train:156 -   Epoch   1 | val_loss=1.1502 | val_acc=0.3153 | lr=0.000905
+2026-03-04 09:50:49.625 | INFO     | models.cnn_model:train:156 -   Epoch   2 | val_loss=1.1789 | val_acc=0.2786 | lr=0.000794
+2026-03-04 09:50:50.321 | INFO     | models.cnn_model:train:156 -   Epoch   3 | val_loss=1.2338 | val_acc=0.2826 | lr=0.000655
+2026-03-04 09:50:50.991 | INFO     | models.cnn_model:train:156 -   Epoch   4 | val_loss=1.2494 | val_acc=0.2969 | lr=0.000501
+2026-03-04 09:50:51.679 | INFO     | models.cnn_model:train:156 -   Epoch   5 | val_loss=1.2717 | val_acc=0.2738 | lr=0.000346
+2026-03-04 09:50:52.364 | INFO     | models.cnn_model:train:156 -   Epoch   6 | val_loss=1.3160 | val_acc=0.3115 | lr=0.000207
+2026-03-04 09:50:53.049 | INFO     | models.cnn_model:train:156 -   Epoch   7 | val_loss=1.3280 | val_acc=0.3032 | lr=0.000096
+2026-03-04 09:50:53.049 | INFO     | models.cnn_model:train:165 - Early stopping at epoch 7
+2026-03-04 09:50:53.060 | SUCCESS  | models.cnn_model:train:169 - 1D CNN best val_loss: 1.0947
+2026-03-04 09:50:56.921 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.533756309747696): BUY=19 (0.4%)  SELL=611 (14.1%)  HOLD=3709 (85.5%)
+2026-03-04 09:50:56.936 | INFO     | backtest.filters:apply_filters:120 - Filters [2h] 86/630 removed (86% survive) — trend=0 vol=69 volume=17 funding=0 regime=0
+2026-03-04 09:50:56.936 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=-18.84% | Sharpe=-2.37 | MaxDD=-21.09% | WinRate=27.68% | Trades=112 (L:7 S:105)
+2026-03-04 09:50:56.936 | INFO     | __main__:main:275 - 
+──────────────────────────────────────── TFT ────────────────────────────────────────
+2026-03-04 09:50:56.944 | INFO     | models.tft_model:<module>:33 - TFT using cuda
+2026-03-04 09:50:56.956 | INFO     | models.tft_model:train:224 - Training TFT for LINK/USD on cuda — 12990 train samples
+2026-03-04 09:50:59.540 | INFO     | models.tft_model:train:255 -   Epoch   0 | val_loss=1.0895 | val_acc=0.3222
+2026-03-04 09:51:12.181 | INFO     | models.tft_model:train:255 -   Epoch   5 | val_loss=1.5084 | val_acc=0.3336
+2026-03-04 09:51:25.187 | INFO     | models.tft_model:train:255 -   Epoch  10 | val_loss=1.6374 | val_acc=0.3278
+2026-03-04 09:51:37.970 | INFO     | models.tft_model:train:255 -   Epoch  15 | val_loss=1.9763 | val_acc=0.3962
+2026-03-04 09:51:37.970 | INFO     | models.tft_model:train:264 - Early stopping at epoch 15
+2026-03-04 09:51:37.970 | SUCCESS  | models.tft_model:train:268 - TFT best val_loss: 1.0895
+2026-03-04 09:51:48.207 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.47531682848930357): BUY=101 (2.3%)  SELL=545 (12.6%)  HOLD=3693 (85.1%)
+2026-03-04 09:51:48.223 | INFO     | backtest.filters:apply_filters:120 - Filters [2h] 29/646 removed (96% survive) — trend=0 vol=14 volume=15 funding=0 regime=0
+2026-03-04 09:51:48.223 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=-21.55% | Sharpe=-1.76 | MaxDD=-23.83% | WinRate=29.89% | Trades=174 (L:35 S:139)
+2026-03-04 09:51:48.223 | INFO     | __main__:main:284 - 
+──────────────────────────────────────── Ensemble ────────────────────────────────────────
+2026-03-04 09:51:48.231 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.4955723205809031): BUY=61 (1.4%)  SELL=582 (13.4%)  HOLD=3696 (85.2%)
+2026-03-04 09:51:48.247 | INFO     | backtest.filters:apply_filters:120 - Filters [2h] 76/643 removed (88% survive) — trend=0 vol=63 volume=13 funding=0 regime=0
+2026-03-04 09:51:48.251 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=-13.77% | Sharpe=-1.24 | MaxDD=-15.58% | WinRate=32.03% | Trades=153 (L:22 S:131)

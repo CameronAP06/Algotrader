@@ -92,16 +92,33 @@ def optimise_weights(p1, p2, p3, y_true):
     return best_w
 
 
-def generate_signals(blended_proba, threshold=SIGNAL_THRESHOLD, symbol=None):
+def generate_signals(blended_proba, threshold=SIGNAL_THRESHOLD, symbol=None,
+                     use_percentile: bool = True, top_pct: float = 0.15):
     """
     Convert ensemble probabilities to trading signals.
     Returns a dict with keys: signal, confidence, up_prob, down_prob.
+
+    use_percentile=True (default): fires on top top_pct of confident bars,
+    adapting to whatever probability range the ensemble actually outputs.
+    This is robust to probability compression from ensemble averaging.
+
+    use_percentile=False: uses fixed threshold (legacy behaviour).
     """
-    # Use per-symbol threshold if available
     if symbol is not None:
         threshold = SIGNAL_THRESHOLDS.get(symbol, threshold)
     up_prob   = blended_proba[:, 2]
     down_prob = blended_proba[:, 0]
+    best_prob = np.maximum(up_prob, down_prob)
+
+    if use_percentile and len(best_prob) >= 20:
+        # Find the threshold that selects the top top_pct most confident bars
+        # Floor at 0.34 to never fire on near-random predictions
+        candidates = best_prob[best_prob > 0.34]
+        if len(candidates) >= 5:
+            threshold = float(np.percentile(candidates, (1 - top_pct) * 100))
+            threshold = max(threshold, 0.34)
+        else:
+            threshold = 0.40  # fallback if very few confident bars
 
     signals = np.full(len(blended_proba), "HOLD", dtype=object)
     signals[up_prob   >= threshold] = "BUY"

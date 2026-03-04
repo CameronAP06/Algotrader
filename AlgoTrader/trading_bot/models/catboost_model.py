@@ -14,7 +14,6 @@ from loguru import logger
 from catboost import CatBoostClassifier
 from config.settings import MODEL_DIR
 
-
 CATBOOST_PARAMS = {
     "iterations":        500,
     "learning_rate":     0.05,
@@ -22,7 +21,10 @@ CATBOOST_PARAMS = {
     "l2_leaf_reg":       3.0,
     "loss_function":     "MultiClass",
     "classes_count":     3,
-    "eval_metric":       "Accuracy",
+    # TotalF1 macro treats all 3 classes equally regardless of frequency.
+    # Accuracy would converge on all-NEUTRAL (73% of labels) because that
+    # maximises raw accuracy — the wrong optimisation target here.
+    "eval_metric":       "TotalF1:average=Macro",
     "class_weights":     [2.0, 0.5, 2.0],  # UP/DOWN weighted 4x NEUTRAL
     "random_seed":       42,
     "thread_count":      -1,

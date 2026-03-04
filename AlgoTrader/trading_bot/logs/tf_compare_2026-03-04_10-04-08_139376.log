@@ -1,0 +1,47 @@
+2026-03-04 10:04:08.141 | INFO     | __main__:main:285 - [1/6] DOGE/USD
+2026-03-04 10:04:08.556 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:232 - Loaded DOGE/USD 4h from cache (10950 rows)
+2026-03-04 10:04:08.556 | INFO     | data.feature_engineer:build_features:334 - Building features for unknown (10950 rows)
+2026-03-04 10:04:08.663 | INFO     | data.feature_engineer:build_features:359 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-03-04 10:04:08.665 | INFO     | data.feature_engineer:build_features:362 - Label distribution: DOWN=1423 NEUTRAL=7859 UP=1468
+2026-03-04 10:04:08.666 | INFO     | data.feature_engineer:build_features:369 - Regime: ranging=4061 trending_up=2982 trending_down=3707
+2026-03-04 10:04:08.666 | ERROR    | __main__:run_symbol:190 - DOGE/USD failed: 'str' object has no attribute 'empty'
+2026-03-04 10:04:08.668 | INFO     | __main__:main:285 - [2/6] BTC/USD
+2026-03-04 10:04:08.687 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:235 - Fetching BTC/USD [4h] — 1825 days...
+2026-03-04 10:04:16.769 | SUCCESS  | timeframe_comparison:fetch_ohlcv_timeframe:268 - BTC/USD 4h: 10950 candles (2021-03-05 -> 2026-03-04)
+2026-03-04 10:04:16.819 | INFO     | data.feature_engineer:build_features:334 - Building features for unknown (10950 rows)
+2026-03-04 10:04:16.914 | INFO     | data.feature_engineer:build_features:359 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-03-04 10:04:16.915 | INFO     | data.feature_engineer:build_features:362 - Label distribution: DOWN=662 NEUTRAL=9326 UP=762
+2026-03-04 10:04:16.916 | INFO     | data.feature_engineer:build_features:369 - Regime: ranging=4760 trending_up=2769 trending_down=3221
+2026-03-04 10:04:16.916 | ERROR    | __main__:run_symbol:190 - BTC/USD failed: 'str' object has no attribute 'empty'
+2026-03-04 10:04:16.919 | INFO     | __main__:main:285 - [3/6] ETH/USD
+2026-03-04 10:04:16.936 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:235 - Fetching ETH/USD [4h] — 1825 days...
+2026-03-04 10:04:24.434 | SUCCESS  | timeframe_comparison:fetch_ohlcv_timeframe:268 - ETH/USD 4h: 10950 candles (2021-03-05 -> 2026-03-04)
+2026-03-04 10:04:24.474 | INFO     | data.feature_engineer:build_features:334 - Building features for unknown (10950 rows)
+2026-03-04 10:04:24.567 | INFO     | data.feature_engineer:build_features:359 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-03-04 10:04:24.567 | INFO     | data.feature_engineer:build_features:362 - Label distribution: DOWN=1082 NEUTRAL=8479 UP=1189
+2026-03-04 10:04:24.571 | INFO     | data.feature_engineer:build_features:369 - Regime: ranging=4259 trending_up=2765 trending_down=3726
+2026-03-04 10:04:24.571 | ERROR    | __main__:run_symbol:190 - ETH/USD failed: 'str' object has no attribute 'empty'
+2026-03-04 10:04:24.575 | INFO     | __main__:main:285 - [4/6] SOL/USD
+2026-03-04 10:04:24.596 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:235 - Fetching SOL/USD [4h] — 1825 days...
+2026-03-04 10:04:33.702 | SUCCESS  | timeframe_comparison:fetch_ohlcv_timeframe:268 - SOL/USD 4h: 10950 candles (2021-03-05 -> 2026-03-04)
+2026-03-04 10:04:33.749 | INFO     | data.feature_engineer:build_features:334 - Building features for unknown (10950 rows)
+2026-03-04 10:04:33.847 | INFO     | data.feature_engineer:build_features:359 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-03-04 10:04:33.848 | INFO     | data.feature_engineer:build_features:362 - Label distribution: DOWN=1624 NEUTRAL=7313 UP=1813
+2026-03-04 10:04:33.849 | INFO     | data.feature_engineer:build_features:369 - Regime: ranging=4071 trending_up=3228 trending_down=3451
+2026-03-04 10:04:33.849 | ERROR    | __main__:run_symbol:190 - SOL/USD failed: 'str' object has no attribute 'empty'
+2026-03-04 10:04:33.852 | INFO     | __main__:main:285 - [5/6] LINK/USD
+2026-03-04 10:04:33.876 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:235 - Fetching LINK/USD [4h] — 1825 days...
+2026-03-04 10:04:41.780 | SUCCESS  | timeframe_comparison:fetch_ohlcv_timeframe:268 - LINK/USD 4h: 10950 candles (2021-03-05 -> 2026-03-04)
+2026-03-04 10:04:41.823 | INFO     | data.feature_engineer:build_features:334 - Building features for unknown (10950 rows)
+2026-03-04 10:04:41.931 | INFO     | data.feature_engineer:build_features:359 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-03-04 10:04:41.932 | INFO     | data.feature_engineer:build_features:362 - Label distribution: DOWN=1524 NEUTRAL=7568 UP=1658
+2026-03-04 10:04:41.932 | INFO     | data.feature_engineer:build_features:369 - Regime: ranging=4295 trending_up=2816 trending_down=3639
+2026-03-04 10:04:41.932 | ERROR    | __main__:run_symbol:190 - LINK/USD failed: 'str' object has no attribute 'empty'
+2026-03-04 10:04:41.935 | INFO     | __main__:main:285 - [6/6] ARB/USD
+2026-03-04 10:04:41.948 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:235 - Fetching ARB/USD [4h] — 1825 days...
+2026-03-04 10:04:47.806 | SUCCESS  | timeframe_comparison:fetch_ohlcv_timeframe:268 - ARB/USD 4h: 6462 candles (2023-03-23 -> 2026-03-04)
+2026-03-04 10:04:47.848 | INFO     | data.feature_engineer:build_features:334 - Building features for unknown (6462 rows)
+2026-03-04 10:04:47.934 | INFO     | data.feature_engineer:build_features:359 - Dropped 200 NaN/inf rows → 6262 usable rows
+2026-03-04 10:04:47.936 | INFO     | data.feature_engineer:build_features:362 - Label distribution: DOWN=937 NEUTRAL=4501 UP=824
+2026-03-04 10:04:47.936 | INFO     | data.feature_engineer:build_features:369 - Regime: ranging=2367 trending_up=1541 trending_down=2354
+2026-03-04 10:04:47.938 | ERROR    | __main__:run_symbol:190 - ARB/USD failed: 'str' object has no attribute 'empty'

@@ -106,7 +106,9 @@ def suggest_filter_params(trial: optuna.Trial) -> dict:
 
 
 def suggest_signal_threshold(trial: optuna.Trial) -> float:
-    # Narrower range — wide range was producing extreme signal imbalances
+    # Ensemble outputs are compressed vs single-model — blending 3 models
+    # pushes probabilities toward 0.5, so threshold must be lower than
+    # edge scanner's 0.60 (which ran LSTM standalone)
     return trial.suggest_float("signal_thresh", 0.33, 0.45)
 
 
@@ -181,7 +183,8 @@ def make_objective(X_train, y_train, X_val, y_val, all_cols,
             s.ATR_STOP_MULT = atr_p["atr_stop_mult"]
             s.ATR_TP_MULT   = atr_p["atr_tp_mult"]
 
-            signals = generate_signals(probs, threshold=threshold)
+            signals = generate_signals(probs, threshold=threshold,
+                                        use_percentile=True, top_pct=top_pct)
             filtered = apply_filters(feat_df_val, signals, timeframe=timeframe)
 
             # Restore filter + ATR params
@@ -196,8 +199,10 @@ def make_objective(X_train, y_train, X_val, y_val, all_cols,
             metrics = engine.run(feat_df_val, filtered)
 
             n_trades = metrics["n_trades"]
-            if n_trades < 5:
-                return -10.0  # Penalise configs that barely trade
+            if n_trades < 3:
+                return -10.0  # Too few trades — no signal
+            if n_trades > 60:
+                return -5.0   # Too many trades — low-confidence noise, fee destruction
 
             sharpe   = metrics["sharpe_ratio"]
             win_rate = metrics["win_rate"]
@@ -206,11 +211,11 @@ def make_objective(X_train, y_train, X_val, y_val, all_cols,
             # Composite score rewarding:
             # 1. Win rate above breakeven (33% at 2:1) — most important
             # 2. Positive return
-            # 3. Trade count (more trades = more confident signal)
+            # 3. Trade count in sweet spot (3-30) — not too few, not too many
             # 4. Sharpe as tiebreaker but capped to avoid outlier games
             wr_bonus      = max(0.0, (win_rate - 0.33) * 10)   # 0 at breakeven, +1 at 43%
             ret_bonus     = 2.0 if ret > 0 else 0.0
-            count_bonus   = min(2.0, n_trades / 10)             # up to +2 for 20+ trades
+            count_bonus   = min(2.0, n_trades / 15)             # peaks at 30 trades, no bonus beyond
             sharpe_capped = max(-3.0, min(3.0, sharpe))         # cap to ±3 to avoid outliers
 
             return sharpe_capped + wr_bonus + ret_bonus + count_bonus
@@ -262,7 +267,8 @@ def run_optuna_search(X_train: np.ndarray, y_train: np.ndarray,
                               ["seq_len","d_model","n_heads","n_lstm_layers",
                                "dropout","batch_size","lr"]
                               if k in best.params},
-        "signal_threshold":  best.params.get("signal_thresh", 0.38),
+        "signal_threshold":  best.params.get("signal_thresh", 0.36),
+        "top_pct":           best.params.get("top_pct", 0.15),
         "filter_params": {
             "volume_pct":    best.params.get("volume_pct",  0.40),
             "adx_threshold": best.params.get("adx_thresh",  18.0),

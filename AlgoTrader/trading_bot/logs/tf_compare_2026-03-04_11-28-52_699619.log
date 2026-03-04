@@ -1,0 +1,32 @@
+2026-03-04 11:28:52.699 | INFO     | __main__:run_oot:70 - Fetching 3000 days of history for LINK/USD...
+2026-03-04 11:28:53.210 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:232 - Loaded LINK/USD 4h from cache (10950 rows)
+2026-03-04 11:28:53.210 | INFO     | data.feature_engineer:build_features:334 - Building features for unknown (10950 rows)
+2026-03-04 11:28:53.323 | INFO     | data.feature_engineer:build_features:359 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-03-04 11:28:53.325 | INFO     | data.feature_engineer:build_features:362 - Label distribution: DOWN=1524 NEUTRAL=7568 UP=1658
+2026-03-04 11:28:53.326 | INFO     | data.feature_engineer:build_features:369 - Regime: ranging=4295 trending_up=2816 trending_down=3639
+2026-03-04 11:28:53.328 | INFO     | __main__:run_oot:106 - Data split:
+2026-03-04 11:28:53.328 | INFO     | __main__:run_oot:107 -   OOT   (unseen): bars 0     → 4211   = 4211 bars (702 days)  [0 → 4210]
+2026-03-04 11:28:53.328 | INFO     | __main__:run_oot:110 -   Train:          bars 4211 → 8134 = 3923 bars
+2026-03-04 11:28:53.328 | INFO     | __main__:run_oot:111 -   Val:            bars 8134 → 9441   = 1307 bars
+2026-03-04 11:28:53.336 | INFO     | __main__:run_oot:112 -   Test:           bars 9441 → 10750  = 1309 bars
+2026-03-04 11:28:53.345 | INFO     | __main__:run_oot:132 - Training LSTM on 3923 bars...
+2026-03-04 11:28:54.792 | INFO     | models.lstm_model:train:118 - Training LSTM for LINK/USD on cuda — 3899 train samples
+2026-03-04 11:28:55.268 | INFO     | models.lstm_model:train:148 -   Epoch   0 | val_loss=1.0935 | val_acc=0.4334 | lr=0.000976
+2026-03-04 11:28:55.461 | INFO     | models.lstm_model:train:148 -   Epoch   1 | val_loss=1.1213 | val_acc=0.5105 | lr=0.000905
+2026-03-04 11:28:55.699 | INFO     | models.lstm_model:train:148 -   Epoch   2 | val_loss=1.1443 | val_acc=0.5175 | lr=0.000794
+2026-03-04 11:28:55.935 | INFO     | models.lstm_model:train:148 -   Epoch   3 | val_loss=1.2070 | val_acc=0.4747 | lr=0.000655
+2026-03-04 11:28:56.211 | INFO     | models.lstm_model:train:148 -   Epoch   4 | val_loss=1.2426 | val_acc=0.4661 | lr=0.000501
+2026-03-04 11:28:56.428 | INFO     | models.lstm_model:train:148 -   Epoch   5 | val_loss=1.2872 | val_acc=0.4754 | lr=0.000346
+2026-03-04 11:28:56.644 | INFO     | models.lstm_model:train:148 -   Epoch   6 | val_loss=1.3319 | val_acc=0.4864 | lr=0.000207
+2026-03-04 11:28:56.825 | INFO     | models.lstm_model:train:148 -   Epoch   7 | val_loss=1.3486 | val_acc=0.4731 | lr=0.000096
+2026-03-04 11:28:56.832 | INFO     | models.lstm_model:train:157 - Early stopping at epoch 7
+2026-03-04 11:28:56.832 | SUCCESS  | models.lstm_model:train:161 - LSTM best val_loss: 1.0935
+2026-03-04 11:28:56.832 | INFO     | __main__:run_oot:171 - Running inference on standard TEST window...
+2026-03-04 11:28:57.809 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.5031117975711823): BUY=62 (4.7%)  SELL=58 (4.4%)  HOLD=1189 (90.8%)
+2026-03-04 11:28:57.817 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 7/120 removed (94% survive) — trend=0 vol=2 volume=5 funding=0 regime=0
+2026-03-04 11:28:57.819 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=0.65% | Sharpe=0.16 | MaxDD=-5.97% | WinRate=39.29% | Trades=28 (L:10 S:18)
+2026-03-04 11:28:57.819 | INFO     | __main__:run_oot:174 - Running inference on OOT (historical, never-seen) window...
+2026-03-04 11:29:00.847 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.5008360683918): BUY=212 (5.0%)  SELL=172 (4.1%)  HOLD=3827 (90.9%)
+2026-03-04 11:29:00.863 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 0/384 removed (100% survive) — trend=0 vol=0 volume=0 funding=0 regime=0
+2026-03-04 11:29:00.871 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=-28.67% | Sharpe=-0.95 | MaxDD=-34.34% | WinRate=27.83% | Trades=115 (L:66 S:49)
+2026-03-04 11:29:00.877 | SUCCESS  | __main__:save_results:240 - Results saved -> backtest\results\oot_LINK_USD_4h_20260304_112900.csv

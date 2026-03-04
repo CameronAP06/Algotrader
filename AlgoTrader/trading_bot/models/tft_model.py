@@ -24,7 +24,13 @@ from loguru import logger
 import joblib
 from config.settings import MODEL_DIR
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+try:
+    import torch_directml
+    DEVICE = torch_directml.device()
+    logger.info("TFT using DirectML (AMD GPU)")
+except ImportError:
+    DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    logger.info(f"TFT using {DEVICE}")
 
 class MIOpenSafeLayerNorm(nn.Module):
     """
@@ -47,15 +53,15 @@ class MIOpenSafeLayerNorm(nn.Module):
 
 
 TFT_PARAMS = {
-    "sequence_length":  48,    # 48h look-back window
-    "d_model":          64,    # Model dimension
-    "n_heads":          4,     # Attention heads
-    "n_lstm_layers":    2,     # LSTM layers in encoder/decoder
-    "dropout":          0.0,  # MIOpen dropout kernel broken on gfx1100/Win — use Python-layer dropout
-    "epochs":           40,
-    "batch_size":       128,
-    "learning_rate":    0.0005,
-    "patience":         8,
+    "sequence_length":  24,    # Reduced from 48 — less context, less overfitting
+    "d_model":          16,    # Reduced from 64 — much smaller model
+    "n_heads":          2,     # Reduced from 4
+    "n_lstm_layers":    1,     # Reduced from 2
+    "dropout":          0.0,   # MIOpen dropout kernel broken on gfx1100/Win — use Python-layer dropout
+    "epochs":           60,    # More epochs — smaller model needs longer to converge
+    "batch_size":       64,    # Smaller batch — more gradient updates per epoch
+    "learning_rate":    0.001, # Higher LR — smaller model can handle it
+    "patience":         15,    # More patience — give it time to find signal
 }
 
 
@@ -92,23 +98,26 @@ class GatedLinearUnit(nn.Module):
 
 
 class VariableSelectionNetwork(nn.Module):
-    """Learns which input features are most relevant at each timestep."""
+    """Learns which input features are most relevant at each timestep.
+
+    Uses sigmoid gating instead of softmax — sigmoid allows sparse selection
+    (multiple features can be near-zero simultaneously), whereas softmax on
+    100 features produces near-uniform weights ~0.01 each, which is essentially
+    no selection at all. Sigmoid lets the network learn to suppress most features
+    and amplify the small subset that matter.
+    """
     def __init__(self, input_size: int, d_model: int, dropout: float):
         super().__init__()
         self.input_proj = nn.Linear(input_size, d_model)
-        self.weight_net = nn.Sequential(
-            nn.Linear(input_size, input_size),
-            nn.ReLU(),
-            nn.Linear(input_size, input_size),
-            nn.Softmax(dim=-1),
-        )
+        # Single linear gate with sigmoid — sparse, interpretable
+        self.gate = nn.Linear(input_size, input_size)
         self.dropout = nn.Dropout(dropout)
         self.norm    = MIOpenSafeLayerNorm(d_model)
 
     def forward(self, x):
         # x: (batch, seq_len, input_size)
-        weights = self.weight_net(x)             # (batch, seq_len, input_size)
-        x_weighted = x * weights                 # Feature selection
+        gates      = torch.sigmoid(self.gate(x))   # Sparse feature selection
+        x_weighted = x * gates
         return self.norm(self.dropout(self.input_proj(x_weighted)))
 
 
@@ -135,14 +144,14 @@ class TemporalFusionTransformer(nn.Module):
         # 1. Variable selection — learn which features matter
         self.var_select = VariableSelectionNetwork(input_size, d_model, dropout)
 
-        # 2. Local processing — LSTM captures local temporal patterns
-        # NOTE: nn.LSTM dropout triggers MIOpen's JIT kernel (broken on gfx1100+MSVC14.39).
-        # Use dropout=0.0 in LSTM and apply a standard nn.Dropout after instead.
-        self.lstm = nn.LSTM(
-            d_model, d_model, n_lstm_layers,
-            batch_first=True, dropout=0.0  # MIOpen fused dropout disabled — see lstm_dropout below
+        # 2. Local processing — nn.GRU (CUDA-fused, ~100x faster than manual loop)
+        # Note: DirectML doesn't support fused RNN, but this project runs on CUDA.
+        # If DirectML is needed, swap back to manual GRU loop.
+        self.gru = nn.GRU(
+            input_size=d_model, hidden_size=d_model,
+            num_layers=n_lstm_layers, batch_first=True, dropout=0.0
         )
-        self.lstm_dropout = nn.Dropout(dropout)  # Applied in Python, not MIOpen
+        self.lstm_dropout = nn.Dropout(dropout)
         self.lstm_glu = GatedLinearUnit(d_model, dropout)
 
         # 3. Temporal self-attention — captures long-range dependencies
@@ -164,9 +173,11 @@ class TemporalFusionTransformer(nn.Module):
     def forward(self, x):
         # x: (batch, seq_len, input_size)
         x = self.var_select(x)                    # Feature selection
-        lstm_out, _ = self.lstm(x)                # Local patterns
-        lstm_out = self.lstm_dropout(lstm_out)    # Python dropout (MIOpen kernel disabled)
-        x = self.lstm_glu(lstm_out)               # Gate LSTM output
+
+        # GRU forward pass — fused CUDA kernel, fast
+        x, _ = self.gru(x)                        # (batch, seq_len, d_model)
+        lstm_out = self.lstm_dropout(x)
+        x = self.lstm_glu(lstm_out)               # Gate GRU output
         x = self.attention(x)                     # Long-range patterns
         x = self.attn_glu(x)                      # Gate attention output
         x = self.ff_norm(self.ff(x[:, -1, :]) + x[:, -1, :])  # Last timestep
@@ -198,7 +209,9 @@ def train(X_train: np.ndarray, y_train: np.ndarray,
     ).to(DEVICE)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=p["learning_rate"], weight_decay=1e-4)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=p["epochs"])
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+        optimizer, T_0=10, T_mult=2, eta_min=1e-6
+    )
 
     # Weight UP/DOWN 4x higher than NEUTRAL to combat class imbalance
     class_weights = torch.FloatTensor([2.0, 0.5, 2.0]).to(DEVICE)

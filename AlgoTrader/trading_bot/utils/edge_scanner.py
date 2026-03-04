@@ -97,14 +97,14 @@ OPTIONAL_GROUPS = ["trend", "momentum", "macd", "bollinger",
 
 EDGE_MIN_ACCURACY   = 0.36    # Must beat 33% random baseline by a margin
 EDGE_MIN_WIN_RATE   = 0.36    # 36% WR is profitable at 2:1 RR (breakeven = 33%)
-EDGE_MIN_PROF_FOLDS = 0.34    # At least 1/3 of folds profitable (avoids all-loss)
+EDGE_MIN_PROF_FOLDS = 0.50    # At least half of folds profitable (stricter with 6 folds)
 EDGE_MIN_SHARPE     = 0.2     # Modest positive risk-adjusted return
 
 # Minimum trades per fold to consider the result meaningful
 MIN_TRADES_PER_FOLD = 3
 
 # Walk-forward config for the scanner (lighter than the full pipeline)
-SCAN_N_FOLDS    = 3     # 3 OOS folds is enough to detect consistency
+SCAN_N_FOLDS    = 6     # 6 OOS folds — matches walkforward rigour better
 SCAN_TRAIN_MULT = 3     # train = 3x test window
 SCAN_EPOCHS     = 30    # Fast training; full pipeline uses 50+
 SCAN_PATIENCE   = 7
@@ -224,6 +224,8 @@ def quick_walk_forward(feat_df: pd.DataFrame,
     Returns list of fold result dicts.
     """
     from models.lstm_model import LSTMClassifier, SequenceDataset, DEVICE
+    from models import cnn_model, tft_model
+    from models.ensemble import weighted_ensemble, optimise_weights
     from torch.utils.data import DataLoader
     import torch
     import torch.nn as nn
@@ -407,8 +409,23 @@ def quick_walk_forward(feat_df: pd.DataFrame,
         else:
             probs3 = all_probs
 
-        from models.ensemble import generate_signals
-        signals = generate_signals(probs3, threshold=0.60)
+        from models.ensemble import generate_signals, weighted_ensemble, optimise_weights
+        # Use full ensemble for consistency with walkforward
+        # Train CNN and TFT on same fold data
+        try:
+            cnn  = cnn_model.train(X_train, y_train, X_test, y_test, f"scan_{fold}")
+            cnn_p = cnn_model.predict_proba(cnn, X_test)
+            tft  = tft_model.train(X_train, y_train, X_test, y_test, f"scan_{fold}")
+            tft_p = tft_model.predict_proba(tft, X_test)
+            blended = weighted_ensemble(tft_p, cnn_p, probs3)
+        except Exception:
+            blended = probs3  # fallback to LSTM only if ensemble fails
+        # Percentile-based threshold: fire on top 15% most confident signals
+        up_p   = blended[:, 2]
+        dn_p   = blended[:, 0]
+        best_p = np.maximum(up_p, dn_p)
+        thresh = float(np.percentile(best_p[best_p > 0.34], 85)) if (best_p > 0.34).sum() > 5 else 0.40
+        signals = generate_signals(blended, threshold=thresh)
 
         orig_pos = s.MAX_POSITION_PCT
         s.MAX_POSITION_PCT = 0.25

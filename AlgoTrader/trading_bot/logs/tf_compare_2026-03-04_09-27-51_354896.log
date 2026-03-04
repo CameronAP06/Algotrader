@@ -1,0 +1,50 @@
+2026-03-04 09:27:51.769 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:232 - Loaded DOGE/USD 4h from cache (10950 rows)
+2026-03-04 09:27:51.769 | INFO     | data.feature_engineer:build_features:334 - Building features for DOGE/USD (10950 rows)
+2026-03-04 09:27:51.866 | INFO     | data.feature_engineer:build_features:359 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-03-04 09:27:51.871 | INFO     | data.feature_engineer:build_features:362 - Label distribution: DOWN=1423 NEUTRAL=7859 UP=1468
+2026-03-04 09:27:51.872 | INFO     | data.feature_engineer:build_features:369 - Regime: ranging=4061 trending_up=2982 trending_down=3707
+2026-03-04 09:27:51.889 | INFO     | __main__:main:205 - Data split — Train: 6450, Val: 2150, Test: 2150
+2026-03-04 09:27:51.889 | INFO     | __main__:main:212 - 
+──────────────────────────────────────── LightGBM ────────────────────────────────────────
+2026-03-04 09:27:52.130 | INFO     | models.lgbm_model:train:44 - Training LightGBM for DOGE/USD — 6450 train samples, 2150 val samples, 100 features
+2026-03-04 09:27:52.324 | SUCCESS  | models.lgbm_model:train:64 - LightGBM val_acc=0.6842 | best_iter=1 | pred_dist: DOWN=0 NEUTRAL=2150 UP=0
+2026-03-04 09:27:52.329 | INFO     | __main__:main:221 - Top 20 features: ema_200(5), bb_width_20(5), obv(5), macd_hist(4), atr_pct_7(4), adx(4), hurst_approx(4), vol_regime(4), close_vs_sma_200(3), atr_14(3), vol_sma_7(3), dow_sin(3), close_vs_sma_7(2), close_vs_sma_50(2), sma_200(2), macd_signal(2), bb_lower_20(2), atr_pct_14(2), vol_ratio_21(2), close_vs_vwap(2)
+2026-03-04 09:27:52.330 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.4): BUY=0 (0.0%)  SELL=0 (0.0%)  HOLD=2150 (100.0%)
+2026-03-04 09:27:52.333 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 0/0 removed (0% survive) — trend=0 vol=0 volume=0 funding=0 regime=0
+2026-03-04 09:27:52.336 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=0.00% | Sharpe=0.00 | MaxDD=0.00% | WinRate=0.00% | Trades=0 (L:0 S:0)
+2026-03-04 09:27:52.337 | INFO     | __main__:main:227 - 
+──────────────────────────────────────── LSTM ────────────────────────────────────────
+2026-03-04 09:27:53.551 | INFO     | models.lstm_model:train:108 - Training LSTM for DOGE/USD on cuda — 6426 train samples
+2026-03-04 09:27:54.056 | INFO     | models.lstm_model:train:139 -   Epoch   0 | val_loss=1.1112 | val_acc=0.5917
+2026-03-04 09:27:56.034 | INFO     | models.lstm_model:train:148 - Early stopping at epoch 7
+2026-03-04 09:27:56.036 | SUCCESS  | models.lstm_model:train:152 - LSTM best val_loss: 1.1112
+2026-03-04 09:27:57.399 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.4099889054894447): BUY=39 (1.8%)  SELL=86 (4.0%)  HOLD=2025 (94.2%)
+2026-03-04 09:27:57.399 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 2/125 removed (98% survive) — trend=0 vol=2 volume=0 funding=0 regime=0
+2026-03-04 09:27:57.407 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=7.36% | Sharpe=0.74 | MaxDD=-5.72% | WinRate=40.43% | Trades=47 (L:20 S:27)
+2026-03-04 09:27:57.408 | INFO     | __main__:main:236 - 
+──────────────────────────────────────── CNN ────────────────────────────────────────
+2026-03-04 09:27:57.416 | INFO     | models.cnn_model:train:116 - Training 1D CNN for DOGE/USD on cuda — 6426 train samples
+2026-03-04 09:27:57.903 | INFO     | models.cnn_model:train:145 -   Epoch   0 | val_loss=1.1946 | val_acc=0.4812
+2026-03-04 09:28:00.440 | INFO     | models.cnn_model:train:154 - Early stopping at epoch 7
+2026-03-04 09:28:00.442 | SUCCESS  | models.cnn_model:train:158 - 1D CNN best val_loss: 1.1946
+2026-03-04 09:28:02.650 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.5520579814910889): BUY=0 (0.0%)  SELL=204 (9.5%)  HOLD=1946 (90.5%)
+2026-03-04 09:28:02.657 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 3/204 removed (99% survive) — trend=0 vol=0 volume=3 funding=0 regime=0
+2026-03-04 09:28:02.662 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=7.57% | Sharpe=1.17 | MaxDD=-9.30% | WinRate=45.45% | Trades=33 (L:0 S:33)
+2026-03-04 09:28:02.663 | INFO     | __main__:main:245 - 
+──────────────────────────────────────── TFT ────────────────────────────────────────
+2026-03-04 09:28:02.672 | INFO     | models.tft_model:<module>:33 - TFT using cuda
+2026-03-04 09:28:02.683 | INFO     | models.tft_model:train:237 - Training TFT for DOGE/USD on cuda — 6426 train samples
+2026-03-04 09:28:08.104 | INFO     | models.tft_model:train:268 -   Epoch   0 | val_loss=1.1381 | val_acc=0.5273
+2026-03-04 09:28:34.700 | INFO     | models.tft_model:train:268 -   Epoch   5 | val_loss=1.3565 | val_acc=0.4802
+2026-03-04 09:29:00.796 | INFO     | models.tft_model:train:268 -   Epoch  10 | val_loss=1.7709 | val_acc=0.4718
+2026-03-04 09:29:27.839 | INFO     | models.tft_model:train:268 -   Epoch  15 | val_loss=2.0514 | val_acc=0.4478
+2026-03-04 09:29:27.839 | INFO     | models.tft_model:train:277 - Early stopping at epoch 15
+2026-03-04 09:29:27.839 | SUCCESS  | models.tft_model:train:281 - TFT best val_loss: 1.1381
+2026-03-04 09:29:53.792 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.41629994213581084): BUY=55 (2.6%)  SELL=80 (3.7%)  HOLD=2015 (93.7%)
+2026-03-04 09:29:53.797 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 1/135 removed (99% survive) — trend=0 vol=0 volume=1 funding=0 regime=0
+2026-03-04 09:29:53.801 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=1.61% | Sharpe=0.20 | MaxDD=-6.94% | WinRate=36.11% | Trades=36 (L:21 S:15)
+2026-03-04 09:29:53.803 | INFO     | __main__:main:254 - 
+──────────────────────────────────────── Ensemble ────────────────────────────────────────
+2026-03-04 09:29:53.804 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.39947048188701567): BUY=5 (0.2%)  SELL=136 (6.3%)  HOLD=2009 (93.4%)
+2026-03-04 09:29:53.807 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 2/141 removed (99% survive) — trend=0 vol=0 volume=2 funding=0 regime=0
+2026-03-04 09:29:53.811 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=-7.53% | Sharpe=-0.84 | MaxDD=-9.19% | WinRate=29.63% | Trades=27 (L:2 S:25)

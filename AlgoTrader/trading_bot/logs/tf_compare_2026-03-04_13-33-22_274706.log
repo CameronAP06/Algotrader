@@ -1,0 +1,33 @@
+2026-03-04 13:33:22.276 | INFO     | __main__:run_oot:70 - Fetching 3000 days of history for LINK/USD...
+2026-03-04 13:33:22.669 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:232 - Loaded LINK/USD 4h from cache (10950 rows)
+2026-03-04 13:33:22.674 | INFO     | data.feature_engineer:build_features:334 - Building features for unknown (10950 rows)
+2026-03-04 13:33:22.771 | INFO     | data.feature_engineer:build_features:359 - Dropped 200 NaN/inf rows → 10750 usable rows
+2026-03-04 13:33:22.771 | INFO     | data.feature_engineer:build_features:362 - Label distribution: DOWN=1524 NEUTRAL=7568 UP=1658
+2026-03-04 13:33:22.775 | INFO     | data.feature_engineer:build_features:369 - Regime: ranging=4295 trending_up=2816 trending_down=3639
+2026-03-04 13:33:22.781 | INFO     | __main__:run_oot:106 - Data split:
+2026-03-04 13:33:22.782 | INFO     | __main__:run_oot:107 -   OOT   (unseen): bars 0     → 4211   = 4211 bars (702 days)  [0 → 4210]
+2026-03-04 13:33:22.782 | INFO     | __main__:run_oot:110 -   Train:          bars 4211 → 8134 = 3923 bars
+2026-03-04 13:33:22.782 | INFO     | __main__:run_oot:111 -   Val:            bars 8134 → 9441   = 1307 bars
+2026-03-04 13:33:22.783 | INFO     | __main__:run_oot:112 -   Test:           bars 9441 → 10750  = 1309 bars
+2026-03-04 13:33:22.791 | INFO     | __main__:run_oot:132 - Training LSTM on 3923 bars...
+2026-03-04 13:33:24.008 | INFO     | models.lstm_model:train:118 - Training LSTM for LINK/USD on cuda — 3899 train samples
+2026-03-04 13:33:24.441 | INFO     | models.lstm_model:train:148 -   Epoch   0 | val_loss=1.1437 | val_acc=0.4996 | lr=0.000976
+2026-03-04 13:33:24.625 | INFO     | models.lstm_model:train:148 -   Epoch   1 | val_loss=1.1183 | val_acc=0.5620 | lr=0.000905
+2026-03-04 13:33:24.811 | INFO     | models.lstm_model:train:148 -   Epoch   2 | val_loss=1.1356 | val_acc=0.5316 | lr=0.000794
+2026-03-04 13:33:24.998 | INFO     | models.lstm_model:train:148 -   Epoch   3 | val_loss=1.2031 | val_acc=0.5456 | lr=0.000655
+2026-03-04 13:33:25.174 | INFO     | models.lstm_model:train:148 -   Epoch   4 | val_loss=1.2465 | val_acc=0.5776 | lr=0.000501
+2026-03-04 13:33:25.357 | INFO     | models.lstm_model:train:148 -   Epoch   5 | val_loss=1.2992 | val_acc=0.5581 | lr=0.000346
+2026-03-04 13:33:25.545 | INFO     | models.lstm_model:train:148 -   Epoch   6 | val_loss=1.3719 | val_acc=0.5557 | lr=0.000207
+2026-03-04 13:33:25.716 | INFO     | models.lstm_model:train:148 -   Epoch   7 | val_loss=1.3908 | val_acc=0.5682 | lr=0.000096
+2026-03-04 13:33:25.928 | INFO     | models.lstm_model:train:148 -   Epoch   8 | val_loss=1.3958 | val_acc=0.5565 | lr=0.000025
+2026-03-04 13:33:25.929 | INFO     | models.lstm_model:train:157 - Early stopping at epoch 8
+2026-03-04 13:33:25.930 | SUCCESS  | models.lstm_model:train:161 - LSTM best val_loss: 1.1183
+2026-03-04 13:33:25.930 | INFO     | __main__:run_oot:171 - Running inference on standard TEST window...
+2026-03-04 13:33:26.783 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.511702913045883): BUY=39 (3.0%)  SELL=54 (4.1%)  HOLD=1216 (92.9%)
+2026-03-04 13:33:26.789 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 2/93 removed (98% survive) — trend=0 vol=0 volume=2 funding=0 regime=0
+2026-03-04 13:33:26.791 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=2.39% | Sharpe=0.38 | MaxDD=-6.84% | WinRate=39.29% | Trades=28 (L:11 S:17)
+2026-03-04 13:33:26.791 | INFO     | __main__:run_oot:174 - Running inference on OOT (historical, never-seen) window...
+2026-03-04 13:33:29.543 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.500080868601799): BUY=163 (3.9%)  SELL=108 (2.6%)  HOLD=3940 (93.6%)
+2026-03-04 13:33:29.552 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 0/271 removed (100% survive) — trend=0 vol=0 volume=0 funding=0 regime=0
+2026-03-04 13:33:29.557 | INFO     | backtest.engine:_compute_metrics:223 -  Results: Return=17.87% | Sharpe=0.60 | MaxDD=-14.13% | WinRate=40.51% | Trades=79 (L:46 S:33)
+2026-03-04 13:33:29.561 | SUCCESS  | __main__:save_results:240 - Results saved -> backtest\results\oot_LINK_USD_4h_20260304_133329.csv

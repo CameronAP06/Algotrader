@@ -1,0 +1,1 @@
+symbol,timeframe,n_bars,n_train,n_val,n_test,label_down,label_neutral,label_up,n_buy,n_sell,n_trades,win_rate,gross_return,net_return,sharpe,max_drawdown,mean_conf,max_conf,pct_pred_down,pct_pred_neutral,pct_pred_up,status,elapsed_s

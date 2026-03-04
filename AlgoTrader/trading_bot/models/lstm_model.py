@@ -14,7 +14,13 @@ from pathlib import Path
 from loguru import logger
 from config.settings import LSTM_PARAMS, MODEL_DIR
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+try:
+    import torch_directml
+    DEVICE = torch_directml.device()
+    logger.info("LSTM using DirectML (AMD GPU)")
+except ImportError:
+    DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    logger.info(f"LSTM using {DEVICE}")
 
 class MIOpenSafeLayerNorm(nn.Module):
     """LayerNorm avoiding MIOpen's broken gfx1100+MSVC14.39 reduction kernel."""
@@ -95,9 +101,13 @@ def train(X_train: np.ndarray, y_train: np.ndarray,
         dropout     = p["dropout"],
     ).to(DEVICE)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=p["learning_rate"])
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=5, factor=0.5)
-    # Weight UP/DOWN classes 4x higher than NEUTRAL to counter class imbalance
+    optimizer = torch.optim.AdamW(model.parameters(), lr=p["learning_rate"], weight_decay=1e-4)
+    # CosineAnnealingWarmRestarts: LR decays and resets every T_0 epochs.
+    # Decoupled from early stopping — no race condition with patience counter.
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+        optimizer, T_0=10, T_mult=2, eta_min=1e-6
+    )
+    # Focal-style weighting: UP/DOWN 4x NEUTRAL to counter ~73% NEUTRAL imbalance
     class_weights = torch.FloatTensor([2.0, 0.5, 2.0]).to(DEVICE)
     criterion = nn.CrossEntropyLoss(weight=class_weights)
 
@@ -133,10 +143,9 @@ def train(X_train: np.ndarray, y_train: np.ndarray,
 
         val_loss /= len(val_dl)
         val_acc   = correct / total
-        scheduler.step(val_loss)
+        scheduler.step()
 
-        if epoch % 10 == 0:
-            logger.info(f"  Epoch {epoch:3d} | val_loss={val_loss:.4f} | val_acc={val_acc:.4f}")
+        logger.info(f"  Epoch {epoch:3d} | val_loss={val_loss:.4f} | val_acc={val_acc:.4f} | lr={optimizer.param_groups[0]['lr']:.6f}")
 
         if val_loss < best_val_loss:
             best_val_loss = val_loss
