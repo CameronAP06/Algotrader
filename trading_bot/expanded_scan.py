@@ -32,7 +32,7 @@ import numpy as np
 from loguru import logger
 from sklearn.preprocessing import StandardScaler
 
-from timeframe_comparison import fetch_ohlcv_timeframe, fetch_ohlcv_8h
+from timeframe_comparison import fetch_ohlcv_timeframe, fetch_ohlcv_8h, fetch_ohlcv_2h
 from data.feature_engineer import build_features, get_feature_columns
 from backtest.engine import BacktestEngine
 from backtest.filters import apply_filters
@@ -66,28 +66,30 @@ FOREX_PAIRS = [
 
 ALL_PAIRS = CRYPTO_PAIRS + FOREX_PAIRS
 
-TIMEFRAMES = ["1h", "4h", "8h", "12h", "1d", "1w", "2w"]
+TIMEFRAMES = ["1h", "2h", "4h", "8h", "12h", "1d", "1w", "2w"]
 
 # Minimum bars per timeframe (need enough for OOT + training)
 MIN_BARS = {
     "1h":  5000,
+    "2h":  3000,   # resampled from 1h
     "4h":  3000,
     "8h":  1500,   # resampled from 4h
-    "12h": 1000,   # resampled from 4h
+    "12h": 1000,   # native 12h CSV
     "1d":   500,
     "1w":   150,
     "2w":    75,
 }
 
-# History to fetch per timeframe
+# History to fetch per timeframe — capped at ~4 years to avoid stale regimes
 HISTORY_DAYS = {
-    "1h":  1825,
-    "4h":  1825,
-    "8h":  1825,   # resampled from 4h
-    "12h": 1825,   # resampled from 4h
-    "1d":  3650,
-    "1w":  3650,
-    "2w":  3650,
+    "1h":  1460,
+    "2h":  1460,   # resampled from 1h
+    "4h":  1460,
+    "8h":  1460,   # resampled from 4h
+    "12h": 1460,   # native 12h CSV
+    "1d":  1460,
+    "1w":  1460,
+    "2w":  1460,
 }
 
 TRAIN_RATIO = 0.60
@@ -98,9 +100,9 @@ MIN_TRADES  = 5
 
 _HDR = (
     f"{'Symbol':<12} {'TF':>3} {'Class':>6} {'Bars':>6} {'Trades':>7} "
-    f"{'WR':>6} {'Net':>7} {'Sharpe':>7} {'MaxDD':>7} {'Status'}"
+    f"{'WR':>6} {'Net':>7} {'Ann':>7} {'Sharpe':>7} {'MaxDD':>7} {'Status'}"
 )
-_SEP = "─" * 85
+_SEP = "─" * 93
 
 
 # ── Core ──────────────────────────────────────────────────────────────────────
@@ -113,9 +115,11 @@ def asset_class(symbol: str) -> str:
 def run_symbol(symbol: str, timeframe: str) -> dict | None:
     t0 = time.time()
     try:
-        days = HISTORY_DAYS.get(timeframe, 1825)
+        days = HISTORY_DAYS.get(timeframe, 1460)
         if timeframe == "8h":
             raw = fetch_ohlcv_8h(symbol, history_days=days)
+        elif timeframe == "2h":
+            raw = fetch_ohlcv_2h(symbol, history_days=days)
         else:
             raw = fetch_ohlcv_timeframe(symbol, timeframe, history_days=days)
 
@@ -179,6 +183,16 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
         n_buy   = int((sig_arr == "BUY").sum())
         n_sell  = int((sig_arr == "SELL").sum())
 
+        # Annualised return — normalises across different history lengths/timeframes
+        if "timestamp" in feat_test.columns and len(feat_test) > 1:
+            test_days = (feat_test["timestamp"].iloc[-1] - feat_test["timestamp"].iloc[0]).total_seconds() / 86400
+            if test_days > 1:
+                ann_return = round((1 + net) ** (365.0 / test_days) - 1, 4)
+            else:
+                ann_return = net
+        else:
+            ann_return = net
+
         elapsed = time.time() - t0
 
         if n_trades < MIN_TRADES:
@@ -211,6 +225,7 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
             "n_trades":         n_trades,
             "win_rate":         round(wr, 4),
             "net_return":       round(net, 4),
+            "annualised_return": ann_return,
             "sharpe":           round(sharpe, 3),
             "max_drawdown":     round(dd, 4),
             "mean_conf":        round(mean_conf, 4),
@@ -225,10 +240,11 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
 
 
 def print_row(r: dict):
+    ann = r.get("annualised_return", r["net_return"])
     print(
         f"  {r['symbol']:<12} {r['timeframe']:>3}  {r['asset_class']:>6}  "
         f"{r['n_bars']:>5}  {r['n_trades']:>6}  "
-        f"{r['win_rate']:>5.1%}  {r['net_return']:>+6.1%}  "
+        f"{r['win_rate']:>5.1%}  {r['net_return']:>+6.1%}  {ann:>+6.1%}  "
         f"{r['sharpe']:>6.2f}  {r['max_drawdown']:>6.1%}  {r['status']}"
     )
 
@@ -259,12 +275,12 @@ def print_summary(results: list):
         print("\nNo valid results.")
         return
 
-    ranked     = sorted(valid, key=lambda r: r["net_return"], reverse=True)
+    ranked     = sorted(valid, key=lambda r: r.get("annualised_return", r["net_return"]), reverse=True)
     profitable = [r for r in ranked if r["net_return"] > 0]
 
-    print(f"\n{'='*85}")
+    print(f"\n{'='*93}")
     print(f"  EXPANDED ENSEMBLE SCAN — FINAL SUMMARY")
-    print(f"{'='*85}")
+    print(f"{'='*93}")
     print(f"  {_HDR}")
     print("  " + _SEP)
     for r in ranked[:30]:   # Top 30
@@ -272,6 +288,7 @@ def print_summary(results: list):
     print("  " + _SEP)
 
     print(f"\n  Profitable: {len(profitable)}/{len(ranked)} symbol/timeframe combos")
+    print(f"  (Ranked by annualised return — normalised for fair cross-timeframe comparison)")
 
     # Best per asset class
     for cls in ["crypto", "forex"]:
@@ -287,8 +304,9 @@ def print_summary(results: list):
                  if r["net_return"] > 0.04 and r["win_rate"] >= 0.38]
     print(f"\n  SHORTLIST for OOT validation ({len(shortlist)} combos):")
     for r in shortlist:
+        ann = r.get("annualised_return", r["net_return"])
         print(f"    {r['symbol']:<12} {r['timeframe']:>3} | "
-              f"{r['net_return']:+.1%} net | {r['win_rate']:.1%} WR | "
+              f"{r['net_return']:+.1%} net | {ann:+.1%} ann | {r['win_rate']:.1%} WR | "
               f"{r['sharpe']:.2f} Sharpe | {r['asset_class']}")
 
     # Timeframe comparison for symbols appearing in multiple TFs
@@ -346,13 +364,13 @@ def main():
             completed = load_completed(csv_path)
             logger.info(f"Resuming from {csv_path} — {len(completed)} combos already done")
 
-    print(f"\n{'='*85}")
+    print(f"\n{'='*93}")
     print(f"  EXPANDED ENSEMBLE SCAN")
     print(f"  Symbols: {len(symbols)} | Timeframes: {timeframes} | Combos: {total}")
     print(f"  Asset classes: {args.asset_class} | Models per combo: {N_MODELS}")
     print(f"  Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"  Output:  {csv_path}")
-    print(f"{'='*85}")
+    print(f"{'='*93}")
     print(f"  {_HDR}")
     print("  " + _SEP)
 
@@ -369,8 +387,8 @@ def main():
                           "label_down","label_neutral","label_up"]:
                     if k in r:
                         r[k] = int(r[k])
-                for k in ["win_rate","net_return","sharpe","max_drawdown",
-                          "mean_conf","elapsed_s"]:
+                for k in ["win_rate","net_return","annualised_return","sharpe",
+                          "max_drawdown","mean_conf","elapsed_s"]:
                     if k in r:
                         r[k] = float(r[k])
 

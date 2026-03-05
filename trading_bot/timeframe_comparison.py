@@ -339,6 +339,46 @@ def fetch_ohlcv_8h(symbol: str, history_days: int) -> pd.DataFrame:
     return df_8h
 
 
+def resample_to_2h(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Resample 1h OHLCV candles into 2h candles.
+    Kraken doesn't support 2h natively — synthesised from 1h data.
+    Groups every 2 consecutive 1h bars: open=first, high=max, low=min,
+    close=last, volume=sum. Timestamp = start of the 2h window.
+    """
+    df = df.copy().sort_values("timestamp").reset_index(drop=True)
+
+    ts = df["timestamp"]
+    if hasattr(ts.iloc[0], 'tzinfo') and ts.iloc[0].tzinfo is not None:
+        epoch = pd.Timestamp("1970-01-01", tz="UTC")
+    else:
+        epoch = pd.Timestamp("1970-01-01")
+
+    hours_since_epoch = (ts - epoch).dt.total_seconds() / 3600
+    df["_2h_bucket"] = (hours_since_epoch // 2).astype(int)
+
+    agg = df.groupby("_2h_bucket").agg(
+        timestamp=("timestamp", "first"),
+        open=("open",    "first"),
+        high=("high",    "max"),
+        low=("low",      "min"),
+        close=("close",  "last"),
+        volume=("volume","sum"),
+    ).reset_index(drop=True)
+
+    return agg
+
+
+def fetch_ohlcv_2h(symbol: str, history_days: int) -> pd.DataFrame:
+    """Fetch 1h data from Kraken and resample to 2h."""
+    df_1h = fetch_ohlcv_timeframe(symbol, "1h", history_days)
+    if df_1h is None or len(df_1h) < 2:
+        return pd.DataFrame()
+    df_2h = resample_to_2h(df_1h)
+    logger.info(f"{symbol} 2h (resampled): {len(df_2h)} candles")
+    return df_2h
+
+
 # ─── Single Pipeline Run ─────────────────────────────────────────────────────
 
 def run_pipeline_for_timeframe(symbol: str, raw_df: pd.DataFrame,

@@ -1,1 +1,2 @@
-trading_bot/data/OHLC_Kraken/*.csv
+# Kraken historical OHLCV data — large CSV files, must not be committed
+trading_bot/data/OHLC_Kraken/

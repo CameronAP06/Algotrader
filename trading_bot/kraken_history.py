@@ -13,6 +13,7 @@ CSV columns (no header): timestamp, open, high, low, close, volume, trades
 
 Supported timeframes and their minute values:
   1h  → 60
+  2h  → resample from 1h (60)
   4h  → 240
   1d  → 1440
   8h  → resample from 4h (240)
@@ -91,6 +92,7 @@ SYMBOL_TO_KRAKEN = {
 # Timeframe → minute interval in CSV filename
 TF_TO_MINUTES = {
     "1h":  60,
+    "2h":  60,    # load 1h, then resample
     "4h":  240,
     "8h":  240,   # load 4h, then resample
     "12h": 720,   # native 12h CSV
@@ -99,7 +101,7 @@ TF_TO_MINUTES = {
     "2w":  1440,  # load 1d, then resample
 }
 
-NEEDS_RESAMPLE = {"8h", "1w", "2w"}
+NEEDS_RESAMPLE = {"2h", "8h", "1w", "2w"}
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -149,8 +151,8 @@ def _topup_from_api(symbol: str, timeframe: str, after: pd.Timestamp) -> pd.Data
 
     # Map to API timeframe (8h isn't native, use 4h)
     api_tf = timeframe
-    if timeframe in ("8h", "1w", "2w"):
-        api_tf_map = {"8h": "4h", "1w": "1d", "2w": "1d"}
+    if timeframe in ("2h", "8h", "1w", "2w"):
+        api_tf_map = {"2h": "1h", "8h": "4h", "1w": "1d", "2w": "1d"}
         api_tf = api_tf_map[timeframe]
 
     tf_hours = {"1h": 1, "4h": 4, "1d": 24}
@@ -192,7 +194,14 @@ def _resample(df: pd.DataFrame, timeframe: str) -> pd.DataFrame:
     """Resample a lower timeframe DataFrame to a higher one."""
     df = df.copy().sort_values("timestamp").reset_index(drop=True)
 
-    if timeframe == "8h":
+    if timeframe == "2h":
+        # Group 1h → 2h: every 2 bars
+        ts = df["timestamp"]
+        epoch = pd.Timestamp("1970-01-01")
+        hours = (ts - epoch).dt.total_seconds() / 3600
+        df["_bucket"] = (hours // 2).astype(int)
+
+    elif timeframe == "8h":
         # Group 4h → 8h: every 2 bars
         ts = df["timestamp"]
         epoch = pd.Timestamp("1970-01-01")
@@ -279,7 +288,7 @@ def fetch_ohlcv_full(
 
     # 3. Top up with API to get recent bars
     last_ts  = df_hist["timestamp"].max()
-    df_topup = _topup_from_api(symbol, timeframe if timeframe not in NEEDS_RESAMPLE else TF_TO_MINUTES.get(timeframe, "4h"), last_ts)
+    df_topup = _topup_from_api(symbol, timeframe, last_ts)
 
     if not df_topup.empty:
         df_hist = pd.concat([df_hist, df_topup], ignore_index=True)
@@ -302,7 +311,7 @@ def fetch_ohlcv_full(
 def _api_only_fallback(symbol: str, timeframe: str) -> pd.DataFrame:
     """Last resort — just use the API (720 bar limit applies)."""
     import ccxt
-    api_tf_map = {"8h": "4h", "1w": "1d", "2w": "1d"}
+    api_tf_map = {"2h": "1h", "8h": "4h", "1w": "1d", "2w": "1d"}
     api_tf = api_tf_map.get(timeframe, timeframe)
 
     logger.warning(f"API-only fetch for {symbol} {api_tf} (max 720 bars)")
