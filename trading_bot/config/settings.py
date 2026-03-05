@@ -65,10 +65,10 @@ XGB_PARAMS = {
 }
 
 LSTM_PARAMS = {
-    "sequence_length": 24, "hidden_size": 64,
-    "num_layers": 1, "dropout": 0.2,
-    "epochs": 30, "batch_size": 128,
-    "learning_rate": 0.001, "patience": 7,
+    "sequence_length": 60, "hidden_size": 128,
+    "num_layers": 2, "dropout": 0.2,
+    "epochs": 100, "batch_size": 64,
+    "learning_rate": 0.001, "patience": 25,
 }
 
 ENSEMBLE_WEIGHTS = {"lgbm": 0.40, "xgb": 0.35, "lstm": 0.25}

@@ -216,11 +216,24 @@ SYMBOL_MAP = {
 # ─── Data Fetching ───────────────────────────────────────────────────────────
 
 def fetch_ohlcv_timeframe(symbol: str, timeframe: str, history_days: int) -> pd.DataFrame:
-    """Fetch OHLCV data at a specific timeframe from Binance."""
+    """Fetch OHLCV data at a specific timeframe from Kraken.
+    Uses full historical CSV if available, falls back to API (720 bar limit).
+    """
     import ccxt
     from datetime import datetime, timedelta
 
-    binance_symbol = SYMBOL_MAP.get(symbol, symbol.replace("/", "/"))
+    # Try full history loader first
+    try:
+        from kraken_history import fetch_ohlcv_full, get_history_dir
+        history_dir = get_history_dir()
+        if history_dir:
+            df = fetch_ohlcv_full(symbol, timeframe, history_dir)
+            if df is not None and len(df) > 0:
+                return df
+    except ImportError:
+        pass
+
+    kraken_symbol = symbol  # Kraken uses USD pairs natively, no remapping needed
     cache_path = Path(f"data/raw/{symbol.replace('/','_')}_{timeframe}.csv")
 
     if cache_path.exists():
@@ -233,27 +246,39 @@ def fetch_ohlcv_timeframe(symbol: str, timeframe: str, history_days: int) -> pd.
             return df
 
     logger.info(f"Fetching {symbol} [{timeframe}] — {history_days} days...")
-    exchange = ccxt.binance({"enableRateLimit": True})
+    exchange = ccxt.kraken({"enableRateLimit": True, "rateLimit": 3000})
 
     since_ms  = int((datetime.utcnow() - timedelta(days=history_days)).timestamp() * 1000)
     all_ohlcv = []
-    batch     = 1000
+    batch     = 720  # Kraken max candles per request
 
-    while True:
+    now_ms   = int(datetime.utcnow().timestamp() * 1000)
+    end_ms   = now_ms - 2 * 60 * 60 * 1000   # stop 2h before now
+    retries  = 0
+
+    while since_ms < end_ms:
         try:
-            ohlcv = exchange.fetch_ohlcv(binance_symbol, timeframe, since=since_ms, limit=batch)
+            ohlcv = exchange.fetch_ohlcv(kraken_symbol, timeframe, since=since_ms, limit=batch)
+            retries = 0
         except Exception as e:
             logger.error(f"Fetch error {symbol} {timeframe}: {e}")
-            break
+            retries += 1
+            if retries >= 3:
+                break
+            time.sleep(5)
+            continue
 
         if not ohlcv:
             break
 
         all_ohlcv.extend(ohlcv)
-        if len(ohlcv) < batch:
+        last_ts = ohlcv[-1][0]
+        if last_ts >= end_ms:
             break
-        since_ms = ohlcv[-1][0] + 1
-        time.sleep(0.1)
+        # Always advance by the last returned timestamp — never rely on
+        # batch size to detect end of history (Kraken returns partial batches)
+        since_ms = last_ts + 1
+        time.sleep(0.5)
 
     if not all_ohlcv:
         logger.error(f"No data returned for {symbol} {timeframe}")
@@ -267,6 +292,51 @@ def fetch_ohlcv_timeframe(symbol: str, timeframe: str, history_days: int) -> pd.
     df.to_csv(cache_path, index=False)
     logger.success(f"{symbol} {timeframe}: {len(df)} candles ({df['timestamp'].iloc[0].date()} -> {df['timestamp'].iloc[-1].date()})")
     return df
+
+
+
+
+def resample_to_8h(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Resample 4h OHLCV candles into 8h candles.
+    Kraken doesn't support 8h natively — we synthesise it from 4h data.
+    Groups every 2 consecutive 4h bars: open=first, high=max, low=min,
+    close=last, volume=sum. Timestamp = start of the 8h window.
+    """
+    df = df.copy().sort_values("timestamp").reset_index(drop=True)
+
+    # Align to 8h boundaries (00:00, 08:00, 16:00 UTC)
+    # Each 8h window contains exactly 2 x 4h bars
+    ts = df["timestamp"]
+    if hasattr(ts.iloc[0], 'tzinfo') and ts.iloc[0].tzinfo is not None:
+        epoch = pd.Timestamp("1970-01-01", tz="UTC")
+    else:
+        epoch = pd.Timestamp("1970-01-01")
+
+    hours_since_epoch = (ts - epoch).dt.total_seconds() / 3600
+    df["_8h_bucket"] = (hours_since_epoch // 8).astype(int)
+
+    agg = df.groupby("_8h_bucket").agg(
+        timestamp=("timestamp", "first"),
+        open=("open",   "first"),
+        high=("high",   "max"),
+        low=("low",     "min"),
+        close=("close", "last"),
+        volume=("volume","sum"),
+    ).reset_index(drop=True)
+
+    return agg
+
+
+def fetch_ohlcv_8h(symbol: str, history_days: int) -> pd.DataFrame:
+    """Fetch 4h data from Kraken and resample to 8h."""
+    import ccxt
+    df_4h = fetch_ohlcv_timeframe(symbol, "4h", history_days)
+    if df_4h is None or len(df_4h) < 2:
+        return pd.DataFrame()
+    df_8h = resample_to_8h(df_4h)
+    logger.info(f"{symbol} 8h (resampled): {len(df_8h)} candles")
+    return df_8h
 
 
 # ─── Single Pipeline Run ─────────────────────────────────────────────────────

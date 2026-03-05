@@ -1,26 +1,21 @@
 """
-oot_validate.py  —  Out-of-Time Validation
-───────────────────────────────────────────
-Tests a FROZEN, already-trained LSTM on historical data that predates
-the training window entirely. The model never sees this data during
-training — it's a true out-of-sample test.
+oot_validate.py
+───────────────
+Out-of-time validation using a 9-model ensemble.
 
-Workflow:
-  1. Fetch the full available history for a symbol (e.g. back to 2017)
-  2. Split into:
-       [HISTORICAL (OOT)]  |  [TRAIN]  |  [VAL]  |  [TEST]
-        never touched          model trained on this        already tested
-  3. Fit scaler on TRAIN only (no leakage)
-  4. Apply scaler + frozen model to HISTORICAL period
-  5. Backtest and report
+Splits data into 4 windows:
+  [OOT (historical)] | [TRAIN] | [VAL] | [TEST]
 
-This answers: "Does the signal generalise to market regimes the model
-never experienced during training?"
+Trains ensemble on TRAIN+VAL, then backtests on both TEST and OOT.
+Runs N_RUNS independent times to measure remaining variance.
+
+If OOT and TEST are both consistently positive across runs,
+the signal is structural — not just regime-specific.
 
 Usage:
     python oot_validate.py --symbol DOGE/USD
-    python oot_validate.py --symbol BTC/USD --history-days 3000
-    python oot_validate.py  # defaults to DOGE/USD
+    python oot_validate.py --symbol DOGE/USD LINK/USD
+    python oot_validate.py --symbol DOGE/USD --runs 5
 """
 import os, sys, argparse, csv
 from datetime import datetime
@@ -35,229 +30,216 @@ import numpy as np
 from loguru import logger
 from sklearn.preprocessing import StandardScaler
 
-from config.settings import HISTORY_DAYS
 from timeframe_comparison import fetch_ohlcv_timeframe
 from data.feature_engineer import build_features, get_feature_columns
 from backtest.engine import BacktestEngine
 from backtest.filters import apply_filters
 from models.ensemble import generate_signals
-from models import lstm_model
+from models.lstm_ensemble import train_ensemble, predict_proba_ensemble
 
-# ── Constants ─────────────────────────────────────────────────────────────────
+# ── Config ────────────────────────────────────────────────────────────────────
 
-TIMEFRAME   = "4h"
-TRAIN_RATIO = 0.60
-VAL_RATIO   = 0.20
-TEST_RATIO  = 0.20
-TOP_PCT     = 0.15
-MIN_OOT_BARS = 200   # Minimum bars in OOT window to be worth reporting
-
-# Maximum history to fetch — 3000 days gets back to mid-2017 for BTC/ETH
-MAX_HISTORY_DAYS = 3000
+TIMEFRAME    = "4h"   # overridden by --timeframe arg
+HISTORY_DAYS = {
+    "4h": 1825,   # 5 years
+    "8h": 1825,
+    "1d": 3650,   # 10 years for daily — need long OOT window
+}
+OOT_RATIO    = 0.20   # oldest 20% = OOT window
+TRAIN_RATIO  = 0.48   # next 48%  = train
+VAL_RATIO    = 0.16   # next 16%  = val
+TEST_RATIO   = 0.16   # newest 16% = test
+N_MODELS     = 9
+N_RUNS       = 5      # repeat full ensemble training N times to measure residual variance
+TOP_PCT      = 0.15
 
 
 # ── Core ──────────────────────────────────────────────────────────────────────
 
-def run_oot(symbol: str, timeframe: str, history_days: int, verbose: bool = True):
-    """
-    Full out-of-time validation for one symbol.
-
-    Returns a dict with metrics for both the OOT period and the
-    standard test period side-by-side for comparison.
-    """
-
-    # ── 1. Fetch maximum available history ────────────────────────────────────
-    logger.info(f"Fetching {history_days} days of history for {symbol}...")
-    raw = fetch_ohlcv_timeframe(symbol, timeframe, history_days=history_days)
-
-    if raw is None or len(raw) < 500:
-        logger.error(f"{symbol}: insufficient data ({len(raw) if raw is not None else 0} bars)")
+def run_once(symbol: str, run_idx: int, timeframe: str = "4h") -> dict | None:
+    """One full OOT validation run."""
+    days = HISTORY_DAYS.get(timeframe, 1825)
+    raw = fetch_ohlcv_timeframe(symbol, timeframe, history_days=days)
+    if raw is None or len(raw) < 2000:
+        logger.error(f"{symbol}: insufficient data ({len(raw) if raw else 0} bars)")
         return None
 
     feat_df   = build_features(raw, timeframe=timeframe)
     feat_cols = get_feature_columns(feat_df)
+    X = feat_df[feat_cols].values.astype(np.float32)
+    y = feat_df["label"].values.astype(int)
+    n = len(X)
 
-    X_all = feat_df[feat_cols].values.astype(np.float32)
-    y_all = feat_df["label"].values.astype(int)
-    n_all = len(X_all)
+    # Split
+    i0 = int(n * OOT_RATIO)
+    i1 = i0 + int(n * TRAIN_RATIO)
+    i2 = i1 + int(n * VAL_RATIO)
+    # test is i2:end
 
-    # ── 2. Identify the standard train/val/test split boundaries ─────────────
-    # These are the same splits used during training — based on HISTORY_DAYS data
-    # Standard data: last HISTORY_DAYS worth of bars
-    bars_standard = int(HISTORY_DAYS / (history_days / n_all))
-    bars_standard = min(bars_standard, n_all)
+    X_oot,   y_oot   = X[:i0],   y[:i0]
+    X_train, y_train = X[i0:i1], y[i0:i1]
+    X_val,   y_val   = X[i1:i2], y[i1:i2]
+    X_test,  y_test  = X[i2:],   y[i2:]
+    feat_oot  = feat_df.iloc[:i0].reset_index(drop=True)
+    feat_test = feat_df.iloc[i2:].reset_index(drop=True)
 
-    # OOT data = everything BEFORE the standard training window
-    oot_end   = n_all - bars_standard
-    train_end = oot_end + int(bars_standard * TRAIN_RATIO)
-    val_end   = train_end + int(bars_standard * VAL_RATIO)
-    # test_end  = n_all
+    oot_days  = int((feat_oot["timestamp"].iloc[-1]  - feat_oot["timestamp"].iloc[0]).days)  \
+                if "timestamp" in feat_oot.columns else i0 // 6
+    test_days = int((feat_test["timestamp"].iloc[-1] - feat_test["timestamp"].iloc[0]).days) \
+                if "timestamp" in feat_test.columns else (n - i2) // 6
 
-    n_oot   = oot_end
-    n_train = train_end - oot_end
-    n_val   = val_end - train_end
-    n_test  = n_all - val_end
+    logger.info(f"\nRun {run_idx+1}/{N_RUNS} | {symbol}")
+    logger.info(f"  OOT:   {len(X_oot):>5} bars ({oot_days} days)")
+    logger.info(f"  Train: {len(X_train):>5} bars")
+    logger.info(f"  Val:   {len(X_val):>5} bars")
+    logger.info(f"  Test:  {len(X_test):>5} bars ({test_days} days)")
 
-    if n_oot < MIN_OOT_BARS:
-        logger.warning(f"{symbol}: only {n_oot} OOT bars (need {MIN_OOT_BARS}) — "
-                       f"try --history-days {history_days + 500}")
-        return None
-
-    logger.info(f"Data split:")
-    logger.info(f"  OOT   (unseen): bars 0     → {oot_end}   = {n_oot} bars "
-                f"({n_oot*4/24:.0f} days)  "
-                f"[{feat_df.index[0]} → {feat_df.index[oot_end-1]}]")
-    logger.info(f"  Train:          bars {oot_end} → {train_end} = {n_train} bars")
-    logger.info(f"  Val:            bars {train_end} → {val_end}   = {n_val} bars")
-    logger.info(f"  Test:           bars {val_end} → {n_all}  = {n_test} bars")
-
-    # ── 3. Fit scaler on TRAIN only — no leakage into OOT ────────────────────
+    # Scale — fit on train only, apply everywhere
     scaler = StandardScaler()
-    scaler.fit(X_all[oot_end:train_end])
+    scaler.fit(X_train)
+    X_train_s = scaler.transform(X_train)
+    X_val_s   = scaler.transform(X_val)
+    X_test_s  = scaler.transform(X_test)
+    X_oot_s   = scaler.transform(X_oot)
 
-    X_oot   = scaler.transform(X_all[:oot_end])
-    X_train = scaler.transform(X_all[oot_end:train_end])
-    X_val   = scaler.transform(X_all[train_end:val_end])
-    X_test  = scaler.transform(X_all[val_end:])
+    # Train 9-model ensemble
+    models = train_ensemble(
+        X_train_s, y_train, X_val_s, y_val,
+        symbol=symbol, n_models=N_MODELS
+    )
 
-    y_oot   = y_all[:oot_end]
-    y_train = y_all[oot_end:train_end]
-    y_val   = y_all[train_end:val_end]
-    y_test  = y_all[val_end:]
-
-    feat_oot  = feat_df.iloc[:oot_end].reset_index(drop=True)
-    feat_test = feat_df.iloc[val_end:].reset_index(drop=True)
-
-    # ── 4. Train LSTM on train+val (same as standard pipeline) ───────────────
-    logger.info(f"Training LSTM on {n_train} bars...")
-    model = lstm_model.train(X_train, y_train, X_val, y_val, symbol=symbol)
-
-    # ── 5. Run inference on BOTH test and OOT windows ─────────────────────────
-    def backtest_window(X, y, feat, label):
-        proba    = lstm_model.predict_proba(model, X)
+    def backtest_window(X_s, feat_window, label):
+        proba    = predict_proba_ensemble(models, X_s)
         signals  = generate_signals(proba, use_percentile=True, top_pct=TOP_PCT)
-        filtered = apply_filters(feat, signals, timeframe=timeframe)
-        engine   = BacktestEngine()
-        m        = engine.run(feat, filtered, timeframe=timeframe)
-
+        filtered = apply_filters(feat_window, signals, timeframe=timeframe)
+        m        = BacktestEngine().run(feat_window, filtered, timeframe=timeframe)
         n_trades = int(m.get("n_trades", 0))
         net      = float(m.get("total_return", 0.0))
         wr       = float(m.get("win_rate", 0.0))
         sharpe   = float(m.get("sharpe_ratio", 0.0))
         dd       = float(m.get("max_drawdown", 0.0))
-        acc      = (proba.argmax(axis=1) == y).mean()
-
-        sig_arr  = np.array(signals["signal"])
-        n_buy    = int((sig_arr == "BUY").sum())
-        n_sell   = int((sig_arr == "SELL").sum())
-
         best_p   = np.maximum(proba[:, 2], proba[:, 0])
-
+        logger.info(f"  {label:<5}: net={net:+.1%} WR={wr:.1%} "
+                    f"Sharpe={sharpe:.2f} trades={n_trades} MaxDD={dd:.1%}")
         return {
-            "window":    label,
-            "n_bars":    len(X),
-            "n_days":    round(len(X) * 4 / 24, 0),
-            "n_buy":     n_buy,
-            "n_sell":    n_sell,
-            "n_trades":  n_trades,
-            "win_rate":  round(wr, 4),
-            "net_return":round(net, 4),
-            "sharpe":    round(sharpe, 3),
-            "max_dd":    round(dd, 4),
-            "accuracy":  round(float(acc), 4),
+            "window": label, "n_trades": n_trades,
+            "win_rate": round(wr, 4), "net_return": round(net, 4),
+            "sharpe": round(sharpe, 3), "max_dd": round(dd, 4),
             "mean_conf": round(float(best_p.mean()), 4),
         }
 
-    logger.info("Running inference on standard TEST window...")
-    test_result = backtest_window(X_test, y_test, feat_test, "TEST (in-distribution)")
+    test_result = backtest_window(X_test_s, feat_test, "TEST")
+    oot_result  = backtest_window(X_oot_s,  feat_oot,  "OOT ")
 
-    logger.info("Running inference on OOT (historical, never-seen) window...")
-    oot_result  = backtest_window(X_oot,  y_oot,  feat_oot,  "OOT  (out-of-time)")
-
-    return test_result, oot_result
+    return {"run": run_idx + 1, "test": test_result, "oot": oot_result}
 
 
-def print_comparison(symbol: str, test_r: dict, oot_r: dict):
-    """Print side-by-side comparison of test vs OOT results."""
-    bar = "=" * 70
+def validate_symbol(symbol: str, n_runs: int, timeframe: str = "4h") -> list:
+    logger.info(f"\n{'='*60}\n  OOT VALIDATION: {symbol} {timeframe} x{n_runs} runs\n{'='*60}")
+    results = []
+    for i in range(n_runs):
+        r = run_once(symbol, i, timeframe=timeframe)
+        if r:
+            results.append(r)
+    return results
 
-    def verdict(r):
-        if r["n_trades"] < 5:    return "TOO FEW TRADES"
-        if r["net_return"] > 0.08 and r["win_rate"] >= 0.42: return "** STRONG"
-        if r["net_return"] > 0.04 and r["win_rate"] >= 0.38: return "*  GOOD"
-        if r["net_return"] > 0.0  and r["win_rate"] >= 0.35: return "+  MARGINAL"
-        if r["net_return"] > 0.0:                             return "~  WEAK+"
-        return "-  LOSS"
 
-    print(f"\n{bar}")
-    print(f"  OUT-OF-TIME VALIDATION — {symbol} [{TIMEFRAME}]")
-    print(bar)
-    print(f"  {'':30} {'TEST':>18} {'OOT':>18}")
-    print(f"  {'':30} {'(in-distribution)':>18} {'(historical)':>18}")
-    print(f"  {'-'*66}")
-    print(f"  {'Window length (days)':<30} {test_r['n_days']:>18.0f} {oot_r['n_days']:>18.0f}")
-    print(f"  {'Bars':<30} {test_r['n_bars']:>18} {oot_r['n_bars']:>18}")
-    print(f"  {'Trades':<30} {test_r['n_trades']:>18} {oot_r['n_trades']:>18}")
-    print(f"  {'Win rate':<30} {test_r['win_rate']:>17.1%} {oot_r['win_rate']:>17.1%}")
-    print(f"  {'Net return':<30} {test_r['net_return']:>+17.1%} {oot_r['net_return']:>+17.1%}")
-    print(f"  {'Sharpe':<30} {test_r['sharpe']:>18.2f} {oot_r['sharpe']:>18.2f}")
-    print(f"  {'Max drawdown':<30} {test_r['max_dd']:>17.1%} {oot_r['max_dd']:>17.1%}")
-    print(f"  {'Mean confidence':<30} {test_r['mean_conf']:>18.3f} {oot_r['mean_conf']:>18.3f}")
-    print(f"  {'Verdict':<30} {verdict(test_r):>18} {verdict(oot_r):>18}")
-    print(f"  {'-'*66}")
+def print_summary(symbol: str, results: list):
+    if not results:
+        return
 
-    # Interpretation
-    print()
-    t_pos = test_r["net_return"] > 0
-    o_pos = oot_r["net_return"] > 0
-    if t_pos and o_pos:
-        print("  RESULT: Signal holds in BOTH windows.")
-        print("  Strong evidence of a genuine, regime-independent edge.")
-    elif t_pos and not o_pos:
-        print("  RESULT: Profitable in TEST but not in OOT.")
-        print("  Signal may be specific to 2021-2026 market conditions.")
-        print("  Treat live deployment with caution.")
-    elif not t_pos and o_pos:
-        print("  RESULT: Profitable in OOT but not TEST.")
-        print("  Unusual — possibly regime-dependent in the opposite direction.")
+    test_nets  = [r["test"]["net_return"] for r in results]
+    oot_nets   = [r["oot"]["net_return"]  for r in results]
+    test_wrs   = [r["test"]["win_rate"]   for r in results]
+    oot_wrs    = [r["oot"]["win_rate"]    for r in results]
+    test_sh    = [r["test"]["sharpe"]     for r in results]
+    oot_sh     = [r["oot"]["sharpe"]      for r in results]
+
+    print(f"\n{'='*60}")
+    print(f"  {symbol} — {len(results)} runs x {N_MODELS} models each")
+    print(f"{'='*60}")
+    print(f"  {'':22} {'TEST':>12} {'OOT':>12}")
+    print(f"  {'-'*48}")
+    print(f"  {'Net return  mean':<22} {np.mean(test_nets):>+11.1%} {np.mean(oot_nets):>+11.1%}")
+    print(f"  {'Net return  std':<22} {np.std(test_nets):>11.1%} {np.std(oot_nets):>11.1%}")
+    print(f"  {'Net return  min':<22} {np.min(test_nets):>+11.1%} {np.min(oot_nets):>+11.1%}")
+    print(f"  {'Net return  max':<22} {np.max(test_nets):>+11.1%} {np.max(oot_nets):>+11.1%}")
+    print(f"  {'Win rate    mean':<22} {np.mean(test_wrs):>11.1%} {np.mean(oot_wrs):>11.1%}")
+    print(f"  {'Sharpe      mean':<22} {np.mean(test_sh):>11.2f} {np.mean(oot_sh):>11.2f}")
+    print(f"  {'% runs positive':<22} {sum(1 for x in test_nets if x>0)/len(results):>11.0%} "
+          f"{sum(1 for x in oot_nets if x>0)/len(results):>11.0%}")
+
+    corr = np.corrcoef(test_nets, oot_nets)[0, 1] if len(results) > 2 else float("nan")
+    print(f"\n  TEST vs OOT correlation: {corr:+.2f}")
+
+    both_pos = sum(1 for r in results if r["test"]["net_return"] > 0 and r["oot"]["net_return"] > 0)
+    both_neg = sum(1 for r in results if r["test"]["net_return"] < 0 and r["oot"]["net_return"] < 0)
+    t_p_o_n  = sum(1 for r in results if r["test"]["net_return"] > 0 and r["oot"]["net_return"] < 0)
+    t_n_o_p  = sum(1 for r in results if r["test"]["net_return"] < 0 and r["oot"]["net_return"] > 0)
+
+    n = len(results)
+    print(f"\n  Outcome breakdown ({n} runs):")
+    print(f"    Both positive:   {both_pos}/{n}  <- genuine signal if high")
+    print(f"    Test+ OOT-:      {t_p_o_n}/{n}  <- regime-specific")
+    print(f"    Test- OOT+:      {t_n_o_p}/{n}")
+    print(f"    Both negative:   {both_neg}/{n}  <- no signal")
+
+    # Verdict
+    print(f"\n  VERDICT:")
+    mean_oot = np.mean(oot_nets)
+    std_oot  = np.std(oot_nets)
+    if both_pos >= int(n * 0.7) and mean_oot > 0.03:
+        print(f"  STRONG SIGNAL — {both_pos}/{n} both-positive runs, OOT mean {mean_oot:+.1%}")
+        print(f"  Proceed to live deployment with this symbol.")
+    elif mean_oot > 0 and std_oot < 0.10:
+        print(f"  WEAK SIGNAL — positive mean OOT ({mean_oot:+.1%}) but low consistency")
+        print(f"  Consider deploying with reduced position sizing.")
+    elif std_oot < 0.08:
+        print(f"  NO SIGNAL — variance reduced but mean near zero ({mean_oot:+.1%})")
+        print(f"  Drop this symbol from the paper trade.")
     else:
-        print("  RESULT: Loss in both windows. No reliable signal found.")
-    print(f"\n{bar}\n")
+        print(f"  INCONCLUSIVE — high variance remains (std={std_oot:.1%})")
+        print(f"  The ensemble hasn't fully stabilised. Consider more runs.")
+    print()
 
 
-def save_results(symbol: str, test_r: dict, oot_r: dict):
-    out_dir  = Path("backtest/results")
+def save_results(symbol: str, results: list, ts: str, timeframe: str = "4h"):
+    out_dir = Path("backtest/results")
     out_dir.mkdir(parents=True, exist_ok=True)
-    ts       = datetime.now().strftime("%Y%m%d_%H%M%S")
-    csv_path = out_dir / f"oot_{symbol.replace('/','_')}_{TIMEFRAME}_{ts}.csv"
+    safe    = symbol.replace("/", "_")
+    path    = out_dir / f"oot_ensemble_{safe}_{timeframe}_{ts}.csv"
 
-    with open(csv_path, "w", newline="", encoding="utf-8-sig") as f:
-        w = csv.DictWriter(f, fieldnames=test_r.keys())
-        w.writeheader()
-        w.writerow(test_r)
-        w.writerow(oot_r)
+    rows = []
+    for r in results:
+        for window, d in [("TEST", r["test"]), ("OOT", r["oot"])]:
+            rows.append({"run": r["run"], "symbol": symbol, **d})
 
-    logger.success(f"Results saved -> {csv_path}")
+    if rows:
+        with open(path, "w", newline="", encoding="utf-8-sig") as f:
+            w = csv.DictWriter(f, fieldnames=rows[0].keys())
+            w.writeheader()
+            w.writerows(rows)
+        logger.info(f"Saved -> {path}")
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="Out-of-time validation for LSTM signal")
-    parser.add_argument("--symbol",       default="DOGE/USD")
-    parser.add_argument("--timeframe",    default="4h")
-    parser.add_argument("--history-days", type=int, default=MAX_HISTORY_DAYS,
-                        help=f"How far back to fetch (default: {MAX_HISTORY_DAYS})")
-    args = parser.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--symbol",    nargs="+", default=["DOGE/USD"],
+                        help="Symbol(s) to validate")
+    parser.add_argument("--timeframe", default="4h",
+                        choices=["4h", "8h", "1d"],
+                        help="Timeframe to validate (default: 4h)")
+    parser.add_argument("--runs",      type=int, default=N_RUNS,
+                        help="Number of independent ensemble runs")
+    args   = parser.parse_args()
+    ts     = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    result = run_oot(args.symbol, args.timeframe, args.history_days)
-    if result is None:
-        logger.error("Validation failed — see errors above.")
-        return
-
-    test_r, oot_r = result
-    print_comparison(args.symbol, test_r, oot_r)
-    save_results(args.symbol, test_r, oot_r)
+    for symbol in args.symbol:
+        results = validate_symbol(symbol, args.runs, timeframe=args.timeframe)
+        print_summary(symbol, results)
+        save_results(symbol, results, ts, timeframe=args.timeframe)
 
 
 if __name__ == "__main__":

@@ -2,10 +2,10 @@
 freeze_model.py
 ───────────────
 Run this LOCALLY (on your GPU machine) before deploying to Railway.
+Trains a 9-model ensemble for each symbol and saves frozen weights.
 
 Usage:
     python freeze_model.py --symbol DOGE/USD
-    python freeze_model.py --symbol LINK/USD
     python freeze_model.py --symbol DOGE/USD --symbol LINK/USD
 """
 
@@ -21,7 +21,7 @@ from sklearn.preprocessing import StandardScaler
 
 from timeframe_comparison import fetch_ohlcv_timeframe
 from data.feature_engineer import build_features, get_feature_columns
-from models.lstm_model import train as train_lstm
+from models.lstm_ensemble import train_ensemble, LSTMClassifier
 from config.settings import LSTM_PARAMS
 
 TIMEFRAME    = "4h"
@@ -36,7 +36,7 @@ def safe_name(symbol: str) -> str:
 
 def freeze(symbol: str):
     OUT_DIR.mkdir(exist_ok=True)
-    logger.info(f"\n{'='*50}\nFreezing {symbol}\n{'='*50}")
+    logger.info(f"\n{'='*50}\nFreezing ensemble for {symbol}\n{'='*50}")
 
     # 1. Fetch
     raw = fetch_ohlcv_timeframe(symbol, TIMEFRAME, history_days=HISTORY_DAYS)
@@ -55,50 +55,56 @@ def freeze(symbol: str):
     y_train, y_val = y_all[:split], y_all[split:]
     logger.info(f"Train: {len(X_train)} | Val: {len(X_val)} | Features: {len(feat_cols)}")
 
-    # 3. Scaler
+    # 3. Scaler — fit on train only
     scaler = StandardScaler()
     scaler.fit(X_train)
     X_train_s = scaler.transform(X_train)
     X_val_s   = scaler.transform(X_val)
 
-    # 4. Train
-    model = train_lstm(X_train_s, y_train, X_val_s, y_val, symbol=symbol)
+    # 4. Train 9-model ensemble
+    models = train_ensemble(X_train_s, y_train, X_val_s, y_val, symbol=symbol)
 
-    # 5. Save — all files named by symbol e.g. lstm_doge_usd.pt
+    # 5. Save all 9 model weights
     name = safe_name(symbol)
+    for i, model in enumerate(models):
+        torch.save(model.state_dict(), OUT_DIR / f"lstm_{name}_{i}.pt")
 
-    torch.save(model.state_dict(), OUT_DIR / f"lstm_{name}.pt")
+    # 6. Save shared info (architecture + feature cols)
+    m = models[0]
     joblib.dump({
-        "input_size":   model.lstm.input_size,
-        "hidden_size":  model.lstm.hidden_size,
-        "num_layers":   model.lstm.num_layers,
+        "input_size":   m.lstm.input_size,
+        "hidden_size":  m.lstm.hidden_size,
+        "num_layers":   m.lstm.num_layers,
         "dropout":      LSTM_PARAMS["dropout"],
         "seq_len":      LSTM_PARAMS["sequence_length"],
+        "n_models":     len(models),
         "symbol":       symbol,
         "timeframe":    TIMEFRAME,
         "feature_cols": feat_cols,
     }, OUT_DIR / f"lstm_{name}_info.pkl")
+
+    # 7. Save scaler
     joblib.dump(scaler, OUT_DIR / f"scaler_{name}.pkl")
 
-    logger.success(f"Saved: lstm_{name}.pt | lstm_{name}_info.pkl | scaler_{name}.pkl")
+    logger.success(
+        f"Saved {len(models)}-model ensemble for {symbol}:\n"
+        f"  {len(models)} x lstm_{name}_N.pt\n"
+        f"  lstm_{name}_info.pkl\n"
+        f"  scaler_{name}.pkl"
+    )
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--symbol", action="append",
-                        default=["DOGE/USD"],
-                        help="Symbol(s) to freeze. Can be repeated.")
-    args = parser.parse_args()
-
-    # deduplicate while preserving order
+    parser.add_argument("--symbol", action="append", default=["DOGE/USD"])
+    args    = parser.parse_args()
     symbols = list(dict.fromkeys(args.symbol))
-    logger.info(f"Freezing {len(symbols)} symbol(s): {symbols}")
 
+    logger.info(f"Freezing ensemble for: {symbols}")
     for sym in symbols:
         freeze(sym)
 
-    logger.info("\nAll models frozen and ready for deployment.")
-    logger.info(f"Commit the contents of {OUT_DIR} to your Railway repo.")
+    logger.info(f"\nDone. Commit all files in {OUT_DIR} to your Railway repo.")
 
 
 if __name__ == "__main__":

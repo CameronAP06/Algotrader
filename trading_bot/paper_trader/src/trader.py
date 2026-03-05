@@ -1,8 +1,8 @@
 """
 src/trader.py
 ─────────────
-Paper trading logic for multiple symbols.
-Each 4h cycle runs independently for each symbol.
+Paper trading logic using a 9-model LSTM ensemble.
+Each 4h cycle runs independently for DOGE/USD and LINK/USD.
 """
 
 import os, csv, json
@@ -18,18 +18,17 @@ from pathlib import Path
 from loguru import logger
 
 from src.feature_engineer import build_features, get_feature_columns
-from sklearn.preprocessing import StandardScaler
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
-SYMBOLS       = ["DOGE/USD", "LINK/USD"]
-TIMEFRAME     = "4h"
-HISTORY_DAYS  = 60
-SEQ_LEN       = 24
-TOP_PCT       = 0.15
-STOP_LOSS     = 0.05
-TAKE_PROFIT   = 0.10
-FEE_RATE      = 0.001
+SYMBOLS         = ["DOGE/USD", "LINK/USD"]
+TIMEFRAME       = "4h"
+HISTORY_DAYS    = 400
+SEQ_LEN         = 24
+TOP_PCT         = 0.15
+STOP_LOSS       = 0.05
+TAKE_PROFIT     = 0.10
+FEE_RATE        = 0.001
 INITIAL_CAPITAL = 1000.0
 
 DATA_DIR  = Path("data")
@@ -56,8 +55,8 @@ class MIOpenSafeLayerNorm(nn.Module):
         self.eps    = eps
 
     def forward(self, x):
-        mean  = x.mean(dim=-1, keepdim=True)
-        var   = x.var(dim=-1, keepdim=True, unbiased=False)
+        mean = x.mean(dim=-1, keepdim=True)
+        var  = x.var(dim=-1, keepdim=True, unbiased=False)
         return self.weight * (x - mean) / torch.sqrt(var + self.eps) + self.bias
 
 
@@ -100,59 +99,89 @@ def fetch_candles(symbol: str) -> pd.DataFrame:
     return df
 
 
-# ── Model ─────────────────────────────────────────────────────────────────────
+# ── Ensemble Model Loading ────────────────────────────────────────────────────
 
-def load_model(symbol: str):
+def load_ensemble(symbol: str) -> tuple:
+    """Load all N frozen models + scaler + info for a symbol."""
     name   = safe_name(symbol)
     device = torch.device("cpu")
     info   = joblib.load(MODEL_DIR / f"lstm_{name}_info.pkl")
     scaler = joblib.load(MODEL_DIR / f"scaler_{name}.pkl")
+    n      = info["n_models"]
 
-    model = LSTMClassifier(
-        input_size  = info["input_size"],
-        hidden_size = info["hidden_size"],
-        num_layers  = info["num_layers"],
-        num_classes = 3,
-        dropout     = info["dropout"],
-    ).to(device)
-    model.load_state_dict(torch.load(MODEL_DIR / f"lstm_{name}.pt", map_location=device))
-    model.eval()
-    return model, scaler, device
+    models = []
+    for i in range(n):
+        m = LSTMClassifier(
+            input_size  = info["input_size"],
+            hidden_size = info["hidden_size"],
+            num_layers  = info["num_layers"],
+            num_classes = 3,
+            dropout     = info["dropout"],
+        ).to(device)
+        m.load_state_dict(torch.load(MODEL_DIR / f"lstm_{name}_{i}.pt", map_location=device))
+        m.eval()
+        models.append(m)
+
+    logger.info(f"Loaded {n}-model ensemble for {symbol} "
+                f"(input={info['input_size']} hidden={info['hidden_size']})")
+    return models, scaler, device, info
 
 
-def get_signal(model, scaler, device, df: pd.DataFrame) -> dict:
-    feat_df   = build_features(df, timeframe=TIMEFRAME)
-    feat_cols = get_feature_columns(feat_df)
-    X = scaler.transform(feat_df[feat_cols].values.astype(np.float32))
+# ── Inference ─────────────────────────────────────────────────────────────────
+
+def _infer_single(model, X: np.ndarray, device) -> np.ndarray:
+    """Run one model over the last SEQ_LEN bars, return softmax probs."""
+    seq = torch.FloatTensor(X[-SEQ_LEN:]).unsqueeze(0).to(device)
+    with torch.no_grad():
+        return torch.softmax(model(seq), dim=1).cpu().numpy()[0]
+
+
+def _score_window(models, X: np.ndarray, device, n: int = 300) -> list:
+    """Score recent bars across all models to build percentile threshold."""
+    all_best = []
+    for i in range(SEQ_LEN, min(len(X), n) + 1):
+        bar_probs = []
+        for m in models:
+            seq = torch.FloatTensor(X[i-SEQ_LEN:i]).unsqueeze(0).to(device)
+            with torch.no_grad():
+                p = torch.softmax(m(seq), dim=1).cpu().numpy()[0]
+            bar_probs.append(p)
+        avg = np.mean(bar_probs, axis=0)
+        all_best.append(max(avg[0], avg[2]))
+    return all_best
+
+
+def get_signal(models, scaler, device, info, df: pd.DataFrame) -> dict:
+    feat_df = build_features(df, timeframe=TIMEFRAME)
+
+    # Align to exact training feature columns — fill missing with 0
+    saved_cols = info.get("feature_cols") or get_feature_columns(feat_df)
+    for col in saved_cols:
+        if col not in feat_df.columns:
+            feat_df[col] = 0.0
+
+    X = scaler.transform(feat_df[saved_cols].values.astype(np.float32))
 
     if len(X) < SEQ_LEN:
         return {"signal": "HOLD", "confidence": 0.0, "up_prob": 0.0, "down_prob": 0.0}
 
-    # Score recent bars to find percentile threshold
-    all_best = []
-    n = min(len(X), 300)
-    for i in range(SEQ_LEN, n + 1):
-        seq = torch.FloatTensor(X[i-SEQ_LEN:i]).unsqueeze(0).to(device)
-        with torch.no_grad():
-            p = torch.softmax(model(seq), dim=1).cpu().numpy()[0]
-        all_best.append(max(p[0], p[2]))
-
+    # Percentile threshold from recent window
+    all_best   = _score_window(models, X, device)
     candidates = [p for p in all_best if p > 0.34]
     threshold  = max(float(np.percentile(candidates, (1-TOP_PCT)*100)), 0.34) \
                  if len(candidates) >= 5 else 0.40
 
-    # Latest bar signal
-    seq = torch.FloatTensor(X[-SEQ_LEN:]).unsqueeze(0).to(device)
-    with torch.no_grad():
-        probs = torch.softmax(model(seq), dim=1).cpu().numpy()[0]
+    # Ensemble average on latest bar
+    bar_probs = [_infer_single(m, X, device) for m in models]
+    avg       = np.mean(bar_probs, axis=0)
+    down_p, up_p = float(avg[0]), float(avg[2])
 
-    down_p, up_p = float(probs[0]), float(probs[2])
+    if up_p >= threshold:     signal = "BUY"
+    elif down_p >= threshold: signal = "SELL"
+    else:                     signal = "HOLD"
 
-    if up_p >= threshold:      signal = "BUY"
-    elif down_p >= threshold:  signal = "SELL"
-    else:                      signal = "HOLD"
-
-    logger.info(f"Signal: {signal} | up={up_p:.3f} down={down_p:.3f} threshold={threshold:.3f}")
+    logger.info(f"Signal: {signal} | up={up_p:.3f} down={down_p:.3f} "
+                f"threshold={threshold:.3f} (ensemble of {len(models)})")
     return {"signal": signal, "confidence": max(up_p, down_p),
             "up_prob": up_p, "down_prob": down_p}
 
@@ -177,7 +206,7 @@ def save_state(symbol: str, state: dict):
 
 def log_trade(row: dict):
     DATA_DIR.mkdir(exist_ok=True)
-    path = DATA_DIR / "trades.csv"
+    path         = DATA_DIR / "trades.csv"
     write_header = not path.exists()
     with open(path, "a", newline="", encoding="utf-8-sig") as f:
         w = csv.DictWriter(f, fieldnames=TRADES_HEADER)
@@ -189,14 +218,14 @@ def log_trade(row: dict):
 # ── Core ──────────────────────────────────────────────────────────────────────
 
 def run_symbol(symbol: str) -> dict | None:
-    df             = fetch_candles(symbol)
-    model, scaler, device = load_model(symbol)
-    sig            = get_signal(model, scaler, device, df)
-    state          = load_state(symbol)
-    current_price  = float(df["close"].iloc[-1])
-    now            = datetime.now(timezone.utc).isoformat()
-    signal         = sig["signal"]
-    event          = None
+    df                      = fetch_candles(symbol)
+    models, scaler, device, info = load_ensemble(symbol)
+    sig                     = get_signal(models, scaler, device, info, df)
+    state                   = load_state(symbol)
+    current_price           = float(df["close"].iloc[-1])
+    now                     = datetime.now(timezone.utc).isoformat()
+    signal                  = sig["signal"]
+    event                   = None
 
     def _log(action, pnl="", reason=""):
         log_trade({
@@ -239,14 +268,15 @@ def run_symbol(symbol: str) -> dict | None:
                 state["winning_trades"] += 1
 
             _log(f"CLOSE_{pos}", round(net_pnl * 100, 2), exit_reason)
-            event = {"type": "CLOSE", "symbol": symbol, "position": pos,
-                     "entry": entry, "exit": current_price,
-                     "pnl_pct": net_pnl * 100,
-                     "portfolio": state["portfolio_value"],
-                     "reason": exit_reason,
-                     "total_trades": state["total_trades"],
-                     "win_rate": state["winning_trades"] / state["total_trades"] * 100}
-
+            event = {
+                "type": "CLOSE", "symbol": symbol, "position": pos,
+                "entry": entry, "exit": current_price,
+                "pnl_pct": net_pnl * 100,
+                "portfolio": state["portfolio_value"],
+                "reason": exit_reason,
+                "total_trades": state["total_trades"],
+                "win_rate": state["winning_trades"] / state["total_trades"] * 100,
+            }
             state.update({"position": None, "entry_price": None,
                           "entry_time": None, "hold_bars": 0})
 
@@ -256,11 +286,13 @@ def run_symbol(symbol: str) -> dict | None:
         state.update({"position": pos_type, "entry_price": current_price,
                       "entry_time": now, "hold_bars": 0})
         _log(f"OPEN_{pos_type}", reason=f"{signal} conf={sig['confidence']:.3f}")
-        event = {"type": "OPEN", "symbol": symbol, "position": pos_type,
-                 "signal": signal, "price": current_price,
-                 "portfolio": state["portfolio_value"],
-                 "confidence": sig["confidence"],
-                 "up_prob": sig["up_prob"], "down_prob": sig["down_prob"]}
+        event = {
+            "type": "OPEN", "symbol": symbol, "position": pos_type,
+            "signal": signal, "price": current_price,
+            "portfolio": state["portfolio_value"],
+            "confidence": sig["confidence"],
+            "up_prob": sig["up_prob"], "down_prob": sig["down_prob"],
+        }
     else:
         _log("HOLD", reason="No signal")
 
@@ -269,7 +301,7 @@ def run_symbol(symbol: str) -> dict | None:
 
 
 def run_paper_trade() -> list:
-    """Run one cycle for all symbols. Returns list of events (may be empty)."""
+    """Run one cycle for all symbols. Returns list of events."""
     DATA_DIR.mkdir(exist_ok=True)
     events = []
     for symbol in SYMBOLS:

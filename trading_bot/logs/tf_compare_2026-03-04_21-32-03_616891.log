@@ -1,0 +1,12 @@
+2026-03-04 21:32:03.621 | INFO     | models.lstm_ensemble:<module>:39 - Ensemble using cuda
+2026-03-04 21:32:03.624 | INFO     | __main__:main:369 - [1/126] BTC/USD 4h
+2026-03-04 21:32:04.034 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:235 - Fetching BTC/USD [4h] — 1825 days...
+2026-03-04 21:32:13.099 | SUCCESS  | timeframe_comparison:fetch_ohlcv_timeframe:268 - BTC/USD 4h: 721 candles (2025-11-04 -> 2026-03-04)
+2026-03-04 21:32:13.109 | WARNING  | __main__:run_symbol:115 - BTC/USD 4h: 721 bars — skipping
+2026-03-04 21:32:13.109 | INFO     | __main__:main:369 - [2/126] BTC/USD 8h
+2026-03-04 21:32:13.110 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:235 - Fetching BTC/USD [8h] — 1825 days...
+2026-03-04 21:32:19.162 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:246 - Fetch error BTC/USD 8h: kraken {"error":["EGeneral:Invalid arguments"]}
+2026-03-04 21:32:19.162 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:259 - No data returned for BTC/USD 8h
+2026-03-04 21:32:19.169 | WARNING  | __main__:run_symbol:115 - BTC/USD 8h: 0 bars — skipping
+2026-03-04 21:32:19.172 | INFO     | __main__:main:369 - [3/126] BTC/USD 1d
+2026-03-04 21:32:19.172 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:235 - Fetching BTC/USD [1d] — 3650 days...

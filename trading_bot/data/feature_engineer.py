@@ -31,7 +31,10 @@ _BARS_PER_HOUR = {
     "2h":  0.5,
     "4h":  0.25,
     "8h":  0.125,
+    "12h": 1/12,
     "1d":  1/24,
+    "1w":  1/168,   # 1 bar = 168 hours
+    "2w":  1/336,   # 1 bar = 336 hours
 }
 
 def get_label_params(timeframe: str = "1h") -> tuple:
@@ -54,7 +57,10 @@ def get_label_params(timeframe: str = "1h") -> tuple:
         "2h":  0.025,   # 2.5%
         "4h":  0.035,   # 3.5%  — meaningful 4h move
         "8h":  0.045,   # 4.5%  — half-day directional move
+        "12h": 0.055,   # 5.5%  — between 8h and 1d
         "1d":  0.060,   # 6.0%  — daily candle with real conviction
+        "1w":  0.120,   # 12.0% — weekly crypto move with real conviction
+        "2w":  0.180,   # 18.0% — two-week directional move
     }
     threshold = thresholds.get(timeframe, 0.012)
 
