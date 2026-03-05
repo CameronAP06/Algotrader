@@ -61,7 +61,7 @@ SYMBOL_TO_KRAKEN = {
     "DOT/USD":  "DOTUSD",
     "AVAX/USD": "AVAXUSD",
     "LINK/USD": "LINKUSD",
-    "MATIC/USD":"MATICUSD",
+    "POL/USD":"POLUSD",
     "ATOM/USD": "ATOMUSD",
     "UNI/USD":  "UNIUSD",
     "AAVE/USD": "AAVEUSD",
@@ -74,7 +74,7 @@ SYMBOL_TO_KRAKEN = {
     "GRT/USD":  "GRTUSD",
     "NEAR/USD": "NEARUSD",
     "RUNE/USD": "RUNEUSD",
-    "FTM/USD":  "FTMUSD",
+    "S/USD":  "SUSD",
     "XLM/USD":  "XLMUSD",
     "XTZ/USD":  "XTZUSD",
     "EOS/USD":  "EOSUSD",
@@ -146,7 +146,11 @@ def _topup_from_api(symbol: str, timeframe: str, after: pd.Timestamp) -> pd.Data
     Only fetches if gap > 1 bar worth of time.
     """
     import ccxt
-
+# In _topup_from_api, add at the top of the function:
+    if timeframe in ("1w", "2w"):
+        logger.debug(f"  Skipping API top-up for {timeframe} — CSV history is sufficient")
+        return pd.DataFrame()
+    
     # Map to API timeframe (8h isn't native, use 4h)
     api_tf = timeframe
     if timeframe in ("8h", "1w", "2w"):

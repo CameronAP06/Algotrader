@@ -44,10 +44,10 @@ from models.lstm_ensemble import train_ensemble, predict_proba_ensemble
 CRYPTO_PAIRS = [
     # Large caps
     "BTC/USD", "ETH/USD", "SOL/USD", "XRP/USD", "ADA/USD", "AVAX/USD",
-    "DOT/USD", "MATIC/USD", "LTC/USD", "BCH/USD", "LINK/USD",
+    "DOT/USD", "POL/USD", "LTC/USD", "BCH/USD", "LINK/USD",
     # Mid caps
     "DOGE/USD", "ETC/USD", "XLM/USD", "ATOM/USD", "ALGO/USD",
-    "NEAR/USD", "FTM/USD", "XTZ/USD", "EOS/USD",  # VET/USD not in Kraken CSV
+    "NEAR/USD", "S/USD", "XTZ/USD", "EOS/USD",  # VET/USD not in Kraken CSV
     # DeFi / alts
     "UNI/USD", "AAVE/USD", "MKR/USD", "COMP/USD", "SNX/USD",
     "CRV/USD", "GRT/USD", "INJ/USD", "ARB/USD", "OP/USD",
