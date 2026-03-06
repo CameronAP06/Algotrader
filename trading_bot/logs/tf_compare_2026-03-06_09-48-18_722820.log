@@ -1,0 +1,25 @@
+2026-03-06 09:48:18.727 | INFO     | models.lstm_ensemble:<module>:39 - Ensemble using cuda
+2026-03-06 09:48:18.729 | INFO     | __main__:main:103 - Freezing ensemble for: ['DOGE/USD', 'LINK/USD', 'AAVE/USD', 'XMR/USD']
+2026-03-06 09:48:18.730 | INFO     | __main__:freeze:39 - 
+==================================================
+Freezing ensemble for DOGE/USD
+==================================================
+2026-03-06 09:48:19.851 | INFO     | kraken_history:get_history_dir:364 - Found Kraken OHLC data at: data/OHLC_Kraken (12027 CSV files)
+2026-03-06 09:48:19.888 | INFO     | kraken_history:fetch_ohlcv_full:288 - Loading DOGE/USD 4h from data/OHLC_Kraken\XDGUSD_240.csv...
+2026-03-06 09:48:19.908 | INFO     | kraken_history:fetch_ohlcv_full:290 -   Loaded 4384 bars (2024-01-01 → 2025-12-31)
+2026-03-06 09:48:19.908 | INFO     | kraken_history:fetch_ohlcv_full:299 -   History cap 730d: 4384 → 4379 bars (from 2024-01-01)
+2026-03-06 09:48:19.908 | INFO     | kraken_history:_topup_from_api:176 -   Topping up DOGE/USD 4h from 2025-12-31 via API...
+2026-03-06 09:48:25.998 | INFO     | kraken_history:_topup_from_api:199 -   Top-up: 387 new bars
+2026-03-06 09:48:26.010 | SUCCESS  | kraken_history:fetch_ohlcv_full:314 - DOGE/USD 4h: 4766 bars total (2024-01-01 → 2026-03-06)
+2026-03-06 09:48:26.039 | INFO     | data.feature_engineer:build_features:342 - Building features for unknown (4766 rows)
+2026-03-06 09:48:26.129 | INFO     | data.feature_engineer:build_features:367 - Dropped 200 NaN/inf rows → 4566 usable rows
+2026-03-06 09:48:26.131 | INFO     | data.feature_engineer:build_features:370 - Label distribution: DOWN=662 NEUTRAL=3188 UP=716
+2026-03-06 09:48:26.133 | INFO     | data.feature_engineer:build_features:377 - Regime: ranging=1699 trending_up=1283 trending_down=1584
+2026-03-06 09:48:26.136 | INFO     | __main__:freeze:56 - Train: 3652 | Val: 914 | Features: 100
+2026-03-06 09:48:26.142 | INFO     | models.lstm_ensemble:train_ensemble:181 - 
+Training 9-model ensemble for DOGE/USD on cuda
+2026-03-06 09:48:26.142 | INFO     | models.lstm_ensemble:train_ensemble:182 -   Train: 3652 | Val: 914 | Features: 100
+2026-03-06 09:48:28.374 | INFO     | models.lstm_ensemble:_train_one:126 -   [1/9] Training seed=42 — 3592 samples
+2026-03-06 09:48:29.437 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.1555 | val_acc=0.4204 | lr=0.000976
+2026-03-06 09:48:29.881 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.3017 | val_acc=0.4274 | lr=0.000905
+2026-03-06 09:48:30.258 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.2722 | val_acc=0.5094 | lr=0.000794

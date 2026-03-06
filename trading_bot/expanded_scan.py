@@ -32,7 +32,7 @@ import numpy as np
 from loguru import logger
 from sklearn.preprocessing import StandardScaler
 
-from timeframe_comparison import fetch_ohlcv_timeframe, fetch_ohlcv_8h
+from timeframe_comparison import fetch_ohlcv_timeframe
 from data.feature_engineer import build_features, get_feature_columns
 from backtest.engine import BacktestEngine
 from backtest.filters import apply_filters
@@ -66,28 +66,26 @@ FOREX_PAIRS = [
 
 ALL_PAIRS = CRYPTO_PAIRS + FOREX_PAIRS
 
-TIMEFRAMES = ["1h", "4h", "8h", "12h", "1d", "1w", "2w"]
+TIMEFRAMES = ["15m", "30m", "1h", "4h", "12h", "1d"]
 
-# Minimum bars per timeframe (need enough for OOT + training)
+# Minimum bars per timeframe (need enough for seq_len + train/val/test split)
 MIN_BARS = {
+    "15m": 10000,
+    "30m": 6000,
     "1h":  5000,
     "4h":  3000,
-    "8h":  1500,   # resampled from 4h
-    "12h": 1000,   # resampled from 4h
+    "12h": 1000,
     "1d":   500,
-    "1w":   150,
-    "2w":    75,
 }
 
-# History to fetch per timeframe
+# History to fetch per timeframe (used by API fallback only — CSV loader uses HISTORY_CAPS)
 HISTORY_DAYS = {
-    "1h":  1825,
-    "4h":  1825,
-    "8h":  1825,   # resampled from 4h
-    "12h": 1825,   # resampled from 4h
-    "1d":  3650,
-    "1w":  3650,
-    "2w":  3650,
+    "15m": 180,
+    "30m": 180,
+    "1h":  365,
+    "4h":  730,
+    "12h": 730,
+    "1d":  1095,
 }
 
 TRAIN_RATIO = 0.60
@@ -97,10 +95,10 @@ N_MODELS    = 9
 MIN_TRADES  = 5
 
 _HDR = (
-    f"{'Symbol':<12} {'TF':>3} {'Class':>6} {'Bars':>6} {'Trades':>7} "
-    f"{'WR':>6} {'Net':>7} {'Sharpe':>7} {'MaxDD':>7} {'Status'}"
+    f"{'Symbol':<12} {'TF':>4} {'Class':>6} {'Bars':>6} {'Trades':>7} "
+    f"{'WR':>6} {'Net':>7} {'Ann':>7} {'Sharpe':>7} {'MaxDD':>7} {'Status'}"
 )
-_SEP = "─" * 85
+_SEP = "─" * 95
 
 
 # ── Core ──────────────────────────────────────────────────────────────────────
@@ -113,11 +111,8 @@ def asset_class(symbol: str) -> str:
 def run_symbol(symbol: str, timeframe: str) -> dict | None:
     t0 = time.time()
     try:
-        days = HISTORY_DAYS.get(timeframe, 1825)
-        if timeframe == "8h":
-            raw = fetch_ohlcv_8h(symbol, history_days=days)
-        else:
-            raw = fetch_ohlcv_timeframe(symbol, timeframe, history_days=days)
+        days = HISTORY_DAYS.get(timeframe, 730)
+        raw = fetch_ohlcv_timeframe(symbol, timeframe, history_days=days)
 
         min_b = MIN_BARS.get(timeframe, 1000)
         if raw is None or len(raw) < min_b:
@@ -172,6 +167,16 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
         sharpe   = float(m.get("sharpe_ratio", 0.0))
         dd       = float(m.get("max_drawdown", 0.0))
 
+        # Annualised return — normalises cumulative return by test window length
+        # so results are comparable across timeframes and history lengths
+        hours_per_bar = {
+            "15m": 0.25, "30m": 0.5, "1h": 1.0, "4h": 4.0,
+            "12h": 12.0, "1d": 24.0, "1w": 168.0, "2w": 336.0,
+        }
+        test_hours = len(X_test) * hours_per_bar.get(timeframe, 1.0)
+        test_years = max(test_hours / 8760, 1/365)   # floor at 1 day to avoid div/0
+        ann_return = (1 + net) ** (1 / test_years) - 1
+
         best_p    = np.maximum(proba[:, 2], proba[:, 0])
         mean_conf = float(best_p.mean())
 
@@ -183,13 +188,13 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
 
         if n_trades < MIN_TRADES:
             status = "TOO_FEW_TRADES"
-        elif net > 0.08 and wr >= 0.42:
+        elif ann_return > 0.20 and wr >= 0.42:
             status = "** STRONG"
-        elif net > 0.04 and wr >= 0.38:
+        elif ann_return > 0.10 and wr >= 0.38:
             status = "* GOOD"
-        elif net > 0.0 and wr >= 0.35:
+        elif ann_return > 0.0 and wr >= 0.35:
             status = "+ MARGINAL"
-        elif net > 0.0:
+        elif ann_return > 0.0:
             status = "~ WEAK+"
         else:
             status = "- LOSS"
@@ -211,6 +216,7 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
             "n_trades":         n_trades,
             "win_rate":         round(wr, 4),
             "net_return":       round(net, 4),
+            "ann_return":       round(ann_return, 4),
             "sharpe":           round(sharpe, 3),
             "max_drawdown":     round(dd, 4),
             "mean_conf":        round(mean_conf, 4),
@@ -226,9 +232,9 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
 
 def print_row(r: dict):
     print(
-        f"  {r['symbol']:<12} {r['timeframe']:>3}  {r['asset_class']:>6}  "
+        f"  {r['symbol']:<12} {r['timeframe']:>4}  {r['asset_class']:>6}  "
         f"{r['n_bars']:>5}  {r['n_trades']:>6}  "
-        f"{r['win_rate']:>5.1%}  {r['net_return']:>+6.1%}  "
+        f"{r['win_rate']:>5.1%}  {r['net_return']:>+6.1%}  {r['ann_return']:>+6.1%}  "
         f"{r['sharpe']:>6.2f}  {r['max_drawdown']:>6.1%}  {r['status']}"
     )
 
@@ -284,12 +290,12 @@ def print_summary(results: list):
 
     # Shortlist
     shortlist = [r for r in ranked
-                 if r["net_return"] > 0.04 and r["win_rate"] >= 0.38]
+                 if r["ann_return"] > 0.10 and r["win_rate"] >= 0.38]
     print(f"\n  SHORTLIST for OOT validation ({len(shortlist)} combos):")
     for r in shortlist:
-        print(f"    {r['symbol']:<12} {r['timeframe']:>3} | "
-              f"{r['net_return']:+.1%} net | {r['win_rate']:.1%} WR | "
-              f"{r['sharpe']:.2f} Sharpe | {r['asset_class']}")
+        print(f"    {r['symbol']:<12} {r['timeframe']:>4} | "
+              f"{r['net_return']:+.1%} net | {r['ann_return']:+.1%} ann | "
+              f"{r['win_rate']:.1%} WR | {r['sharpe']:.2f} Sharpe | {r['asset_class']}")
 
     # Timeframe comparison for symbols appearing in multiple TFs
     tf_groups = {}

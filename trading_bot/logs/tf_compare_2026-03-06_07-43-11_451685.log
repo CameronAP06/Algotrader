@@ -1,0 +1,10 @@
+2026-03-06 07:43:11.462 | INFO     | models.lstm_ensemble:<module>:39 - Ensemble using cuda
+2026-03-06 07:43:11.467 | INFO     | __main__:validate_symbol:148 - 
+============================================================
+  OOT VALIDATION: LINK/USD 1h x5 runs
+============================================================
+2026-03-06 07:43:12.538 | INFO     | kraken_history:get_history_dir:364 - Found Kraken OHLC data at: data/OHLC_Kraken (12027 CSV files)
+2026-03-06 07:43:12.575 | INFO     | kraken_history:fetch_ohlcv_full:288 - Loading LINK/USD 1h from data/OHLC_Kraken\LINKUSD_60.csv...
+2026-03-06 07:43:12.623 | INFO     | kraken_history:fetch_ohlcv_full:290 -   Loaded 54430 bars (2019-09-25 → 2025-12-31)
+2026-03-06 07:43:12.623 | INFO     | kraken_history:fetch_ohlcv_full:299 -   History cap 365d: 54430 → 8750 bars (from 2024-12-31)
+2026-03-06 07:43:12.623 | INFO     | kraken_history:_topup_from_api:176 -   Topping up LINK/USD 1h from 2025-12-31 via API...

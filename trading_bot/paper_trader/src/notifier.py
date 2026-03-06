@@ -66,7 +66,7 @@ def format_event(event: dict) -> str | None:
 def notify_startup():
     send(
         "🤖 <b>Paper Trader — STARTED</b>\n"
-        "Symbols: DOGE/USD + LINK/USD\n"
+        "Symbols: DOGE/USD + LINK/USD + AAVE/USD + XMR/USD\n"
         "Timeframe: 4h | Capital: $1,000 each\n"
         "Alerts on every signal and position close."
     )

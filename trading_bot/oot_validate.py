@@ -41,9 +41,10 @@ from models.lstm_ensemble import train_ensemble, predict_proba_ensemble
 
 TIMEFRAME    = "4h"   # overridden by --timeframe arg
 HISTORY_DAYS = {
-    "4h": 1825,   # 5 years
-    "8h": 1825,
-    "1d": 3650,   # 10 years for daily — need long OOT window
+    "1h":  365,
+    "4h":  730,
+    "12h": 730,
+    "1d":  1095,
 }
 OOT_RATIO    = 0.20   # oldest 20% = OOT window
 TRAIN_RATIO  = 0.48   # next 48%  = train
@@ -108,7 +109,12 @@ def run_once(symbol: str, run_idx: int, timeframe: str = "4h") -> dict | None:
         symbol=symbol, n_models=N_MODELS
     )
 
-    def backtest_window(X_s, feat_window, label):
+    hours_per_bar = {
+        "15m": 0.25, "30m": 0.5, "1h": 1.0, "4h": 4.0,
+        "12h": 12.0, "1d": 24.0,
+    }
+
+    def backtest_window(X_s, feat_window, label, n_bars):
         proba    = predict_proba_ensemble(models, X_s)
         signals  = generate_signals(proba, use_percentile=True, top_pct=TOP_PCT)
         filtered = apply_filters(feat_window, signals, timeframe=timeframe)
@@ -119,17 +125,21 @@ def run_once(symbol: str, run_idx: int, timeframe: str = "4h") -> dict | None:
         sharpe   = float(m.get("sharpe_ratio", 0.0))
         dd       = float(m.get("max_drawdown", 0.0))
         best_p   = np.maximum(proba[:, 2], proba[:, 0])
-        logger.info(f"  {label:<5}: net={net:+.1%} WR={wr:.1%} "
+        # Annualised return
+        test_years = max(n_bars * hours_per_bar.get(timeframe, 1.0) / 8760, 1/365)
+        ann = (1 + net) ** (1 / test_years) - 1
+        logger.info(f"  {label:<5}: net={net:+.1%} ann={ann:+.1%} WR={wr:.1%} "
                     f"Sharpe={sharpe:.2f} trades={n_trades} MaxDD={dd:.1%}")
         return {
             "window": label, "n_trades": n_trades,
             "win_rate": round(wr, 4), "net_return": round(net, 4),
+            "ann_return": round(ann, 4),
             "sharpe": round(sharpe, 3), "max_dd": round(dd, 4),
             "mean_conf": round(float(best_p.mean()), 4),
         }
 
-    test_result = backtest_window(X_test_s, feat_test, "TEST")
-    oot_result  = backtest_window(X_oot_s,  feat_oot,  "OOT ")
+    test_result = backtest_window(X_test_s, feat_test, "TEST", len(X_test))
+    oot_result  = backtest_window(X_oot_s,  feat_oot,  "OOT ", len(X_oot))
 
     return {"run": run_idx + 1, "test": test_result, "oot": oot_result}
 
@@ -150,6 +160,8 @@ def print_summary(symbol: str, results: list):
 
     test_nets  = [r["test"]["net_return"] for r in results]
     oot_nets   = [r["oot"]["net_return"]  for r in results]
+    test_anns  = [r["test"]["ann_return"] for r in results]
+    oot_anns   = [r["oot"]["ann_return"]  for r in results]
     test_wrs   = [r["test"]["win_rate"]   for r in results]
     oot_wrs    = [r["oot"]["win_rate"]    for r in results]
     test_sh    = [r["test"]["sharpe"]     for r in results]
@@ -164,6 +176,8 @@ def print_summary(symbol: str, results: list):
     print(f"  {'Net return  std':<22} {np.std(test_nets):>11.1%} {np.std(oot_nets):>11.1%}")
     print(f"  {'Net return  min':<22} {np.min(test_nets):>+11.1%} {np.min(oot_nets):>+11.1%}")
     print(f"  {'Net return  max':<22} {np.max(test_nets):>+11.1%} {np.max(oot_nets):>+11.1%}")
+    print(f"  {'Ann return  mean':<22} {np.mean(test_anns):>+11.1%} {np.mean(oot_anns):>+11.1%}")
+    print(f"  {'Ann return  std':<22} {np.std(test_anns):>11.1%} {np.std(oot_anns):>11.1%}")
     print(f"  {'Win rate    mean':<22} {np.mean(test_wrs):>11.1%} {np.mean(oot_wrs):>11.1%}")
     print(f"  {'Sharpe      mean':<22} {np.mean(test_sh):>11.2f} {np.mean(oot_sh):>11.2f}")
     print(f"  {'% runs positive':<22} {sum(1 for x in test_nets if x>0)/len(results):>11.0%} "
@@ -229,7 +243,7 @@ def main():
     parser.add_argument("--symbol",    nargs="+", default=["DOGE/USD"],
                         help="Symbol(s) to validate")
     parser.add_argument("--timeframe", default="4h",
-                        choices=["4h", "8h", "1d"],
+                        choices=["1h", "4h", "12h", "1d"],
                         help="Timeframe to validate (default: 4h)")
     parser.add_argument("--runs",      type=int, default=N_RUNS,
                         help="Number of independent ensemble runs")

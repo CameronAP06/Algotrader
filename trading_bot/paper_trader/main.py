@@ -34,7 +34,7 @@ def run_cycle():
         notify_error(err)
 
 def main():
-    logger.info("Paper Trader starting — DOGE/USD + LINK/USD 4h")
+    logger.info("Paper Trader starting — DOGE/USD + LINK/USD + AAVE/USD + XMR/USD 4h")
     notify_startup()
     run_cycle()
     while True:

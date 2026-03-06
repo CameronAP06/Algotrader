@@ -25,7 +25,7 @@ from models.lstm_ensemble import train_ensemble, LSTMClassifier
 from config.settings import LSTM_PARAMS
 
 TIMEFRAME    = "4h"
-HISTORY_DAYS = 1825
+HISTORY_DAYS = 730   # 2 years — matches scan history cap for 4h
 TRAIN_RATIO  = 0.80
 OUT_DIR      = Path(__file__).parent / "models"
 

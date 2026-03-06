@@ -153,16 +153,23 @@ def log_gpu_temp():
 TIMEFRAME_CONFIG = {
     "15m": {
         "ccxt_tf":    "15m",
-        "history_days": 365,      # 1 year — 15m bars fill up fast
-        "label_horizon": 16,      # 16 bars = 4 hours ahead
-        "min_bars":   5000,
+        "history_days": 180,
+        "label_horizon": 96,      # 96 bars = 24h ahead
+        "min_bars":   10000,
         "description": "15 minutes"
+    },
+    "30m": {
+        "ccxt_tf":    "30m",
+        "history_days": 180,
+        "label_horizon": 48,      # 48 bars = 24h ahead
+        "min_bars":   6000,
+        "description": "30 minutes"
     },
     "1h": {
         "ccxt_tf":    "1h",
-        "history_days": 1825,     # 5 years
-        "label_horizon": 8,       # 8 bars = 8 hours ahead
-        "min_bars":   3000,
+        "history_days": 365,
+        "label_horizon": 24,      # 24 bars = 24h ahead
+        "min_bars":   5000,
         "description": "1 hour"
     },
     "2h": {
@@ -174,27 +181,34 @@ TIMEFRAME_CONFIG = {
     },
     "4h": {
         "ccxt_tf":    "4h",
-        "history_days": 1825,
+        "history_days": 730,
         "label_horizon": 6,       # 6 bars = 24 hours ahead
-        "min_bars":   1000,
+        "min_bars":   3000,
         "description": "4 hours"
     },
-        
     "8h": {
         "ccxt_tf":    "8h",
         "history_days": 1825,
-        "label_horizon": 6,       # 6 bars = 24 hours ahead
+        "label_horizon": 6,
         "min_bars":   1000,
         "description": "8 hours"
     },
+    "12h": {
+        "ccxt_tf":    "12h",
+        "history_days": 730,
+        "label_horizon": 2,       # 2 bars = 24h ahead
+        "min_bars":   1000,
+        "description": "12 hours"
+    },
     "1d": {
         "ccxt_tf":    "1d",
-        "history_days": 1825,
+        "history_days": 1095,
         "label_horizon": 5,       # 5 bars = 5 days ahead
-        "min_bars":   300,
+        "min_bars":   500,
         "description": "1 day"
     },
 }
+
 
 SYMBOL_MAP = {
     "BTC/USD":  "BTC/USDT",

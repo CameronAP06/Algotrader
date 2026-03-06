@@ -90,16 +90,30 @@ SYMBOL_TO_KRAKEN = {
 
 # Timeframe → minute interval in CSV filename
 TF_TO_MINUTES = {
+    "15m": 15,
+    "30m": 30,
     "1h":  60,
     "4h":  240,
-    "8h":  240,   # load 4h, then resample
-    "12h": 720,   # native 12h CSV
+    "12h": 720,
     "1d":  1440,
     "1w":  1440,  # load 1d, then resample
     "2w":  1440,  # load 1d, then resample
 }
 
 NEEDS_RESAMPLE = {"8h", "1w", "2w"}
+
+# ── History caps (max days of data to use per timeframe) ─────────────────────
+# Older data trains across too many market regimes, hurting generalisation.
+# Caps are intentionally tighter for shorter timeframes where regime drift
+# is faster, and looser for weekly/daily which need more bars to be useful.
+HISTORY_CAPS = {
+    "15m": 180,    # 6 months  — intraday patterns change fast
+    "30m": 180,    # 6 months
+    "1h":  365,    # 1 year    — one full market cycle
+    "4h":  730,    # 2 years   — multiple cycles, avoids 2017-era noise
+    "12h": 730,    # 2 years
+    "1d":  1095,   # 3 years   — needs more bars to be statistically meaningful
+}
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -146,20 +160,14 @@ def _topup_from_api(symbol: str, timeframe: str, after: pd.Timestamp) -> pd.Data
     Only fetches if gap > 1 bar worth of time.
     """
     import ccxt
-# In _topup_from_api, add at the top of the function:
+
     if timeframe in ("1w", "2w"):
         logger.debug(f"  Skipping API top-up for {timeframe} — CSV history is sufficient")
         return pd.DataFrame()
-    
-    # Map to API timeframe (8h isn't native, use 4h)
-    api_tf = timeframe
-    if timeframe in ("8h", "1w", "2w"):
-        api_tf_map = {"8h": "4h", "1w": "1d", "2w": "1d"}
-        api_tf = api_tf_map[timeframe]
 
-    tf_hours = {"1h": 1, "4h": 4, "1d": 24}
+    tf_hours = {"15m": 0.25, "30m": 0.5, "1h": 1, "4h": 4, "12h": 12, "1d": 24}
     gap_hours = (datetime.utcnow() - after.to_pydatetime()).total_seconds() / 3600
-    bar_hours = tf_hours.get(api_tf, 4)
+    bar_hours = tf_hours.get(timeframe, 1)
 
     if gap_hours < bar_hours * 2:
         logger.info(f"  Top-up not needed — gap is only {gap_hours:.1f}h")
@@ -172,7 +180,7 @@ def _topup_from_api(symbol: str, timeframe: str, after: pd.Timestamp) -> pd.Data
     all_ohlcv = []
     for attempt in range(3):
         try:
-            ohlcv = exchange.fetch_ohlcv(symbol, api_tf, since=since_ms, limit=720)
+            ohlcv = exchange.fetch_ohlcv(symbol, timeframe, since=since_ms, limit=720)
             all_ohlcv = ohlcv
             break
         except Exception as e:
@@ -281,9 +289,18 @@ def fetch_ohlcv_full(
     df_hist = _load_kraken_csv(csv_path)
     logger.info(f"  Loaded {len(df_hist)} bars ({df_hist['timestamp'].iloc[0].date()} → {df_hist['timestamp'].iloc[-1].date()})")
 
+    # Apply history cap — slice to most recent N days to avoid training across
+    # too many market regimes (older data hurts generalisation on recent prices)
+    cap_days = HISTORY_CAPS.get(timeframe)
+    if cap_days:
+        cutoff = df_hist["timestamp"].max() - pd.Timedelta(days=cap_days)
+        before = len(df_hist)
+        df_hist = df_hist[df_hist["timestamp"] >= cutoff].reset_index(drop=True)
+        logger.info(f"  History cap {cap_days}d: {before} → {len(df_hist)} bars (from {df_hist['timestamp'].iloc[0].date()})")
+
     # 3. Top up with API to get recent bars
     last_ts  = df_hist["timestamp"].max()
-    df_topup = _topup_from_api(symbol, timeframe if timeframe not in NEEDS_RESAMPLE else TF_TO_MINUTES.get(timeframe, "4h"), last_ts)
+    df_topup = _topup_from_api(symbol, timeframe if timeframe not in NEEDS_RESAMPLE else "1d", last_ts)
 
     if not df_topup.empty:
         df_hist = pd.concat([df_hist, df_topup], ignore_index=True)

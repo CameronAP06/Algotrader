@@ -27,6 +27,7 @@ from config.settings import (
 # Bars per hour for each supported timeframe
 _BARS_PER_HOUR = {
     "15m": 4.0,
+    "30m": 2.0,
     "1h":  1.0,
     "2h":  0.5,
     "4h":  0.25,
@@ -52,7 +53,8 @@ def get_label_params(timeframe: str = "1h") -> tuple:
     horizon = max(1, round(24 * bph))   # 24h ahead in bars
 
     thresholds = {
-        "15m": 0.010,   # 1.0%  — intraday swing worth trading
+        "15m": 0.006,   # 0.6%  — covers fees+slippage, targets clean intraday scalp
+        "30m": 0.008,   # 0.8%  — slightly larger move required at 30m
         "1h":  0.018,   # 1.8%  — 1h crypto typically moves 0.8-1.5%, need headroom
         "2h":  0.025,   # 2.5%
         "4h":  0.035,   # 3.5%  — meaningful 4h move
