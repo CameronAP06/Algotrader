@@ -1,2 +1,0 @@
-fold,train_start,test_start,test_end,accuracy,total_return,sharpe_ratio,max_drawdown,win_rate,n_trades,weights
-1,0,30805,34839,0.27987109568666335,-0.07414660280341741,-4.784608699907287,-0.08037888403422622,0.19298245614035087,57,"[np.float64(0.029999999999999943), np.float64(0.0), np.float64(0.9700000000000001)]"

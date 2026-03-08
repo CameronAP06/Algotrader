@@ -1,3 +1,0 @@
-﻿window,n_bars,n_days,n_buy,n_sell,n_trades,win_rate,net_return,sharpe,max_dd,accuracy,mean_conf
-TEST (in-distribution),1309,218.0,35,101,38,0.3947,0.0192,0.323,-0.0699,0.4148,0.3988
-OOT  (out-of-time),4211,702.0,247,151,128,0.3828,0.228,0.615,-0.2213,0.4759,0.376
