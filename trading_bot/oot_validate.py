@@ -1,21 +1,24 @@
 """
 oot_validate.py
 ───────────────
-Out-of-time validation using a 9-model ensemble.
+Walk-forward out-of-time validation using a 9-model ensemble.
 
-Splits data into 4 windows:
-  [OOT (historical)] | [TRAIN] | [VAL] | [TEST]
+Instead of a single fixed OOT window (which only tests one historical regime),
+this runs N_WF_FOLDS walk-forward windows that each cover a different calendar
+period. A signal that survives across all windows is genuinely structural.
 
-Trains ensemble on TRAIN+VAL, then backtests on both TEST and OOT.
-Runs N_RUNS independent times to measure remaining variance.
+Architecture per fold:
+  [  OOT (oldest 12%, fixed) | TRAIN (grows) | VAL | TEST (steps forward)  ]
 
-If OOT and TEST are both consistently positive across runs,
-the signal is structural — not just regime-specific.
+The OOT window is always the same oldest slice (never touched by training).
+The TRAIN/VAL/TEST windows step forward for each fold so the test period
+covers a different regime each time.
 
 Usage:
     python oot_validate.py --symbol DOGE/USD
-    python oot_validate.py --symbol DOGE/USD LINK/USD
-    python oot_validate.py --symbol DOGE/USD --runs 5
+    python oot_validate.py --symbol EOS/USD --timeframe 30m
+    python oot_validate.py --symbol DOGE/USD LINK/USD AAVE/USD --timeframe 4h
+    python oot_validate.py --symbol DOGE/USD --folds 4
 """
 import os, sys, argparse, csv
 from datetime import datetime
@@ -39,31 +42,84 @@ from models.lstm_ensemble import train_ensemble, predict_proba_ensemble
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
-TIMEFRAME    = "4h"   # overridden by --timeframe arg
 HISTORY_DAYS = {
+    "30m": 180,
     "1h":  365,
     "4h":  730,
     "12h": 730,
     "1d":  1095,
 }
-OOT_RATIO    = 0.20   # oldest 20% = OOT window
-TRAIN_RATIO  = 0.48   # next 48%  = train
-VAL_RATIO    = 0.16   # next 16%  = val
-TEST_RATIO   = 0.16   # newest 16% = test
-N_MODELS     = 9
-N_RUNS       = 5      # repeat full ensemble training N times to measure residual variance
-TOP_PCT      = 0.15
+
+OOT_RATIO   = 0.12   # oldest 12% reserved as OOT — never used for training
+N_MODELS    = 9
+N_WF_FOLDS  = 3      # walk-forward test windows (different calendar regimes)
+TOP_PCT     = 0.15
+
+# Walk-forward fold sizing as fraction of total data
+FOLD_VAL    = 0.14
+FOLD_TEST   = 0.10   # each fold's test window — steps backward from end
+
+# Minimum trades to produce a meaningful verdict per timeframe
+MIN_TRADES_TF = {
+    "30m": 12,
+    "1h":  12,
+    "4h":   6,
+    "12h":  4,
+    "1d":   4,
+}
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def _fmt_date(series) -> str:
+    try:
+        return f"{series.iloc[0].strftime('%Y-%m-%d')}→{series.iloc[-1].strftime('%Y-%m-%d')}"
+    except Exception:
+        return "?"
+
+
+def _backtest_window(models, X_s, feat_window, label, timeframe):
+    proba    = predict_proba_ensemble(models, X_s)
+    signals  = generate_signals(proba, use_percentile=True, top_pct=TOP_PCT)
+    filtered = apply_filters(feat_window, signals, timeframe=timeframe)
+    m        = BacktestEngine().run(feat_window, filtered, timeframe=timeframe)
+    net      = float(m.get("total_return",  0.0))
+    ann      = float(m.get("ann_return",    0.0))
+    wr       = float(m.get("win_rate",      0.0))
+    sharpe   = float(m.get("sharpe_ratio",  0.0))
+    calmar   = float(m.get("calmar_ratio",  0.0))
+    dd       = float(m.get("max_drawdown",  0.0))
+    n_trades = int(m.get("n_trades",        0))
+    date_str = _fmt_date(feat_window["timestamp"]) if "timestamp" in feat_window.columns else "?"
+    logger.info(f"  {label:<18} [{date_str}]: net={net:+.1%} ann={ann:+.1%} "
+                f"WR={wr:.1%} Sh={sharpe:.2f} Cal={calmar:.2f} trades={n_trades}")
+    return {
+        "window":     label,
+        "date_range": date_str,
+        "n_trades":   n_trades,
+        "win_rate":   round(wr,     4),
+        "net_return": round(net,    4),
+        "ann_return": round(ann,    4),
+        "sharpe":     round(sharpe, 3),
+        "calmar":     round(calmar, 3),
+        "max_dd":     round(dd,     4),
+    }
 
 
 # ── Core ──────────────────────────────────────────────────────────────────────
 
-def run_once(symbol: str, run_idx: int, timeframe: str = "4h") -> dict | None:
-    """One full OOT validation run."""
-    days = HISTORY_DAYS.get(timeframe, 1825)
-    raw = fetch_ohlcv_timeframe(symbol, timeframe, history_days=days)
-    if raw is None or len(raw) < 2000:
+def validate_symbol(symbol: str, timeframe: str = "4h", n_folds: int = N_WF_FOLDS) -> list:
+    """
+    Run walk-forward OOT validation. Returns list of fold result dicts,
+    each containing 'oot', 'test', and 'fold' keys.
+    """
+    logger.info(f"\n{'='*65}\n  OOT VALIDATION: {symbol} {timeframe} — {n_folds} walk-forward folds\n{'='*65}")
+
+    days = HISTORY_DAYS.get(timeframe, 730)
+    raw  = fetch_ohlcv_timeframe(symbol, timeframe, history_days=days)
+    if raw is None or len(raw) < 1000:
         logger.error(f"{symbol}: insufficient data ({len(raw) if raw else 0} bars)")
-        return None
+        return []
 
     feat_df   = build_features(raw, timeframe=timeframe)
     feat_cols = get_feature_columns(feat_df)
@@ -71,162 +127,200 @@ def run_once(symbol: str, run_idx: int, timeframe: str = "4h") -> dict | None:
     y = feat_df["label"].values.astype(int)
     n = len(X)
 
-    # Split
-    i0 = int(n * OOT_RATIO)
-    i1 = i0 + int(n * TRAIN_RATIO)
-    i2 = i1 + int(n * VAL_RATIO)
-    # test is i2:end
+    # Fixed OOT window — always the oldest OOT_RATIO of data
+    oot_end   = int(n * OOT_RATIO)
+    X_oot_raw = X[:oot_end]
+    feat_oot  = feat_df.iloc[:oot_end].reset_index(drop=True)
 
-    X_oot,   y_oot   = X[:i0],   y[:i0]
-    X_train, y_train = X[i0:i1], y[i0:i1]
-    X_val,   y_val   = X[i1:i2], y[i1:i2]
-    X_test,  y_test  = X[i2:],   y[i2:]
-    feat_oot  = feat_df.iloc[:i0].reset_index(drop=True)
-    feat_test = feat_df.iloc[i2:].reset_index(drop=True)
+    oot_date = _fmt_date(feat_oot["timestamp"]) if "timestamp" in feat_oot.columns else "?"
+    logger.info(f"  OOT window (fixed): {oot_end} bars [{oot_date}]")
+    logger.info(f"  Remaining for WF:   {n - oot_end} bars")
+    logger.info(f"  Walk-forward folds: {n_folds}\n")
 
-    oot_days  = int((feat_oot["timestamp"].iloc[-1]  - feat_oot["timestamp"].iloc[0]).days)  \
-                if "timestamp" in feat_oot.columns else i0 // 6
-    test_days = int((feat_test["timestamp"].iloc[-1] - feat_test["timestamp"].iloc[0]).days) \
-                if "timestamp" in feat_test.columns else (n - i2) // 6
+    fold_step = int(n * FOLD_TEST)
+    fold_val  = int(n * FOLD_VAL)
 
-    logger.info(f"\nRun {run_idx+1}/{N_RUNS} | {symbol}")
-    logger.info(f"  OOT:   {len(X_oot):>5} bars ({oot_days} days)")
-    logger.info(f"  Train: {len(X_train):>5} bars")
-    logger.info(f"  Val:   {len(X_val):>5} bars")
-    logger.info(f"  Test:  {len(X_test):>5} bars ({test_days} days)")
+    all_fold_results = []
 
-    # Scale — fit on train only, apply everywhere
-    scaler = StandardScaler()
-    scaler.fit(X_train)
-    X_train_s = scaler.transform(X_train)
-    X_val_s   = scaler.transform(X_val)
-    X_test_s  = scaler.transform(X_test)
-    X_oot_s   = scaler.transform(X_oot)
+    for fold in range(n_folds):
+        # Step test window backward from the end of data
+        test_end   = n - fold * fold_step
+        test_start = test_end - fold_step
+        val_start  = test_start - fold_val
+        train_end  = val_start   # train from oot_end up to val_start
 
-    # Train 9-model ensemble
-    models = train_ensemble(
-        X_train_s, y_train, X_val_s, y_val,
-        symbol=symbol, n_models=N_MODELS
-    )
+        if train_end <= oot_end or test_start <= val_start or test_end > n:
+            logger.warning(f"  Fold {fold+1}: invalid window boundaries — skipping")
+            continue
 
-    hours_per_bar = {
-        "15m": 0.25, "30m": 0.5, "1h": 1.0, "4h": 4.0,
-        "12h": 12.0, "1d": 24.0,
-    }
+        train_size = train_end - oot_end
+        if train_size < 200:
+            logger.warning(f"  Fold {fold+1}: train too small ({train_size} bars) — skipping")
+            continue
 
-    def backtest_window(X_s, feat_window, label, n_bars):
-        proba    = predict_proba_ensemble(models, X_s)
-        signals  = generate_signals(proba, use_percentile=True, top_pct=TOP_PCT)
-        filtered = apply_filters(feat_window, signals, timeframe=timeframe)
-        m        = BacktestEngine().run(feat_window, filtered, timeframe=timeframe)
-        n_trades = int(m.get("n_trades", 0))
-        net      = float(m.get("total_return", 0.0))
-        wr       = float(m.get("win_rate", 0.0))
-        sharpe   = float(m.get("sharpe_ratio", 0.0))
-        dd       = float(m.get("max_drawdown", 0.0))
-        best_p   = np.maximum(proba[:, 2], proba[:, 0])
-        # Annualised return
-        test_years = max(n_bars * hours_per_bar.get(timeframe, 1.0) / 8760, 1/365)
-        ann = (1 + net) ** (1 / test_years) - 1
-        logger.info(f"  {label:<5}: net={net:+.1%} ann={ann:+.1%} WR={wr:.1%} "
-                    f"Sharpe={sharpe:.2f} trades={n_trades} MaxDD={dd:.1%}")
-        return {
-            "window": label, "n_trades": n_trades,
-            "win_rate": round(wr, 4), "net_return": round(net, 4),
-            "ann_return": round(ann, 4),
-            "sharpe": round(sharpe, 3), "max_dd": round(dd, 4),
-            "mean_conf": round(float(best_p.mean()), 4),
-        }
+        logger.info(f"\n  ── Fold {fold+1}/{n_folds} ──────────────────────────────────────────")
+        logger.info(f"  Train: [{oot_end}:{train_end}] = {train_size} bars")
+        logger.info(f"  Val:   [{val_start}:{test_start}] = {fold_val} bars")
+        logger.info(f"  Test:  [{test_start}:{test_end}] = {fold_step} bars")
 
-    test_result = backtest_window(X_test_s, feat_test, "TEST", len(X_test))
-    oot_result  = backtest_window(X_oot_s,  feat_oot,  "OOT ", len(X_oot))
+        X_train   = X[oot_end:train_end]
+        y_train   = y[oot_end:train_end]
+        X_val     = X[val_start:test_start]
+        y_val     = y[val_start:test_start]
+        X_test    = X[test_start:test_end]
+        feat_test = feat_df.iloc[test_start:test_end].reset_index(drop=True)
 
-    return {"run": run_idx + 1, "test": test_result, "oot": oot_result}
+        # Scale — fit on this fold's train only
+        scaler = StandardScaler()
+        scaler.fit(X_train)
+        X_train_s = scaler.transform(X_train)
+        X_val_s   = scaler.transform(X_val)
+        X_test_s  = scaler.transform(X_test)
+        X_oot_s   = scaler.transform(X_oot_raw)
+
+        # Train ensemble
+        models = train_ensemble(
+            X_train_s, y_train, X_val_s, y_val,
+            symbol=f"{symbol}_{timeframe}_fold{fold+1}", n_models=N_MODELS
+        )
+
+        test_result = _backtest_window(models, X_test_s, feat_test,
+                                       f"TEST fold {fold+1}", timeframe)
+        oot_result  = _backtest_window(models, X_oot_s,  feat_oot,
+                                       f"OOT  fold {fold+1}", timeframe)
+
+        all_fold_results.append({
+            "fold":  fold + 1,
+            "test":  test_result,
+            "oot":   oot_result,
+        })
+
+    return all_fold_results
 
 
-def validate_symbol(symbol: str, n_runs: int, timeframe: str = "4h") -> list:
-    logger.info(f"\n{'='*60}\n  OOT VALIDATION: {symbol} {timeframe} x{n_runs} runs\n{'='*60}")
-    results = []
-    for i in range(n_runs):
-        r = run_once(symbol, i, timeframe=timeframe)
-        if r:
-            results.append(r)
-    return results
+# ── Summary ───────────────────────────────────────────────────────────────────
 
-
-def print_summary(symbol: str, results: list):
+def print_summary(symbol: str, timeframe: str, results: list) -> str:
     if not results:
-        return
-
-    test_nets  = [r["test"]["net_return"] for r in results]
-    oot_nets   = [r["oot"]["net_return"]  for r in results]
-    test_anns  = [r["test"]["ann_return"] for r in results]
-    oot_anns   = [r["oot"]["ann_return"]  for r in results]
-    test_wrs   = [r["test"]["win_rate"]   for r in results]
-    oot_wrs    = [r["oot"]["win_rate"]    for r in results]
-    test_sh    = [r["test"]["sharpe"]     for r in results]
-    oot_sh     = [r["oot"]["sharpe"]      for r in results]
-
-    print(f"\n{'='*60}")
-    print(f"  {symbol} — {len(results)} runs x {N_MODELS} models each")
-    print(f"{'='*60}")
-    print(f"  {'':22} {'TEST':>12} {'OOT':>12}")
-    print(f"  {'-'*48}")
-    print(f"  {'Net return  mean':<22} {np.mean(test_nets):>+11.1%} {np.mean(oot_nets):>+11.1%}")
-    print(f"  {'Net return  std':<22} {np.std(test_nets):>11.1%} {np.std(oot_nets):>11.1%}")
-    print(f"  {'Net return  min':<22} {np.min(test_nets):>+11.1%} {np.min(oot_nets):>+11.1%}")
-    print(f"  {'Net return  max':<22} {np.max(test_nets):>+11.1%} {np.max(oot_nets):>+11.1%}")
-    print(f"  {'Ann return  mean':<22} {np.mean(test_anns):>+11.1%} {np.mean(oot_anns):>+11.1%}")
-    print(f"  {'Ann return  std':<22} {np.std(test_anns):>11.1%} {np.std(oot_anns):>11.1%}")
-    print(f"  {'Win rate    mean':<22} {np.mean(test_wrs):>11.1%} {np.mean(oot_wrs):>11.1%}")
-    print(f"  {'Sharpe      mean':<22} {np.mean(test_sh):>11.2f} {np.mean(oot_sh):>11.2f}")
-    print(f"  {'% runs positive':<22} {sum(1 for x in test_nets if x>0)/len(results):>11.0%} "
-          f"{sum(1 for x in oot_nets if x>0)/len(results):>11.0%}")
-
-    corr = np.corrcoef(test_nets, oot_nets)[0, 1] if len(results) > 2 else float("nan")
-    print(f"\n  TEST vs OOT correlation: {corr:+.2f}")
-
-    both_pos = sum(1 for r in results if r["test"]["net_return"] > 0 and r["oot"]["net_return"] > 0)
-    both_neg = sum(1 for r in results if r["test"]["net_return"] < 0 and r["oot"]["net_return"] < 0)
-    t_p_o_n  = sum(1 for r in results if r["test"]["net_return"] > 0 and r["oot"]["net_return"] < 0)
-    t_n_o_p  = sum(1 for r in results if r["test"]["net_return"] < 0 and r["oot"]["net_return"] > 0)
+        logger.warning(f"No results for {symbol}")
+        return "NO DATA"
 
     n = len(results)
-    print(f"\n  Outcome breakdown ({n} runs):")
-    print(f"    Both positive:   {both_pos}/{n}  <- genuine signal if high")
-    print(f"    Test+ OOT-:      {t_p_o_n}/{n}  <- regime-specific")
-    print(f"    Test- OOT+:      {t_n_o_p}/{n}")
-    print(f"    Both negative:   {both_neg}/{n}  <- no signal")
+    test_nets = [r["test"]["net_return"] for r in results]
+    oot_nets  = [r["oot"]["net_return"]  for r in results]
+    test_anns = [r["test"]["ann_return"] for r in results]
+    oot_anns  = [r["oot"]["ann_return"]  for r in results]
+    test_wrs  = [r["test"]["win_rate"]   for r in results]
+    oot_wrs   = [r["oot"]["win_rate"]    for r in results]
+    test_sh   = [r["test"]["sharpe"]     for r in results]
+    oot_sh    = [r["oot"]["sharpe"]      for r in results]
+    test_cal  = [r["test"]["calmar"]     for r in results]
+    oot_cal   = [r["oot"]["calmar"]      for r in results]
+    test_tr   = [r["test"]["n_trades"]   for r in results]
+    oot_tr    = [r["oot"]["n_trades"]    for r in results]
 
-    # Verdict
+    print(f"\n{'='*70}")
+    print(f"  {symbol} {timeframe} — {n} walk-forward folds × {N_MODELS} models")
+    print(f"{'='*70}")
+
+    # Per-fold detail table
+    print(f"\n  {'Fold':<6} {'Window':<23} {'Net':>7} {'Ann':>7} {'WR':>6} "
+          f"{'Sh':>6} {'Cal':>6} {'Trades':>7}")
+    print(f"  {'─'*70}")
+    for r in results:
+        for wk, lbl in [("test", "TEST"), ("oot", "OOT")]:
+            d = r[wk]
+            pos = "+" if d["net_return"] >= 0 else ""
+            print(f"  {r['fold']:<6} {lbl+' '+d['date_range']:<23} "
+                  f"{d['net_return']:>+6.1%} {d['ann_return']:>+6.1%} "
+                  f"{d['win_rate']:>5.1%} {d['sharpe']:>6.2f} "
+                  f"{d['calmar']:>6.2f} {d['n_trades']:>7}")
+
+    # Aggregate stats
+    print(f"\n  {'Metric':<24} {'TEST mean':>10} {'TEST std':>9} {'OOT mean':>10} {'OOT std':>9}")
+    print(f"  {'─'*64}")
+    for label, t_vals, o_vals in [
+        ("Net return",  test_nets, oot_nets),
+        ("Ann return",  test_anns, oot_anns),
+        ("Win rate",    test_wrs,  oot_wrs),
+        ("Sharpe",      test_sh,   oot_sh),
+        ("Calmar",      test_cal,  oot_cal),
+    ]:
+        fmt = ".1%" if "return" in label.lower() or "rate" in label.lower() else ".2f"
+        print(f"  {label:<24} "
+              f"{np.mean(t_vals):>+9{fmt}} {np.std(t_vals):>8{fmt}} "
+              f"{np.mean(o_vals):>+9{fmt}} {np.std(o_vals):>8{fmt}}")
+    print(f"  {'Trades (avg)':<24} {np.mean(test_tr):>9.1f} {'':>9} {np.mean(oot_tr):>9.1f}")
+
+    both_pos  = sum(1 for r in results if r["test"]["net_return"] > 0 and r["oot"]["net_return"] > 0)
+    both_neg  = sum(1 for r in results if r["test"]["net_return"] < 0 and r["oot"]["net_return"] < 0)
+    t_p_o_n   = sum(1 for r in results if r["test"]["net_return"] > 0 and r["oot"]["net_return"] < 0)
+    t_n_o_p   = sum(1 for r in results if r["test"]["net_return"] < 0 and r["oot"]["net_return"] > 0)
+    oot_pos   = sum(1 for x in oot_nets if x > 0)
+
+    print(f"\n  Fold outcomes ({n} folds):")
+    print(f"    Both positive:   {both_pos}/{n}  ← deploy signal if high")
+    print(f"    Test+ OOT-:      {t_p_o_n}/{n}  ← regime-specific overfitting")
+    print(f"    Test- OOT+:      {t_n_o_p}/{n}  ← old signal, not recent")
+    print(f"    Both negative:   {both_neg}/{n}  ← no signal")
+
+    min_trades = MIN_TRADES_TF.get(timeframe, 6)
+    low_trade_folds = sum(1 for r in results
+                          if r["test"]["n_trades"] < min_trades
+                          or r["oot"]["n_trades"]  < min_trades)
+    if low_trade_folds:
+        print(f"\n  ⚠  {low_trade_folds} fold(s) below min trades threshold ({min_trades}) "
+              f"— treat those folds with caution")
+
+    # ── Verdict ──────────────────────────────────────────────────────────────
+    mean_oot_ann = np.mean(oot_anns)
+    std_oot_ann  = np.std(oot_anns)
+
     print(f"\n  VERDICT:")
-    mean_oot = np.mean(oot_nets)
-    std_oot  = np.std(oot_nets)
-    if both_pos >= int(n * 0.7) and mean_oot > 0.03:
-        print(f"  STRONG SIGNAL — {both_pos}/{n} both-positive runs, OOT mean {mean_oot:+.1%}")
-        print(f"  Proceed to live deployment with this symbol.")
-    elif mean_oot > 0 and std_oot < 0.10:
-        print(f"  WEAK SIGNAL — positive mean OOT ({mean_oot:+.1%}) but low consistency")
-        print(f"  Consider deploying with reduced position sizing.")
-    elif std_oot < 0.08:
-        print(f"  NO SIGNAL — variance reduced but mean near zero ({mean_oot:+.1%})")
-        print(f"  Drop this symbol from the paper trade.")
+    if both_pos == n and mean_oot_ann > 0.08 and std_oot_ann < 0.15:
+        verdict = "✓ DEPLOY"
+        detail  = (f"All {n}/{n} folds both-positive. OOT ann={mean_oot_ann:+.1%} "
+                   f"std={std_oot_ann:.1%}. Robust across regimes.")
+    elif both_pos >= n - 1 and mean_oot_ann > 0.05:
+        verdict = "✓ DEPLOY (weak)"
+        detail  = (f"{both_pos}/{n} both-positive folds. OOT ann={mean_oot_ann:+.1%}. "
+                   f"Mostly consistent — deploy with normal sizing.")
+    elif oot_pos == n and mean_oot_ann > 0.03:
+        verdict = "~ MONITOR"
+        detail  = (f"OOT positive in all {n} folds but TEST inconsistent. "
+                   f"Signal exists historically but model struggles on recent data. "
+                   f"Re-check after next data refresh.")
+    elif mean_oot_ann > 0 and both_pos >= n // 2:
+        verdict = "~ WEAK"
+        detail  = (f"OOT mean positive ({mean_oot_ann:+.1%}) but only {both_pos}/{n} "
+                   f"folds both-positive. Too inconsistent for deployment.")
+    elif both_neg >= n - 1:
+        verdict = "✗ DROP"
+        detail  = f"Both TEST and OOT negative in {both_neg}/{n} folds. No signal."
     else:
-        print(f"  INCONCLUSIVE — high variance remains (std={std_oot:.1%})")
-        print(f"  The ensemble hasn't fully stabilised. Consider more runs.")
+        verdict = "✗ DROP"
+        detail  = (f"Inconsistent with no clear positive pattern. "
+                   f"OOT ann={mean_oot_ann:+.1%}, {both_pos}/{n} both-positive.")
+
+    print(f"  {verdict}")
+    print(f"  {detail}")
     print()
+    return verdict
 
 
-def save_results(symbol: str, results: list, ts: str, timeframe: str = "4h"):
+# ── Save ──────────────────────────────────────────────────────────────────────
+
+def save_results(symbol: str, timeframe: str, results: list, ts: str) -> Path:
     out_dir = Path("backtest/results")
     out_dir.mkdir(parents=True, exist_ok=True)
-    safe    = symbol.replace("/", "_")
-    path    = out_dir / f"oot_ensemble_{safe}_{timeframe}_{ts}.csv"
+    safe = symbol.replace("/", "_")
+    path = out_dir / f"oot_ensemble_{safe}_{timeframe}_{ts}.csv"
 
     rows = []
     for r in results:
-        for window, d in [("TEST", r["test"]), ("OOT", r["oot"])]:
-            rows.append({"run": r["run"], "symbol": symbol, **d})
+        base = {"fold": r["fold"], "symbol": symbol, "timeframe": timeframe}
+        for wk in ["test", "oot"]:
+            rows.append({**base, **r[wk]})
 
     if rows:
         with open(path, "w", newline="", encoding="utf-8-sig") as f:
@@ -234,26 +328,35 @@ def save_results(symbol: str, results: list, ts: str, timeframe: str = "4h"):
             w.writeheader()
             w.writerows(rows)
         logger.info(f"Saved -> {path}")
+    return path
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--symbol",    nargs="+", default=["DOGE/USD"],
-                        help="Symbol(s) to validate")
+    parser = argparse.ArgumentParser(description="Walk-forward OOT validation")
+    parser.add_argument("--symbol",    nargs="+", default=["DOGE/USD"])
     parser.add_argument("--timeframe", default="4h",
-                        choices=["1h", "4h", "12h", "1d"],
-                        help="Timeframe to validate (default: 4h)")
-    parser.add_argument("--runs",      type=int, default=N_RUNS,
-                        help="Number of independent ensemble runs")
-    args   = parser.parse_args()
-    ts     = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        choices=["30m", "1h", "4h", "12h", "1d"])
+    parser.add_argument("--folds",     type=int, default=N_WF_FOLDS,
+                        help=f"Walk-forward folds (default: {N_WF_FOLDS})")
+    args = parser.parse_args()
+    ts   = datetime.now().strftime("%Y%m%d_%H%M%S")
 
+    verdicts = {}
     for symbol in args.symbol:
-        results = validate_symbol(symbol, args.runs, timeframe=args.timeframe)
-        print_summary(symbol, results)
-        save_results(symbol, results, ts, timeframe=args.timeframe)
+        results = validate_symbol(symbol, timeframe=args.timeframe, n_folds=args.folds)
+        verdict = print_summary(symbol, args.timeframe, results)
+        save_results(symbol, args.timeframe, results, ts)
+        verdicts[symbol] = verdict
+
+    if len(args.symbol) > 1:
+        print(f"\n{'='*50}")
+        print(f"  BATCH SUMMARY")
+        print(f"{'='*50}")
+        for sym, v in verdicts.items():
+            print(f"  {sym:<14} {v or 'no result'}")
+        print()
 
 
 if __name__ == "__main__":

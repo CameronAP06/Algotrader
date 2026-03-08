@@ -153,23 +153,16 @@ def log_gpu_temp():
 TIMEFRAME_CONFIG = {
     "15m": {
         "ccxt_tf":    "15m",
-        "history_days": 180,
-        "label_horizon": 96,      # 96 bars = 24h ahead
-        "min_bars":   10000,
+        "history_days": 365,      # 1 year — 15m bars fill up fast
+        "label_horizon": 16,      # 16 bars = 4 hours ahead
+        "min_bars":   5000,
         "description": "15 minutes"
-    },
-    "30m": {
-        "ccxt_tf":    "30m",
-        "history_days": 180,
-        "label_horizon": 48,      # 48 bars = 24h ahead
-        "min_bars":   6000,
-        "description": "30 minutes"
     },
     "1h": {
         "ccxt_tf":    "1h",
-        "history_days": 365,
-        "label_horizon": 24,      # 24 bars = 24h ahead
-        "min_bars":   5000,
+        "history_days": 1825,     # 5 years
+        "label_horizon": 8,       # 8 bars = 8 hours ahead
+        "min_bars":   3000,
         "description": "1 hour"
     },
     "2h": {
@@ -181,34 +174,27 @@ TIMEFRAME_CONFIG = {
     },
     "4h": {
         "ccxt_tf":    "4h",
-        "history_days": 730,
+        "history_days": 1825,
         "label_horizon": 6,       # 6 bars = 24 hours ahead
-        "min_bars":   3000,
+        "min_bars":   1000,
         "description": "4 hours"
     },
+        
     "8h": {
         "ccxt_tf":    "8h",
         "history_days": 1825,
-        "label_horizon": 6,
+        "label_horizon": 6,       # 6 bars = 24 hours ahead
         "min_bars":   1000,
         "description": "8 hours"
     },
-    "12h": {
-        "ccxt_tf":    "12h",
-        "history_days": 730,
-        "label_horizon": 2,       # 2 bars = 24h ahead
-        "min_bars":   1000,
-        "description": "12 hours"
-    },
     "1d": {
         "ccxt_tf":    "1d",
-        "history_days": 1095,
+        "history_days": 1825,
         "label_horizon": 5,       # 5 bars = 5 days ahead
-        "min_bars":   500,
+        "min_bars":   300,
         "description": "1 day"
     },
 }
-
 
 SYMBOL_MAP = {
     "BTC/USD":  "BTC/USDT",
@@ -342,8 +328,49 @@ def resample_to_8h(df: pd.DataFrame) -> pd.DataFrame:
     return agg
 
 
-def fetch_ohlcv_8h(symbol: str, history_days: int) -> pd.DataFrame:
-    """Fetch 4h data from Kraken and resample to 8h."""
+def resample_to_12h(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Resample 4h OHLCV candles into 12h candles.
+    Kraken's ccxt interface doesn't accept '12h' as a timeframe string.
+    Groups every 3 consecutive 4h bars: open=first, high=max, low=min,
+    close=last, volume=sum. Timestamp = start of the 12h window.
+    """
+    df = df.copy().sort_values("timestamp").reset_index(drop=True)
+
+    # Align to 12h boundaries (00:00, 12:00 UTC)
+    ts = df["timestamp"]
+    if hasattr(ts.iloc[0], 'tzinfo') and ts.iloc[0].tzinfo is not None:
+        epoch = pd.Timestamp("1970-01-01", tz="UTC")
+    else:
+        epoch = pd.Timestamp("1970-01-01")
+
+    hours_since_epoch = (ts - epoch).dt.total_seconds() / 3600
+    df["_12h_bucket"] = (hours_since_epoch // 12).astype(int)
+
+    agg = df.groupby("_12h_bucket").agg(
+        timestamp=("timestamp", "first"),
+        open=("open",   "first"),
+        high=("high",   "max"),
+        low=("low",     "min"),
+        close=("close", "last"),
+        volume=("volume","sum"),
+    ).reset_index(drop=True)
+
+    return agg
+
+
+def fetch_ohlcv_12h(symbol: str, history_days: int) -> pd.DataFrame:
+    """Fetch 4h data from Kraken and resample to 12h.
+    Kraken's ccxt interface rejects '12h' as a timeframe — we synthesise it."""
+    df_4h = fetch_ohlcv_timeframe(symbol, "4h", history_days)
+    if df_4h is None or len(df_4h) < 2:
+        return pd.DataFrame()
+    df_12h = resample_to_12h(df_4h)
+    logger.info(f"{symbol} 12h (resampled from 4h): {len(df_12h)} candles")
+    return df_12h
+
+
+
     import ccxt
     df_4h = fetch_ohlcv_timeframe(symbol, "4h", history_days)
     if df_4h is None or len(df_4h) < 2:

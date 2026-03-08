@@ -237,6 +237,10 @@ def predict_proba_ensemble(models: list, X: np.ndarray,
                 probs.append(p)
 
         pad = np.full((seq_len - 1, 3), [0.0, 1.0, 0.0])
+        if len(probs) == 0:
+            # X_test shorter than seq_len — return all-neutral predictions
+            all_probas.append(pad[:len(X)] if len(X) > 0 else pad)
+            continue
         all_probas.append(np.vstack([pad, np.array(probs)]))
 
     # Average across all models — this is where variance cancels

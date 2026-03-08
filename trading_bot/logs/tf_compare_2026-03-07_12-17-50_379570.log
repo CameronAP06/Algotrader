@@ -1,0 +1,864 @@
+2026-03-07 12:17:50.386 | INFO     | models.lstm_ensemble:<module>:39 - Ensemble using cuda
+2026-03-07 12:17:50.389 | INFO     | __main__:validate_symbol:116 - 
+=================================================================
+  OOT VALIDATION: XLM/USD 4h — 3 walk-forward folds
+=================================================================
+2026-03-07 12:17:51.493 | INFO     | kraken_history:get_history_dir:364 - Found Kraken OHLC data at: data/OHLC_Kraken (12027 CSV files)
+2026-03-07 12:17:51.526 | INFO     | kraken_history:fetch_ohlcv_full:288 - Loading XLM/USD 4h from data/OHLC_Kraken\XLMUSD_240.csv...
+2026-03-07 12:17:51.544 | INFO     | kraken_history:fetch_ohlcv_full:290 -   Loaded 4383 bars (2024-01-01 → 2025-12-31)
+2026-03-07 12:17:51.544 | INFO     | kraken_history:fetch_ohlcv_full:299 -   History cap 730d: 4383 → 4378 bars (from 2024-01-01)
+2026-03-07 12:17:51.546 | INFO     | kraken_history:_topup_from_api:176 -   Topping up XLM/USD 4h from 2025-12-31 via API...
+2026-03-07 12:17:57.602 | INFO     | kraken_history:_topup_from_api:199 -   Top-up: 394 new bars
+2026-03-07 12:17:57.614 | SUCCESS  | kraken_history:fetch_ohlcv_full:314 - XLM/USD 4h: 4772 bars total (2024-01-01 → 2026-03-07)
+2026-03-07 12:17:57.639 | INFO     | data.feature_engineer:build_features:342 - Building features for unknown (4772 rows)
+2026-03-07 12:17:57.723 | INFO     | data.feature_engineer:build_features:367 - Dropped 200 NaN/inf rows → 4572 usable rows
+2026-03-07 12:17:57.726 | INFO     | data.feature_engineer:build_features:370 - Label distribution: DOWN=469 NEUTRAL=3625 UP=478
+2026-03-07 12:17:57.727 | INFO     | data.feature_engineer:build_features:377 - Regime: ranging=1858 trending_up=999 trending_down=1715
+2026-03-07 12:17:57.731 | INFO     | __main__:validate_symbol:136 -   OOT window (fixed): 548 bars [2024-02-04→2024-05-05]
+2026-03-07 12:17:57.731 | INFO     | __main__:validate_symbol:137 -   Remaining for WF:   4024 bars
+2026-03-07 12:17:57.731 | INFO     | __main__:validate_symbol:138 -   Walk-forward folds: 3
+
+2026-03-07 12:17:57.731 | INFO     | __main__:validate_symbol:161 - 
+  ── Fold 1/3 ──────────────────────────────────────────
+2026-03-07 12:17:57.731 | INFO     | __main__:validate_symbol:162 -   Train: [548:3475] = 2927 bars
+2026-03-07 12:17:57.732 | INFO     | __main__:validate_symbol:163 -   Val:   [3475:4115] = 640 bars
+2026-03-07 12:17:57.732 | INFO     | __main__:validate_symbol:164 -   Test:  [4115:4572] = 457 bars
+2026-03-07 12:17:57.738 | INFO     | models.lstm_ensemble:train_ensemble:181 - 
+Training 9-model ensemble for XLM/USD_4h_fold1 on cuda
+2026-03-07 12:17:57.738 | INFO     | models.lstm_ensemble:train_ensemble:182 -   Train: 2927 | Val: 640 | Features: 100
+2026-03-07 12:17:59.684 | INFO     | models.lstm_ensemble:_train_one:126 -   [1/9] Training seed=42 — 2867 samples
+2026-03-07 12:18:00.682 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=0.9446 | val_acc=0.7052 | lr=0.000976
+2026-03-07 12:18:01.021 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.0247 | val_acc=0.5741 | lr=0.000905
+2026-03-07 12:18:01.327 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.1161 | val_acc=0.5293 | lr=0.000794
+2026-03-07 12:18:01.609 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.1842 | val_acc=0.6534 | lr=0.000655
+2026-03-07 12:18:01.880 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.3090 | val_acc=0.6500 | lr=0.000501
+2026-03-07 12:18:02.150 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.3752 | val_acc=0.6345 | lr=0.000346
+2026-03-07 12:18:02.417 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.4503 | val_acc=0.6845 | lr=0.000207
+2026-03-07 12:18:02.682 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.5775 | val_acc=0.6793 | lr=0.000096
+2026-03-07 12:18:02.954 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.5836 | val_acc=0.6690 | lr=0.000025
+2026-03-07 12:18:03.222 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.5948 | val_acc=0.6793 | lr=0.001000
+2026-03-07 12:18:03.490 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.5075 | val_acc=0.6603 | lr=0.000994
+2026-03-07 12:18:03.756 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.6950 | val_acc=0.6672 | lr=0.000976
+2026-03-07 12:18:04.028 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.6135 | val_acc=0.6172 | lr=0.000946
+2026-03-07 12:18:04.293 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.8638 | val_acc=0.6914 | lr=0.000905
+2026-03-07 12:18:04.557 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.7546 | val_acc=0.6569 | lr=0.000854
+2026-03-07 12:18:04.829 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=1.8685 | val_acc=0.6741 | lr=0.000794
+2026-03-07 12:18:05.097 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=1.9685 | val_acc=0.6690 | lr=0.000727
+2026-03-07 12:18:05.366 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.1820 | val_acc=0.6690 | lr=0.000655
+2026-03-07 12:18:05.627 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.1869 | val_acc=0.6466 | lr=0.000579
+2026-03-07 12:18:05.902 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.3437 | val_acc=0.6793 | lr=0.000501
+2026-03-07 12:18:06.175 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.4403 | val_acc=0.6828 | lr=0.000422
+2026-03-07 12:18:06.441 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.5429 | val_acc=0.6983 | lr=0.000346
+2026-03-07 12:18:06.708 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.6279 | val_acc=0.7034 | lr=0.000274
+2026-03-07 12:18:06.970 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.7425 | val_acc=0.7034 | lr=0.000207
+2026-03-07 12:18:07.244 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=2.7818 | val_acc=0.6897 | lr=0.000147
+2026-03-07 12:18:07.510 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=2.9334 | val_acc=0.6983 | lr=0.000096
+2026-03-07 12:18:07.510 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:18:07.513 | INFO     | models.lstm_ensemble:_train_one:167 -   [1/9] Best val_loss: 0.9446
+2026-03-07 12:18:07.554 | INFO     | models.lstm_ensemble:_train_one:126 -   [2/9] Training seed=179 — 2867 samples
+2026-03-07 12:18:07.825 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=0.9868 | val_acc=0.5672 | lr=0.000976
+2026-03-07 12:18:08.119 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.0092 | val_acc=0.6431 | lr=0.000905
+2026-03-07 12:18:08.393 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.0673 | val_acc=0.6931 | lr=0.000794
+2026-03-07 12:18:08.662 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.1928 | val_acc=0.7086 | lr=0.000655
+2026-03-07 12:18:08.932 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.2837 | val_acc=0.6397 | lr=0.000501
+2026-03-07 12:18:09.201 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.4261 | val_acc=0.7121 | lr=0.000346
+2026-03-07 12:18:09.470 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.4284 | val_acc=0.6414 | lr=0.000207
+2026-03-07 12:18:09.743 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.4977 | val_acc=0.6379 | lr=0.000096
+2026-03-07 12:18:10.014 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.5559 | val_acc=0.6552 | lr=0.000025
+2026-03-07 12:18:10.287 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.5698 | val_acc=0.6517 | lr=0.001000
+2026-03-07 12:18:10.557 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.5757 | val_acc=0.6690 | lr=0.000994
+2026-03-07 12:18:10.829 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.5687 | val_acc=0.6741 | lr=0.000976
+2026-03-07 12:18:11.097 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.6827 | val_acc=0.5724 | lr=0.000946
+2026-03-07 12:18:11.365 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.9356 | val_acc=0.6879 | lr=0.000905
+2026-03-07 12:18:11.631 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.8887 | val_acc=0.6310 | lr=0.000854
+2026-03-07 12:18:11.901 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=2.0913 | val_acc=0.6638 | lr=0.000794
+2026-03-07 12:18:12.169 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.3181 | val_acc=0.7034 | lr=0.000727
+2026-03-07 12:18:12.438 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.3367 | val_acc=0.6276 | lr=0.000655
+2026-03-07 12:18:12.708 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.3270 | val_acc=0.6466 | lr=0.000579
+2026-03-07 12:18:12.977 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.4522 | val_acc=0.6224 | lr=0.000501
+2026-03-07 12:18:13.249 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.4319 | val_acc=0.6603 | lr=0.000422
+2026-03-07 12:18:13.516 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.6976 | val_acc=0.6638 | lr=0.000346
+2026-03-07 12:18:13.785 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.8612 | val_acc=0.6810 | lr=0.000274
+2026-03-07 12:18:14.055 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.8544 | val_acc=0.6655 | lr=0.000207
+2026-03-07 12:18:14.325 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=2.9834 | val_acc=0.6534 | lr=0.000147
+2026-03-07 12:18:14.597 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=3.1076 | val_acc=0.6707 | lr=0.000096
+2026-03-07 12:18:14.597 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:18:14.599 | INFO     | models.lstm_ensemble:_train_one:167 -   [2/9] Best val_loss: 0.9868
+2026-03-07 12:18:14.635 | INFO     | models.lstm_ensemble:_train_one:126 -   [3/9] Training seed=316 — 2867 samples
+2026-03-07 12:18:14.903 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=0.9971 | val_acc=0.6172 | lr=0.000976
+2026-03-07 12:18:15.180 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.0392 | val_acc=0.7155 | lr=0.000905
+2026-03-07 12:18:15.453 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.0968 | val_acc=0.5259 | lr=0.000794
+2026-03-07 12:18:15.728 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.1459 | val_acc=0.5862 | lr=0.000655
+2026-03-07 12:18:15.996 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.2034 | val_acc=0.6776 | lr=0.000501
+2026-03-07 12:18:16.269 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.2307 | val_acc=0.6466 | lr=0.000346
+2026-03-07 12:18:16.538 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.3540 | val_acc=0.6621 | lr=0.000207
+2026-03-07 12:18:16.809 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.4217 | val_acc=0.6931 | lr=0.000096
+2026-03-07 12:18:17.082 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.4204 | val_acc=0.6724 | lr=0.000025
+2026-03-07 12:18:17.352 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.4500 | val_acc=0.6810 | lr=0.001000
+2026-03-07 12:18:17.620 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.3697 | val_acc=0.6328 | lr=0.000994
+2026-03-07 12:18:17.897 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.4968 | val_acc=0.6362 | lr=0.000976
+2026-03-07 12:18:18.169 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.5332 | val_acc=0.6655 | lr=0.000946
+2026-03-07 12:18:18.444 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.6231 | val_acc=0.6241 | lr=0.000905
+2026-03-07 12:18:18.719 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.7559 | val_acc=0.6810 | lr=0.000854
+2026-03-07 12:18:19.005 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=1.7913 | val_acc=0.6810 | lr=0.000794
+2026-03-07 12:18:19.277 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=1.9489 | val_acc=0.6603 | lr=0.000727
+2026-03-07 12:18:19.543 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.0633 | val_acc=0.6569 | lr=0.000655
+2026-03-07 12:18:19.814 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.1488 | val_acc=0.6603 | lr=0.000579
+2026-03-07 12:18:20.089 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.5203 | val_acc=0.6828 | lr=0.000501
+2026-03-07 12:18:20.358 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.4204 | val_acc=0.6879 | lr=0.000422
+2026-03-07 12:18:20.629 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.6441 | val_acc=0.6759 | lr=0.000346
+2026-03-07 12:18:20.902 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.7708 | val_acc=0.6724 | lr=0.000274
+2026-03-07 12:18:21.172 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.7854 | val_acc=0.6672 | lr=0.000207
+2026-03-07 12:18:21.441 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=2.9217 | val_acc=0.6897 | lr=0.000147
+2026-03-07 12:18:21.711 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=3.0131 | val_acc=0.7000 | lr=0.000096
+2026-03-07 12:18:21.711 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:18:21.711 | INFO     | models.lstm_ensemble:_train_one:167 -   [3/9] Best val_loss: 0.9971
+2026-03-07 12:18:21.751 | INFO     | models.lstm_ensemble:_train_one:126 -   [4/9] Training seed=453 — 2867 samples
+2026-03-07 12:18:22.028 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=0.9980 | val_acc=0.5534 | lr=0.000976
+2026-03-07 12:18:22.301 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.0600 | val_acc=0.7000 | lr=0.000905
+2026-03-07 12:18:22.573 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.1199 | val_acc=0.6052 | lr=0.000794
+2026-03-07 12:18:22.840 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.1814 | val_acc=0.6552 | lr=0.000655
+2026-03-07 12:18:23.119 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.2697 | val_acc=0.6966 | lr=0.000501
+2026-03-07 12:18:23.390 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.3879 | val_acc=0.6724 | lr=0.000346
+2026-03-07 12:18:23.664 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.4675 | val_acc=0.7034 | lr=0.000207
+2026-03-07 12:18:23.936 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.5009 | val_acc=0.6793 | lr=0.000096
+2026-03-07 12:18:24.206 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.5371 | val_acc=0.6724 | lr=0.000025
+2026-03-07 12:18:24.477 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.5725 | val_acc=0.6845 | lr=0.001000
+2026-03-07 12:18:24.748 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.5317 | val_acc=0.6741 | lr=0.000994
+2026-03-07 12:18:25.022 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.6957 | val_acc=0.6621 | lr=0.000976
+2026-03-07 12:18:25.292 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.6683 | val_acc=0.5534 | lr=0.000946
+2026-03-07 12:18:25.560 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.8001 | val_acc=0.6431 | lr=0.000905
+2026-03-07 12:18:25.834 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.9806 | val_acc=0.6552 | lr=0.000854
+2026-03-07 12:18:26.107 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=1.9894 | val_acc=0.6828 | lr=0.000794
+2026-03-07 12:18:26.377 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=1.9587 | val_acc=0.6362 | lr=0.000727
+2026-03-07 12:18:26.647 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.2658 | val_acc=0.6879 | lr=0.000655
+2026-03-07 12:18:26.922 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.4057 | val_acc=0.6690 | lr=0.000579
+2026-03-07 12:18:27.194 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.4920 | val_acc=0.6707 | lr=0.000501
+2026-03-07 12:18:27.468 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.5023 | val_acc=0.6724 | lr=0.000422
+2026-03-07 12:18:27.737 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.7615 | val_acc=0.7017 | lr=0.000346
+2026-03-07 12:18:28.005 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.7846 | val_acc=0.6810 | lr=0.000274
+2026-03-07 12:18:28.282 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.9068 | val_acc=0.6931 | lr=0.000207
+2026-03-07 12:18:28.557 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=3.0400 | val_acc=0.7155 | lr=0.000147
+2026-03-07 12:18:28.824 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=3.0841 | val_acc=0.7000 | lr=0.000096
+2026-03-07 12:18:28.824 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:18:28.829 | INFO     | models.lstm_ensemble:_train_one:167 -   [4/9] Best val_loss: 0.9980
+2026-03-07 12:18:28.865 | INFO     | models.lstm_ensemble:_train_one:126 -   [5/9] Training seed=590 — 2867 samples
+2026-03-07 12:18:29.143 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=0.9869 | val_acc=0.5138 | lr=0.000976
+2026-03-07 12:18:29.420 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.0766 | val_acc=0.5603 | lr=0.000905
+2026-03-07 12:18:29.689 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.0957 | val_acc=0.6362 | lr=0.000794
+2026-03-07 12:18:29.962 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.2201 | val_acc=0.6466 | lr=0.000655
+2026-03-07 12:18:30.233 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.3331 | val_acc=0.6293 | lr=0.000501
+2026-03-07 12:18:30.503 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.4427 | val_acc=0.6672 | lr=0.000346
+2026-03-07 12:18:30.777 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.5560 | val_acc=0.6621 | lr=0.000207
+2026-03-07 12:18:31.048 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.6438 | val_acc=0.6741 | lr=0.000096
+2026-03-07 12:18:31.324 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.6524 | val_acc=0.6707 | lr=0.000025
+2026-03-07 12:18:31.594 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.6877 | val_acc=0.6776 | lr=0.001000
+2026-03-07 12:18:31.862 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.6076 | val_acc=0.6397 | lr=0.000994
+2026-03-07 12:18:32.138 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.7730 | val_acc=0.6776 | lr=0.000976
+2026-03-07 12:18:32.412 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=2.0063 | val_acc=0.7000 | lr=0.000946
+2026-03-07 12:18:32.683 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.9763 | val_acc=0.6948 | lr=0.000905
+2026-03-07 12:18:32.960 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=2.1127 | val_acc=0.6707 | lr=0.000854
+2026-03-07 12:18:33.234 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=2.1957 | val_acc=0.6276 | lr=0.000794
+2026-03-07 12:18:33.507 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.2199 | val_acc=0.6586 | lr=0.000727
+2026-03-07 12:18:33.779 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.4408 | val_acc=0.6793 | lr=0.000655
+2026-03-07 12:18:34.053 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.4008 | val_acc=0.6690 | lr=0.000579
+2026-03-07 12:18:34.330 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.5794 | val_acc=0.6759 | lr=0.000501
+2026-03-07 12:18:34.601 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.6810 | val_acc=0.6776 | lr=0.000422
+2026-03-07 12:18:34.875 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.8456 | val_acc=0.6793 | lr=0.000346
+2026-03-07 12:18:35.150 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.9849 | val_acc=0.6931 | lr=0.000274
+2026-03-07 12:18:35.426 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.9808 | val_acc=0.6845 | lr=0.000207
+2026-03-07 12:18:35.702 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=3.0463 | val_acc=0.6690 | lr=0.000147
+2026-03-07 12:18:35.974 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=3.2098 | val_acc=0.6931 | lr=0.000096
+2026-03-07 12:18:35.974 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:18:35.975 | INFO     | models.lstm_ensemble:_train_one:167 -   [5/9] Best val_loss: 0.9869
+2026-03-07 12:18:36.014 | INFO     | models.lstm_ensemble:_train_one:126 -   [6/9] Training seed=727 — 2867 samples
+2026-03-07 12:18:36.284 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=0.9528 | val_acc=0.6552 | lr=0.000976
+2026-03-07 12:18:36.560 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.0765 | val_acc=0.4966 | lr=0.000905
+2026-03-07 12:18:36.833 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.1723 | val_acc=0.6172 | lr=0.000794
+2026-03-07 12:18:37.110 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.3110 | val_acc=0.5914 | lr=0.000655
+2026-03-07 12:18:37.380 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.4075 | val_acc=0.6948 | lr=0.000501
+2026-03-07 12:18:37.651 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.4890 | val_acc=0.6672 | lr=0.000346
+2026-03-07 12:18:37.923 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.4993 | val_acc=0.6259 | lr=0.000207
+2026-03-07 12:18:38.194 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.5791 | val_acc=0.6741 | lr=0.000096
+2026-03-07 12:18:38.472 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.6095 | val_acc=0.6741 | lr=0.000025
+2026-03-07 12:18:38.741 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.6364 | val_acc=0.6845 | lr=0.001000
+2026-03-07 12:18:39.013 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.6933 | val_acc=0.6483 | lr=0.000994
+2026-03-07 12:18:39.292 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.7380 | val_acc=0.6397 | lr=0.000976
+2026-03-07 12:18:39.564 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.9185 | val_acc=0.7034 | lr=0.000946
+2026-03-07 12:18:39.834 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.9584 | val_acc=0.6914 | lr=0.000905
+2026-03-07 12:18:40.110 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=2.1192 | val_acc=0.7397 | lr=0.000854
+2026-03-07 12:18:40.382 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=2.0650 | val_acc=0.6466 | lr=0.000794
+2026-03-07 12:18:40.654 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.1446 | val_acc=0.7017 | lr=0.000727
+2026-03-07 12:18:40.933 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.3642 | val_acc=0.6897 | lr=0.000655
+2026-03-07 12:18:41.212 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.5209 | val_acc=0.7293 | lr=0.000579
+2026-03-07 12:18:41.483 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.4237 | val_acc=0.6621 | lr=0.000501
+2026-03-07 12:18:41.753 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.5848 | val_acc=0.7293 | lr=0.000422
+2026-03-07 12:18:42.026 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.6934 | val_acc=0.7207 | lr=0.000346
+2026-03-07 12:18:42.298 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.8833 | val_acc=0.7379 | lr=0.000274
+2026-03-07 12:18:42.569 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.9764 | val_acc=0.7276 | lr=0.000207
+2026-03-07 12:18:42.840 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=3.0356 | val_acc=0.7276 | lr=0.000147
+2026-03-07 12:18:43.115 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=3.1239 | val_acc=0.7328 | lr=0.000096
+2026-03-07 12:18:43.115 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:18:43.116 | INFO     | models.lstm_ensemble:_train_one:167 -   [6/9] Best val_loss: 0.9528
+2026-03-07 12:18:43.157 | INFO     | models.lstm_ensemble:_train_one:126 -   [7/9] Training seed=864 — 2867 samples
+2026-03-07 12:18:43.440 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=0.9761 | val_acc=0.5448 | lr=0.000976
+2026-03-07 12:18:43.717 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.0126 | val_acc=0.4931 | lr=0.000905
+2026-03-07 12:18:43.990 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.0949 | val_acc=0.7155 | lr=0.000794
+2026-03-07 12:18:44.265 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.2154 | val_acc=0.6190 | lr=0.000655
+2026-03-07 12:18:44.543 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.3817 | val_acc=0.6948 | lr=0.000501
+2026-03-07 12:18:44.814 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.4820 | val_acc=0.6914 | lr=0.000346
+2026-03-07 12:18:45.088 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.4855 | val_acc=0.6379 | lr=0.000207
+2026-03-07 12:18:45.399 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.5804 | val_acc=0.6586 | lr=0.000096
+2026-03-07 12:18:45.702 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.6497 | val_acc=0.6741 | lr=0.000025
+2026-03-07 12:18:45.984 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.6441 | val_acc=0.6638 | lr=0.001000
+2026-03-07 12:18:46.272 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.7032 | val_acc=0.6190 | lr=0.000994
+2026-03-07 12:18:46.557 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.7033 | val_acc=0.6897 | lr=0.000976
+2026-03-07 12:18:46.835 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.9161 | val_acc=0.6103 | lr=0.000946
+2026-03-07 12:18:47.109 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.9835 | val_acc=0.6293 | lr=0.000905
+2026-03-07 12:18:47.387 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.9507 | val_acc=0.6621 | lr=0.000854
+2026-03-07 12:18:47.662 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=1.9923 | val_acc=0.6655 | lr=0.000794
+2026-03-07 12:18:47.934 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.3013 | val_acc=0.6983 | lr=0.000727
+2026-03-07 12:18:48.208 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.2075 | val_acc=0.6707 | lr=0.000655
+2026-03-07 12:18:48.484 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.3656 | val_acc=0.6948 | lr=0.000579
+2026-03-07 12:18:48.760 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.4674 | val_acc=0.7069 | lr=0.000501
+2026-03-07 12:18:49.033 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.5036 | val_acc=0.6741 | lr=0.000422
+2026-03-07 12:18:49.306 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.5880 | val_acc=0.6879 | lr=0.000346
+2026-03-07 12:18:49.580 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.7410 | val_acc=0.6879 | lr=0.000274
+2026-03-07 12:18:49.853 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.9109 | val_acc=0.7069 | lr=0.000207
+2026-03-07 12:18:50.130 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=2.9915 | val_acc=0.7155 | lr=0.000147
+2026-03-07 12:18:50.401 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=3.0046 | val_acc=0.7000 | lr=0.000096
+2026-03-07 12:18:50.401 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:18:50.402 | INFO     | models.lstm_ensemble:_train_one:167 -   [7/9] Best val_loss: 0.9761
+2026-03-07 12:18:50.439 | INFO     | models.lstm_ensemble:_train_one:126 -   [8/9] Training seed=1001 — 2867 samples
+2026-03-07 12:18:50.715 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=0.9735 | val_acc=0.4862 | lr=0.000976
+2026-03-07 12:18:50.999 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.0355 | val_acc=0.6276 | lr=0.000905
+2026-03-07 12:18:51.275 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.1034 | val_acc=0.6241 | lr=0.000794
+2026-03-07 12:18:51.548 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.2149 | val_acc=0.6034 | lr=0.000655
+2026-03-07 12:18:51.822 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.2780 | val_acc=0.6379 | lr=0.000501
+2026-03-07 12:18:52.096 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.4399 | val_acc=0.6983 | lr=0.000346
+2026-03-07 12:18:52.369 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.4189 | val_acc=0.6552 | lr=0.000207
+2026-03-07 12:18:52.643 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.5010 | val_acc=0.6483 | lr=0.000096
+2026-03-07 12:18:52.930 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.5533 | val_acc=0.6897 | lr=0.000025
+2026-03-07 12:18:53.202 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.5667 | val_acc=0.6931 | lr=0.001000
+2026-03-07 12:18:53.478 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.6009 | val_acc=0.6586 | lr=0.000994
+2026-03-07 12:18:53.752 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.5863 | val_acc=0.6897 | lr=0.000976
+2026-03-07 12:18:54.027 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.8222 | val_acc=0.6534 | lr=0.000946
+2026-03-07 12:18:54.302 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.8307 | val_acc=0.5966 | lr=0.000905
+2026-03-07 12:18:54.576 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.9392 | val_acc=0.6466 | lr=0.000854
+2026-03-07 12:18:54.849 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=2.0104 | val_acc=0.6828 | lr=0.000794
+2026-03-07 12:18:55.122 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.1173 | val_acc=0.6310 | lr=0.000727
+2026-03-07 12:18:55.403 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.4028 | val_acc=0.6690 | lr=0.000655
+2026-03-07 12:18:55.681 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.4496 | val_acc=0.7000 | lr=0.000579
+2026-03-07 12:18:55.955 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.4656 | val_acc=0.6707 | lr=0.000501
+2026-03-07 12:18:56.232 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.6684 | val_acc=0.6948 | lr=0.000422
+2026-03-07 12:18:56.506 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.8972 | val_acc=0.7034 | lr=0.000346
+2026-03-07 12:18:56.777 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.8476 | val_acc=0.6741 | lr=0.000274
+2026-03-07 12:18:57.054 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=3.0478 | val_acc=0.6914 | lr=0.000207
+2026-03-07 12:18:57.329 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=3.0938 | val_acc=0.6845 | lr=0.000147
+2026-03-07 12:18:57.604 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=3.1885 | val_acc=0.7017 | lr=0.000096
+2026-03-07 12:18:57.604 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:18:57.606 | INFO     | models.lstm_ensemble:_train_one:167 -   [8/9] Best val_loss: 0.9735
+2026-03-07 12:18:57.643 | INFO     | models.lstm_ensemble:_train_one:126 -   [9/9] Training seed=1138 — 2867 samples
+2026-03-07 12:18:57.918 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=0.9902 | val_acc=0.6259 | lr=0.000976
+2026-03-07 12:18:58.200 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.0307 | val_acc=0.6276 | lr=0.000905
+2026-03-07 12:18:58.475 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.0706 | val_acc=0.7052 | lr=0.000794
+2026-03-07 12:18:58.752 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.1809 | val_acc=0.5828 | lr=0.000655
+2026-03-07 12:18:59.027 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.3537 | val_acc=0.6397 | lr=0.000501
+2026-03-07 12:18:59.300 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.4232 | val_acc=0.6931 | lr=0.000346
+2026-03-07 12:18:59.573 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.5375 | val_acc=0.6828 | lr=0.000207
+2026-03-07 12:18:59.847 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.5188 | val_acc=0.6586 | lr=0.000096
+2026-03-07 12:19:00.121 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.5873 | val_acc=0.6621 | lr=0.000025
+2026-03-07 12:19:00.397 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.6053 | val_acc=0.6672 | lr=0.001000
+2026-03-07 12:19:00.672 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.5966 | val_acc=0.6586 | lr=0.000994
+2026-03-07 12:19:00.952 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.6922 | val_acc=0.6638 | lr=0.000976
+2026-03-07 12:19:01.226 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.8751 | val_acc=0.6017 | lr=0.000946
+2026-03-07 12:19:01.501 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.9580 | val_acc=0.7172 | lr=0.000905
+2026-03-07 12:19:01.780 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.8580 | val_acc=0.6483 | lr=0.000854
+2026-03-07 12:19:02.056 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=2.2441 | val_acc=0.6224 | lr=0.000794
+2026-03-07 12:19:02.357 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.2111 | val_acc=0.5983 | lr=0.000727
+2026-03-07 12:19:02.639 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.2674 | val_acc=0.6966 | lr=0.000655
+2026-03-07 12:19:02.912 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.3180 | val_acc=0.6931 | lr=0.000579
+2026-03-07 12:19:03.204 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.5600 | val_acc=0.6759 | lr=0.000501
+2026-03-07 12:19:03.481 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.6208 | val_acc=0.7017 | lr=0.000422
+2026-03-07 12:19:03.760 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.7449 | val_acc=0.7190 | lr=0.000346
+2026-03-07 12:19:04.036 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.8523 | val_acc=0.6948 | lr=0.000274
+2026-03-07 12:19:04.313 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.9962 | val_acc=0.6983 | lr=0.000207
+2026-03-07 12:19:04.585 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=2.9967 | val_acc=0.7000 | lr=0.000147
+2026-03-07 12:19:04.863 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=3.1678 | val_acc=0.7155 | lr=0.000096
+2026-03-07 12:19:04.863 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:19:04.863 | INFO     | models.lstm_ensemble:_train_one:167 -   [9/9] Best val_loss: 0.9902
+2026-03-07 12:19:04.898 | INFO     | models.lstm_ensemble:train_ensemble:210 - 
+Ensemble training complete for XLM/USD_4h_fold1:
+2026-03-07 12:19:04.900 | INFO     | models.lstm_ensemble:train_ensemble:211 -   Val losses: ['0.9446', '0.9868', '0.9971', '0.9980', '0.9869', '0.9528', '0.9761', '0.9735', '0.9902']
+2026-03-07 12:19:04.900 | INFO     | models.lstm_ensemble:train_ensemble:212 -   Mean: 0.9784 | Std: 0.0178
+2026-03-07 12:19:07.729 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.5766742797361479): BUY=19 (4.2%)  SELL=0 (0.0%)  HOLD=438 (95.8%)
+2026-03-07 12:19:07.730 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 1/19 removed (95% survive) — trend=0 vol=0 volume=1 funding=0 regime=0
+2026-03-07 12:19:07.733 | INFO     | backtest.engine:_compute_metrics:224 -  Results: Return=-2.11% | Ann=-9.73% | Sharpe=-1.09 | Calmar=-2.02 | MaxDD=-4.81% | WinRate=25.00% | Trades=8 (L:8 S:0)
+2026-03-07 12:19:07.733 | INFO     | __main__:_backtest_window:94 -   TEST fold 1        [2025-12-21→2026-03-07]: net=-2.1% ann=-9.7% WR=25.0% Sh=-1.09 Cal=-2.02 trades=8
+2026-03-07 12:19:11.243 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.6005037100778686): BUY=14 (2.6%)  SELL=0 (0.0%)  HOLD=534 (97.4%)
+2026-03-07 12:19:11.253 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 2/14 removed (86% survive) — trend=0 vol=0 volume=2 funding=0 regime=0
+2026-03-07 12:19:11.253 | INFO     | backtest.engine:_compute_metrics:224 -  Results: Return=-2.68% | Ann=-10.30% | Sharpe=-2.02 | Calmar=-3.74 | MaxDD=-2.76% | WinRate=16.67% | Trades=6 (L:6 S:0)
+2026-03-07 12:19:11.253 | INFO     | __main__:_backtest_window:94 -   OOT  fold 1        [2024-02-04→2024-05-05]: net=-2.7% ann=-10.3% WR=16.7% Sh=-2.02 Cal=-3.74 trades=6
+2026-03-07 12:19:11.253 | INFO     | __main__:validate_symbol:161 - 
+  ── Fold 2/3 ──────────────────────────────────────────
+2026-03-07 12:19:11.253 | INFO     | __main__:validate_symbol:162 -   Train: [548:3018] = 2470 bars
+2026-03-07 12:19:11.253 | INFO     | __main__:validate_symbol:163 -   Val:   [3018:3658] = 640 bars
+2026-03-07 12:19:11.253 | INFO     | __main__:validate_symbol:164 -   Test:  [3658:4115] = 457 bars
+2026-03-07 12:19:11.261 | INFO     | models.lstm_ensemble:train_ensemble:181 - 
+Training 9-model ensemble for XLM/USD_4h_fold2 on cuda
+2026-03-07 12:19:11.262 | INFO     | models.lstm_ensemble:train_ensemble:182 -   Train: 2470 | Val: 640 | Features: 100
+2026-03-07 12:19:11.265 | INFO     | models.lstm_ensemble:_train_one:126 -   [1/9] Training seed=42 — 2410 samples
+2026-03-07 12:19:11.499 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.2526 | val_acc=0.2397 | lr=0.000976
+2026-03-07 12:19:11.752 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.3423 | val_acc=0.4000 | lr=0.000905
+2026-03-07 12:19:11.989 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.3972 | val_acc=0.3879 | lr=0.000794
+2026-03-07 12:19:12.221 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.4991 | val_acc=0.4259 | lr=0.000655
+2026-03-07 12:19:12.461 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.5419 | val_acc=0.6138 | lr=0.000501
+2026-03-07 12:19:12.692 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.8170 | val_acc=0.4034 | lr=0.000346
+2026-03-07 12:19:12.934 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.6659 | val_acc=0.5897 | lr=0.000207
+2026-03-07 12:19:13.169 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.8104 | val_acc=0.5052 | lr=0.000096
+2026-03-07 12:19:13.411 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.7503 | val_acc=0.5000 | lr=0.000025
+2026-03-07 12:19:13.641 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.7765 | val_acc=0.5121 | lr=0.001000
+2026-03-07 12:19:13.875 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.7139 | val_acc=0.3793 | lr=0.000994
+2026-03-07 12:19:14.112 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.8253 | val_acc=0.5052 | lr=0.000976
+2026-03-07 12:19:14.355 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.7729 | val_acc=0.5362 | lr=0.000946
+2026-03-07 12:19:14.591 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.7203 | val_acc=0.5741 | lr=0.000905
+2026-03-07 12:19:14.826 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.8175 | val_acc=0.5414 | lr=0.000854
+2026-03-07 12:19:15.067 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=2.1488 | val_acc=0.6034 | lr=0.000794
+2026-03-07 12:19:15.301 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.2664 | val_acc=0.4569 | lr=0.000727
+2026-03-07 12:19:15.541 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.1376 | val_acc=0.5948 | lr=0.000655
+2026-03-07 12:19:15.777 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.3107 | val_acc=0.5862 | lr=0.000579
+2026-03-07 12:19:16.008 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.3498 | val_acc=0.6052 | lr=0.000501
+2026-03-07 12:19:16.250 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.4571 | val_acc=0.5948 | lr=0.000422
+2026-03-07 12:19:16.484 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.7783 | val_acc=0.5931 | lr=0.000346
+2026-03-07 12:19:16.727 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.7699 | val_acc=0.6172 | lr=0.000274
+2026-03-07 12:19:16.961 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.8759 | val_acc=0.5879 | lr=0.000207
+2026-03-07 12:19:17.195 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=3.0693 | val_acc=0.6276 | lr=0.000147
+2026-03-07 12:19:17.424 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=3.0053 | val_acc=0.6121 | lr=0.000096
+2026-03-07 12:19:17.424 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:19:17.435 | INFO     | models.lstm_ensemble:_train_one:167 -   [1/9] Best val_loss: 1.2526
+2026-03-07 12:19:17.472 | INFO     | models.lstm_ensemble:_train_one:126 -   [2/9] Training seed=179 — 2410 samples
+2026-03-07 12:19:17.707 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.1772 | val_acc=0.5431 | lr=0.000976
+2026-03-07 12:19:17.945 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.3866 | val_acc=0.4621 | lr=0.000905
+2026-03-07 12:19:18.189 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.4844 | val_acc=0.5310 | lr=0.000794
+2026-03-07 12:19:18.419 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.5152 | val_acc=0.4672 | lr=0.000655
+2026-03-07 12:19:18.665 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.6984 | val_acc=0.4759 | lr=0.000501
+2026-03-07 12:19:18.899 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.8915 | val_acc=0.4069 | lr=0.000346
+2026-03-07 12:19:19.138 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.8243 | val_acc=0.4672 | lr=0.000207
+2026-03-07 12:19:19.381 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.8749 | val_acc=0.4569 | lr=0.000096
+2026-03-07 12:19:19.619 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.8013 | val_acc=0.5138 | lr=0.000025
+2026-03-07 12:19:19.855 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.8701 | val_acc=0.4914 | lr=0.001000
+2026-03-07 12:19:20.095 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.6503 | val_acc=0.4862 | lr=0.000994
+2026-03-07 12:19:20.334 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.8996 | val_acc=0.4552 | lr=0.000976
+2026-03-07 12:19:20.566 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.7609 | val_acc=0.5483 | lr=0.000946
+2026-03-07 12:19:20.807 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.9081 | val_acc=0.5379 | lr=0.000905
+2026-03-07 12:19:21.041 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=2.0719 | val_acc=0.5569 | lr=0.000854
+2026-03-07 12:19:21.278 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=2.2684 | val_acc=0.5310 | lr=0.000794
+2026-03-07 12:19:21.508 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.3203 | val_acc=0.5879 | lr=0.000727
+2026-03-07 12:19:21.743 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.1643 | val_acc=0.5086 | lr=0.000655
+2026-03-07 12:19:21.989 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.4974 | val_acc=0.5552 | lr=0.000579
+2026-03-07 12:19:22.227 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.4161 | val_acc=0.5328 | lr=0.000501
+2026-03-07 12:19:22.455 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.7938 | val_acc=0.4966 | lr=0.000422
+2026-03-07 12:19:22.701 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.8417 | val_acc=0.5345 | lr=0.000346
+2026-03-07 12:19:22.936 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.7631 | val_acc=0.5500 | lr=0.000274
+2026-03-07 12:19:23.168 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.9488 | val_acc=0.5948 | lr=0.000207
+2026-03-07 12:19:23.408 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=3.0585 | val_acc=0.6017 | lr=0.000147
+2026-03-07 12:19:23.642 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=3.1372 | val_acc=0.5655 | lr=0.000096
+2026-03-07 12:19:23.642 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:19:23.642 | INFO     | models.lstm_ensemble:_train_one:167 -   [2/9] Best val_loss: 1.1772
+2026-03-07 12:19:23.687 | INFO     | models.lstm_ensemble:_train_one:126 -   [3/9] Training seed=316 — 2410 samples
+2026-03-07 12:19:23.928 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.2118 | val_acc=0.3534 | lr=0.000976
+2026-03-07 12:19:24.175 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.3182 | val_acc=0.2397 | lr=0.000905
+2026-03-07 12:19:24.411 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.3905 | val_acc=0.3603 | lr=0.000794
+2026-03-07 12:19:24.642 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.5729 | val_acc=0.4431 | lr=0.000655
+2026-03-07 12:19:24.875 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.6598 | val_acc=0.4948 | lr=0.000501
+2026-03-07 12:19:25.118 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.7402 | val_acc=0.5138 | lr=0.000346
+2026-03-07 12:19:25.356 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.8631 | val_acc=0.5121 | lr=0.000207
+2026-03-07 12:19:25.589 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.9698 | val_acc=0.4948 | lr=0.000096
+2026-03-07 12:19:25.822 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=2.0222 | val_acc=0.5034 | lr=0.000025
+2026-03-07 12:19:26.060 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=2.0216 | val_acc=0.5086 | lr=0.001000
+2026-03-07 12:19:26.293 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=2.2030 | val_acc=0.3414 | lr=0.000994
+2026-03-07 12:19:26.536 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.9827 | val_acc=0.6017 | lr=0.000976
+2026-03-07 12:19:26.770 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.9858 | val_acc=0.5621 | lr=0.000946
+2026-03-07 12:19:27.008 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=2.1540 | val_acc=0.5414 | lr=0.000905
+2026-03-07 12:19:27.241 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=2.2566 | val_acc=0.5621 | lr=0.000854
+2026-03-07 12:19:27.485 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=2.2443 | val_acc=0.6069 | lr=0.000794
+2026-03-07 12:19:27.718 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.3176 | val_acc=0.5431 | lr=0.000727
+2026-03-07 12:19:27.948 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.5034 | val_acc=0.4776 | lr=0.000655
+2026-03-07 12:19:28.196 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.5167 | val_acc=0.5379 | lr=0.000579
+2026-03-07 12:19:28.435 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.7471 | val_acc=0.5000 | lr=0.000501
+2026-03-07 12:19:28.678 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.8400 | val_acc=0.4845 | lr=0.000422
+2026-03-07 12:19:28.914 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.9572 | val_acc=0.5621 | lr=0.000346
+2026-03-07 12:19:29.150 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=3.0664 | val_acc=0.5500 | lr=0.000274
+2026-03-07 12:19:29.391 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=3.0523 | val_acc=0.5828 | lr=0.000207
+2026-03-07 12:19:29.625 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=3.3433 | val_acc=0.5897 | lr=0.000147
+2026-03-07 12:19:29.864 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=3.3715 | val_acc=0.5828 | lr=0.000096
+2026-03-07 12:19:29.865 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:19:29.866 | INFO     | models.lstm_ensemble:_train_one:167 -   [3/9] Best val_loss: 1.2118
+2026-03-07 12:19:29.910 | INFO     | models.lstm_ensemble:_train_one:126 -   [4/9] Training seed=453 — 2410 samples
+2026-03-07 12:19:30.162 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.1541 | val_acc=0.3259 | lr=0.000976
+2026-03-07 12:19:30.407 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.4155 | val_acc=0.3190 | lr=0.000905
+2026-03-07 12:19:30.644 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.5178 | val_acc=0.3466 | lr=0.000794
+2026-03-07 12:19:30.881 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.5191 | val_acc=0.4483 | lr=0.000655
+2026-03-07 12:19:31.120 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.6372 | val_acc=0.3586 | lr=0.000501
+2026-03-07 12:19:31.410 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.6755 | val_acc=0.4362 | lr=0.000346
+2026-03-07 12:19:31.687 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.7027 | val_acc=0.4017 | lr=0.000207
+2026-03-07 12:19:31.921 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.7298 | val_acc=0.4034 | lr=0.000096
+2026-03-07 12:19:32.158 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.8082 | val_acc=0.4431 | lr=0.000025
+2026-03-07 12:19:32.397 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.7817 | val_acc=0.4310 | lr=0.001000
+2026-03-07 12:19:32.633 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=2.0270 | val_acc=0.3362 | lr=0.000994
+2026-03-07 12:19:32.868 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.6377 | val_acc=0.4897 | lr=0.000976
+2026-03-07 12:19:33.108 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.7349 | val_acc=0.4379 | lr=0.000946
+2026-03-07 12:19:33.344 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.7989 | val_acc=0.4638 | lr=0.000905
+2026-03-07 12:19:33.581 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.7834 | val_acc=0.5914 | lr=0.000854
+2026-03-07 12:19:33.821 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=1.8916 | val_acc=0.6103 | lr=0.000794
+2026-03-07 12:19:34.063 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=1.9727 | val_acc=0.5776 | lr=0.000727
+2026-03-07 12:19:34.298 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=1.9973 | val_acc=0.5448 | lr=0.000655
+2026-03-07 12:19:34.536 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.2151 | val_acc=0.4897 | lr=0.000579
+2026-03-07 12:19:34.774 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.3410 | val_acc=0.5138 | lr=0.000501
+2026-03-07 12:19:35.009 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.3712 | val_acc=0.5397 | lr=0.000422
+2026-03-07 12:19:35.249 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.4657 | val_acc=0.6017 | lr=0.000346
+2026-03-07 12:19:35.483 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.5136 | val_acc=0.6086 | lr=0.000274
+2026-03-07 12:19:35.721 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.6366 | val_acc=0.6276 | lr=0.000207
+2026-03-07 12:19:35.958 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=2.7936 | val_acc=0.5845 | lr=0.000147
+2026-03-07 12:19:36.200 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=2.7998 | val_acc=0.6017 | lr=0.000096
+2026-03-07 12:19:36.200 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:19:36.200 | INFO     | models.lstm_ensemble:_train_one:167 -   [4/9] Best val_loss: 1.1541
+2026-03-07 12:19:36.239 | INFO     | models.lstm_ensemble:_train_one:126 -   [5/9] Training seed=590 — 2410 samples
+2026-03-07 12:19:36.474 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.3209 | val_acc=0.2414 | lr=0.000976
+2026-03-07 12:19:36.721 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.3612 | val_acc=0.4724 | lr=0.000905
+2026-03-07 12:19:36.955 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.4993 | val_acc=0.4569 | lr=0.000794
+2026-03-07 12:19:37.193 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.5458 | val_acc=0.5034 | lr=0.000655
+2026-03-07 12:19:37.432 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.7939 | val_acc=0.5500 | lr=0.000501
+2026-03-07 12:19:37.671 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.6898 | val_acc=0.5241 | lr=0.000346
+2026-03-07 12:19:37.905 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.7037 | val_acc=0.5741 | lr=0.000207
+2026-03-07 12:19:38.148 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.7233 | val_acc=0.6138 | lr=0.000096
+2026-03-07 12:19:38.388 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.7801 | val_acc=0.6138 | lr=0.000025
+2026-03-07 12:19:38.621 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.8037 | val_acc=0.6103 | lr=0.001000
+2026-03-07 12:19:38.860 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.6833 | val_acc=0.6310 | lr=0.000994
+2026-03-07 12:19:39.108 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.8146 | val_acc=0.5879 | lr=0.000976
+2026-03-07 12:19:39.345 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.8513 | val_acc=0.5793 | lr=0.000946
+2026-03-07 12:19:39.582 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=2.3105 | val_acc=0.4828 | lr=0.000905
+2026-03-07 12:19:39.820 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.8337 | val_acc=0.5845 | lr=0.000854
+2026-03-07 12:19:40.061 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=2.1612 | val_acc=0.6517 | lr=0.000794
+2026-03-07 12:19:40.301 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.0958 | val_acc=0.5603 | lr=0.000727
+2026-03-07 12:19:40.549 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.4929 | val_acc=0.6810 | lr=0.000655
+2026-03-07 12:19:40.793 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.3385 | val_acc=0.5828 | lr=0.000579
+2026-03-07 12:19:41.042 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.4690 | val_acc=0.6259 | lr=0.000501
+2026-03-07 12:19:41.279 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.8433 | val_acc=0.6414 | lr=0.000422
+2026-03-07 12:19:41.516 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.8900 | val_acc=0.6293 | lr=0.000346
+2026-03-07 12:19:41.753 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.8730 | val_acc=0.6034 | lr=0.000274
+2026-03-07 12:19:41.988 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=3.1003 | val_acc=0.6293 | lr=0.000207
+2026-03-07 12:19:42.230 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=3.1496 | val_acc=0.6621 | lr=0.000147
+2026-03-07 12:19:42.465 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=3.3148 | val_acc=0.6690 | lr=0.000096
+2026-03-07 12:19:42.469 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:19:42.469 | INFO     | models.lstm_ensemble:_train_one:167 -   [5/9] Best val_loss: 1.3209
+2026-03-07 12:19:42.505 | INFO     | models.lstm_ensemble:_train_one:126 -   [6/9] Training seed=727 — 2410 samples
+2026-03-07 12:19:42.742 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.2343 | val_acc=0.5621 | lr=0.000976
+2026-03-07 12:19:42.999 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.3408 | val_acc=0.5914 | lr=0.000905
+2026-03-07 12:19:43.241 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.5968 | val_acc=0.2621 | lr=0.000794
+2026-03-07 12:19:43.482 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.5755 | val_acc=0.4190 | lr=0.000655
+2026-03-07 12:19:43.720 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.5946 | val_acc=0.5414 | lr=0.000501
+2026-03-07 12:19:43.957 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.6538 | val_acc=0.5328 | lr=0.000346
+2026-03-07 12:19:44.194 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.6873 | val_acc=0.5259 | lr=0.000207
+2026-03-07 12:19:44.440 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.6919 | val_acc=0.5552 | lr=0.000096
+2026-03-07 12:19:44.682 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.7512 | val_acc=0.5241 | lr=0.000025
+2026-03-07 12:19:44.915 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.7382 | val_acc=0.5379 | lr=0.001000
+2026-03-07 12:19:45.157 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.7560 | val_acc=0.5431 | lr=0.000994
+2026-03-07 12:19:45.395 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.7579 | val_acc=0.4431 | lr=0.000976
+2026-03-07 12:19:45.635 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.6118 | val_acc=0.5724 | lr=0.000946
+2026-03-07 12:19:45.875 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.8019 | val_acc=0.4793 | lr=0.000905
+2026-03-07 12:19:46.115 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.6931 | val_acc=0.5517 | lr=0.000854
+2026-03-07 12:19:46.354 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=1.7804 | val_acc=0.5483 | lr=0.000794
+2026-03-07 12:19:46.589 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.1053 | val_acc=0.5655 | lr=0.000727
+2026-03-07 12:19:46.829 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.0733 | val_acc=0.5690 | lr=0.000655
+2026-03-07 12:19:47.065 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.3245 | val_acc=0.5362 | lr=0.000579
+2026-03-07 12:19:47.308 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.2223 | val_acc=0.6052 | lr=0.000501
+2026-03-07 12:19:47.546 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.2671 | val_acc=0.5931 | lr=0.000422
+2026-03-07 12:19:47.782 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.5773 | val_acc=0.6362 | lr=0.000346
+2026-03-07 12:19:48.019 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.5594 | val_acc=0.6052 | lr=0.000274
+2026-03-07 12:19:48.260 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.6924 | val_acc=0.6172 | lr=0.000207
+2026-03-07 12:19:48.508 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=2.9087 | val_acc=0.6621 | lr=0.000147
+2026-03-07 12:19:48.747 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=2.9619 | val_acc=0.6534 | lr=0.000096
+2026-03-07 12:19:48.747 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:19:48.749 | INFO     | models.lstm_ensemble:_train_one:167 -   [6/9] Best val_loss: 1.2343
+2026-03-07 12:19:48.787 | INFO     | models.lstm_ensemble:_train_one:126 -   [7/9] Training seed=864 — 2410 samples
+2026-03-07 12:19:49.023 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.2619 | val_acc=0.5741 | lr=0.000976
+2026-03-07 12:19:49.294 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.4004 | val_acc=0.6069 | lr=0.000905
+2026-03-07 12:19:49.531 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.4488 | val_acc=0.5379 | lr=0.000794
+2026-03-07 12:19:49.768 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.5173 | val_acc=0.5328 | lr=0.000655
+2026-03-07 12:19:50.005 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.7337 | val_acc=0.4500 | lr=0.000501
+2026-03-07 12:19:50.246 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.8287 | val_acc=0.5845 | lr=0.000346
+2026-03-07 12:19:50.485 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.7902 | val_acc=0.5517 | lr=0.000207
+2026-03-07 12:19:50.721 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.8027 | val_acc=0.6293 | lr=0.000096
+2026-03-07 12:19:50.959 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.8803 | val_acc=0.5621 | lr=0.000025
+2026-03-07 12:19:51.199 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.8710 | val_acc=0.5862 | lr=0.001000
+2026-03-07 12:19:51.438 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.8281 | val_acc=0.5069 | lr=0.000994
+2026-03-07 12:19:51.680 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.9635 | val_acc=0.3897 | lr=0.000976
+2026-03-07 12:19:51.917 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=2.1040 | val_acc=0.4190 | lr=0.000946
+2026-03-07 12:19:52.159 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=2.0409 | val_acc=0.6655 | lr=0.000905
+2026-03-07 12:19:52.399 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=2.3012 | val_acc=0.5379 | lr=0.000854
+2026-03-07 12:19:52.637 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=2.2516 | val_acc=0.5948 | lr=0.000794
+2026-03-07 12:19:52.877 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.2493 | val_acc=0.6052 | lr=0.000727
+2026-03-07 12:19:53.115 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.4713 | val_acc=0.6172 | lr=0.000655
+2026-03-07 12:19:53.358 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.8665 | val_acc=0.6552 | lr=0.000579
+2026-03-07 12:19:53.597 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.7575 | val_acc=0.6103 | lr=0.000501
+2026-03-07 12:19:53.834 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.8606 | val_acc=0.6241 | lr=0.000422
+2026-03-07 12:19:54.070 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.9125 | val_acc=0.6103 | lr=0.000346
+2026-03-07 12:19:54.315 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=3.0224 | val_acc=0.6172 | lr=0.000274
+2026-03-07 12:19:54.553 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=3.1765 | val_acc=0.6121 | lr=0.000207
+2026-03-07 12:19:54.790 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=3.2594 | val_acc=0.6483 | lr=0.000147
+2026-03-07 12:19:55.028 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=3.3072 | val_acc=0.6224 | lr=0.000096
+2026-03-07 12:19:55.028 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:19:55.028 | INFO     | models.lstm_ensemble:_train_one:167 -   [7/9] Best val_loss: 1.2619
+2026-03-07 12:19:55.063 | INFO     | models.lstm_ensemble:_train_one:126 -   [8/9] Training seed=1001 — 2410 samples
+2026-03-07 12:19:55.304 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.2211 | val_acc=0.2862 | lr=0.000976
+2026-03-07 12:19:55.562 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.3787 | val_acc=0.4724 | lr=0.000905
+2026-03-07 12:19:55.798 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.6826 | val_acc=0.2845 | lr=0.000794
+2026-03-07 12:19:56.035 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.5634 | val_acc=0.4034 | lr=0.000655
+2026-03-07 12:19:56.275 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.6648 | val_acc=0.5534 | lr=0.000501
+2026-03-07 12:19:56.513 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.7978 | val_acc=0.4500 | lr=0.000346
+2026-03-07 12:19:56.748 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.8624 | val_acc=0.5276 | lr=0.000207
+2026-03-07 12:19:56.986 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.8795 | val_acc=0.5155 | lr=0.000096
+2026-03-07 12:19:57.227 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.9342 | val_acc=0.5259 | lr=0.000025
+2026-03-07 12:19:57.470 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.9475 | val_acc=0.5328 | lr=0.001000
+2026-03-07 12:19:57.708 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=2.0001 | val_acc=0.4293 | lr=0.000994
+2026-03-07 12:19:57.947 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=2.0931 | val_acc=0.4138 | lr=0.000976
+2026-03-07 12:19:58.190 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.8027 | val_acc=0.5638 | lr=0.000946
+2026-03-07 12:19:58.430 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.9713 | val_acc=0.5983 | lr=0.000905
+2026-03-07 12:19:58.664 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=2.3375 | val_acc=0.5345 | lr=0.000854
+2026-03-07 12:19:58.906 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=2.2116 | val_acc=0.5448 | lr=0.000794
+2026-03-07 12:19:59.142 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.2216 | val_acc=0.6379 | lr=0.000727
+2026-03-07 12:19:59.384 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.6158 | val_acc=0.5534 | lr=0.000655
+2026-03-07 12:19:59.623 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.5147 | val_acc=0.5517 | lr=0.000579
+2026-03-07 12:19:59.861 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.7339 | val_acc=0.6379 | lr=0.000501
+2026-03-07 12:20:00.098 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.6562 | val_acc=0.5638 | lr=0.000422
+2026-03-07 12:20:00.340 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.7039 | val_acc=0.5914 | lr=0.000346
+2026-03-07 12:20:00.578 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.9731 | val_acc=0.5862 | lr=0.000274
+2026-03-07 12:20:00.829 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=3.1423 | val_acc=0.6276 | lr=0.000207
+2026-03-07 12:20:01.067 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=3.3026 | val_acc=0.6328 | lr=0.000147
+2026-03-07 12:20:01.311 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=3.2872 | val_acc=0.6121 | lr=0.000096
+2026-03-07 12:20:01.311 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:20:01.311 | INFO     | models.lstm_ensemble:_train_one:167 -   [8/9] Best val_loss: 1.2211
+2026-03-07 12:20:01.352 | INFO     | models.lstm_ensemble:_train_one:126 -   [9/9] Training seed=1138 — 2410 samples
+2026-03-07 12:20:01.591 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.1277 | val_acc=0.6241 | lr=0.000976
+2026-03-07 12:20:01.849 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.3898 | val_acc=0.3310 | lr=0.000905
+2026-03-07 12:20:02.091 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.4085 | val_acc=0.3379 | lr=0.000794
+2026-03-07 12:20:02.333 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.5965 | val_acc=0.3810 | lr=0.000655
+2026-03-07 12:20:02.573 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.5808 | val_acc=0.5293 | lr=0.000501
+2026-03-07 12:20:02.810 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.7154 | val_acc=0.3897 | lr=0.000346
+2026-03-07 12:20:03.044 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.6384 | val_acc=0.5121 | lr=0.000207
+2026-03-07 12:20:03.285 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.6935 | val_acc=0.5466 | lr=0.000096
+2026-03-07 12:20:03.523 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.7331 | val_acc=0.5172 | lr=0.000025
+2026-03-07 12:20:03.770 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.7318 | val_acc=0.5259 | lr=0.001000
+2026-03-07 12:20:04.004 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.7252 | val_acc=0.4138 | lr=0.000994
+2026-03-07 12:20:04.243 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.7612 | val_acc=0.5586 | lr=0.000976
+2026-03-07 12:20:04.485 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.8652 | val_acc=0.4741 | lr=0.000946
+2026-03-07 12:20:04.718 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=2.0022 | val_acc=0.4828 | lr=0.000905
+2026-03-07 12:20:04.966 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.9423 | val_acc=0.6086 | lr=0.000854
+2026-03-07 12:20:05.207 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=1.8991 | val_acc=0.5603 | lr=0.000794
+2026-03-07 12:20:05.448 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.1295 | val_acc=0.5414 | lr=0.000727
+2026-03-07 12:20:05.694 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.2327 | val_acc=0.6069 | lr=0.000655
+2026-03-07 12:20:05.934 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.2874 | val_acc=0.4914 | lr=0.000579
+2026-03-07 12:20:06.168 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.2365 | val_acc=0.6052 | lr=0.000501
+2026-03-07 12:20:06.417 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.4357 | val_acc=0.5793 | lr=0.000422
+2026-03-07 12:20:06.658 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.6766 | val_acc=0.6190 | lr=0.000346
+2026-03-07 12:20:06.893 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.6489 | val_acc=0.6121 | lr=0.000274
+2026-03-07 12:20:07.132 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.7617 | val_acc=0.5759 | lr=0.000207
+2026-03-07 12:20:07.373 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=2.8890 | val_acc=0.6000 | lr=0.000147
+2026-03-07 12:20:07.608 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=2.9732 | val_acc=0.6138 | lr=0.000096
+2026-03-07 12:20:07.608 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:20:07.608 | INFO     | models.lstm_ensemble:_train_one:167 -   [9/9] Best val_loss: 1.1277
+2026-03-07 12:20:07.646 | INFO     | models.lstm_ensemble:train_ensemble:210 - 
+Ensemble training complete for XLM/USD_4h_fold2:
+2026-03-07 12:20:07.646 | INFO     | models.lstm_ensemble:train_ensemble:211 -   Val losses: ['1.2526', '1.1772', '1.2118', '1.1541', '1.3209', '1.2343', '1.2619', '1.2211', '1.1277']
+2026-03-07 12:20:07.646 | INFO     | models.lstm_ensemble:train_ensemble:212 -   Mean: 1.2180 | Std: 0.0557
+2026-03-07 12:20:10.560 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.4628284243245919): BUY=20 (4.4%)  SELL=0 (0.0%)  HOLD=437 (95.6%)
+2026-03-07 12:20:10.568 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 1/20 removed (95% survive) — trend=0 vol=0 volume=1 funding=0 regime=0
+2026-03-07 12:20:10.568 | INFO     | backtest.engine:_compute_metrics:224 -  Results: Return=3.82% | Ann=19.68% | Sharpe=2.39 | Calmar=8.64 | MaxDD=-2.28% | WinRate=55.56% | Trades=9 (L:9 S:0)
+2026-03-07 12:20:10.570 | INFO     | __main__:_backtest_window:94 -   TEST fold 2        [2025-10-06→2025-12-21]: net=+3.8% ann=+19.7% WR=55.6% Sh=2.39 Cal=8.64 trades=9
+2026-03-07 12:20:14.022 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.5341858348912663): BUY=13 (2.4%)  SELL=0 (0.0%)  HOLD=535 (97.6%)
+2026-03-07 12:20:14.022 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 2/13 removed (85% survive) — trend=0 vol=0 volume=2 funding=0 regime=0
+2026-03-07 12:20:14.022 | INFO     | backtest.engine:_compute_metrics:224 -  Results: Return=-4.05% | Ann=-15.22% | Sharpe=-1.84 | Calmar=-3.16 | MaxDD=-4.82% | WinRate=0.00% | Trades=5 (L:5 S:0)
+2026-03-07 12:20:14.022 | INFO     | __main__:_backtest_window:94 -   OOT  fold 2        [2024-02-04→2024-05-05]: net=-4.0% ann=-15.2% WR=0.0% Sh=-1.84 Cal=-3.16 trades=5
+2026-03-07 12:20:14.022 | INFO     | __main__:validate_symbol:161 - 
+  ── Fold 3/3 ──────────────────────────────────────────
+2026-03-07 12:20:14.022 | INFO     | __main__:validate_symbol:162 -   Train: [548:2561] = 2013 bars
+2026-03-07 12:20:14.022 | INFO     | __main__:validate_symbol:163 -   Val:   [2561:3201] = 640 bars
+2026-03-07 12:20:14.022 | INFO     | __main__:validate_symbol:164 -   Test:  [3201:3658] = 457 bars
+2026-03-07 12:20:14.034 | INFO     | models.lstm_ensemble:train_ensemble:181 - 
+Training 9-model ensemble for XLM/USD_4h_fold3 on cuda
+2026-03-07 12:20:14.035 | INFO     | models.lstm_ensemble:train_ensemble:182 -   Train: 2013 | Val: 640 | Features: 100
+2026-03-07 12:20:14.039 | INFO     | models.lstm_ensemble:_train_one:126 -   [1/9] Training seed=42 — 1953 samples
+2026-03-07 12:20:14.258 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.1483 | val_acc=0.5845 | lr=0.000976
+2026-03-07 12:20:14.461 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.4054 | val_acc=0.3586 | lr=0.000905
+2026-03-07 12:20:14.660 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.4042 | val_acc=0.4810 | lr=0.000794
+2026-03-07 12:20:14.862 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.4341 | val_acc=0.5931 | lr=0.000655
+2026-03-07 12:20:15.063 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.4907 | val_acc=0.5328 | lr=0.000501
+2026-03-07 12:20:15.264 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.6005 | val_acc=0.5086 | lr=0.000346
+2026-03-07 12:20:15.463 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.5450 | val_acc=0.5586 | lr=0.000207
+2026-03-07 12:20:15.670 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.6153 | val_acc=0.5638 | lr=0.000096
+2026-03-07 12:20:15.872 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.6164 | val_acc=0.5586 | lr=0.000025
+2026-03-07 12:20:16.070 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.6335 | val_acc=0.5534 | lr=0.001000
+2026-03-07 12:20:16.277 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.8112 | val_acc=0.4517 | lr=0.000994
+2026-03-07 12:20:16.477 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.8073 | val_acc=0.5466 | lr=0.000976
+2026-03-07 12:20:16.672 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.8697 | val_acc=0.5121 | lr=0.000946
+2026-03-07 12:20:16.878 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.7452 | val_acc=0.5328 | lr=0.000905
+2026-03-07 12:20:17.071 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.9849 | val_acc=0.6207 | lr=0.000854
+2026-03-07 12:20:17.278 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=2.0500 | val_acc=0.5741 | lr=0.000794
+2026-03-07 12:20:17.477 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=1.8834 | val_acc=0.5759 | lr=0.000727
+2026-03-07 12:20:17.676 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.0688 | val_acc=0.6155 | lr=0.000655
+2026-03-07 12:20:17.871 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.0740 | val_acc=0.6190 | lr=0.000579
+2026-03-07 12:20:18.072 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.2483 | val_acc=0.6259 | lr=0.000501
+2026-03-07 12:20:18.277 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.2423 | val_acc=0.6603 | lr=0.000422
+2026-03-07 12:20:18.476 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.2959 | val_acc=0.6517 | lr=0.000346
+2026-03-07 12:20:18.677 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.4565 | val_acc=0.6638 | lr=0.000274
+2026-03-07 12:20:18.873 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.5371 | val_acc=0.6621 | lr=0.000207
+2026-03-07 12:20:19.075 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=2.5011 | val_acc=0.6776 | lr=0.000147
+2026-03-07 12:20:19.329 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=2.5926 | val_acc=0.6621 | lr=0.000096
+2026-03-07 12:20:19.329 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:20:19.329 | INFO     | models.lstm_ensemble:_train_one:167 -   [1/9] Best val_loss: 1.1483
+2026-03-07 12:20:19.372 | INFO     | models.lstm_ensemble:_train_one:126 -   [2/9] Training seed=179 — 1953 samples
+2026-03-07 12:20:19.597 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.1571 | val_acc=0.6000 | lr=0.000976
+2026-03-07 12:20:19.815 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.3713 | val_acc=0.5172 | lr=0.000905
+2026-03-07 12:20:20.012 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.4879 | val_acc=0.5052 | lr=0.000794
+2026-03-07 12:20:20.216 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.4846 | val_acc=0.5759 | lr=0.000655
+2026-03-07 12:20:20.417 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.6448 | val_acc=0.4879 | lr=0.000501
+2026-03-07 12:20:20.612 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.6593 | val_acc=0.5586 | lr=0.000346
+2026-03-07 12:20:20.817 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.7209 | val_acc=0.5897 | lr=0.000207
+2026-03-07 12:20:21.012 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.7377 | val_acc=0.5810 | lr=0.000096
+2026-03-07 12:20:21.220 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.7666 | val_acc=0.5879 | lr=0.000025
+2026-03-07 12:20:21.419 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.7726 | val_acc=0.5862 | lr=0.001000
+2026-03-07 12:20:21.624 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.9028 | val_acc=0.5690 | lr=0.000994
+2026-03-07 12:20:21.821 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.7884 | val_acc=0.6034 | lr=0.000976
+2026-03-07 12:20:22.017 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.9161 | val_acc=0.6000 | lr=0.000946
+2026-03-07 12:20:22.228 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.7218 | val_acc=0.6138 | lr=0.000905
+2026-03-07 12:20:22.428 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=2.0009 | val_acc=0.6052 | lr=0.000854
+2026-03-07 12:20:22.632 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=1.9411 | val_acc=0.6431 | lr=0.000794
+2026-03-07 12:20:22.826 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.0066 | val_acc=0.6793 | lr=0.000727
+2026-03-07 12:20:23.033 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.0174 | val_acc=0.6328 | lr=0.000655
+2026-03-07 12:20:23.238 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=1.9882 | val_acc=0.6121 | lr=0.000579
+2026-03-07 12:20:23.440 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.2613 | val_acc=0.6448 | lr=0.000501
+2026-03-07 12:20:23.639 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.3666 | val_acc=0.6672 | lr=0.000422
+2026-03-07 12:20:23.834 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.3829 | val_acc=0.6655 | lr=0.000346
+2026-03-07 12:20:24.039 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.5414 | val_acc=0.6776 | lr=0.000274
+2026-03-07 12:20:24.247 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.5977 | val_acc=0.6879 | lr=0.000207
+2026-03-07 12:20:24.451 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=2.5717 | val_acc=0.6897 | lr=0.000147
+2026-03-07 12:20:24.650 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=2.6571 | val_acc=0.6862 | lr=0.000096
+2026-03-07 12:20:24.650 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:20:24.650 | INFO     | models.lstm_ensemble:_train_one:167 -   [2/9] Best val_loss: 1.1571
+2026-03-07 12:20:24.688 | INFO     | models.lstm_ensemble:_train_one:126 -   [3/9] Training seed=316 — 1953 samples
+2026-03-07 12:20:24.890 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.1629 | val_acc=0.4345 | lr=0.000976
+2026-03-07 12:20:25.106 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.2670 | val_acc=0.5000 | lr=0.000905
+2026-03-07 12:20:25.314 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.5168 | val_acc=0.4862 | lr=0.000794
+2026-03-07 12:20:25.514 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.5697 | val_acc=0.5552 | lr=0.000655
+2026-03-07 12:20:25.716 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.5942 | val_acc=0.6224 | lr=0.000501
+2026-03-07 12:20:25.911 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.6330 | val_acc=0.6034 | lr=0.000346
+2026-03-07 12:20:26.116 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.7865 | val_acc=0.6172 | lr=0.000207
+2026-03-07 12:20:26.314 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.7590 | val_acc=0.6776 | lr=0.000096
+2026-03-07 12:20:26.523 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.7875 | val_acc=0.6345 | lr=0.000025
+2026-03-07 12:20:26.720 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.7901 | val_acc=0.6310 | lr=0.001000
+2026-03-07 12:20:26.922 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.7836 | val_acc=0.5414 | lr=0.000994
+2026-03-07 12:20:27.120 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.7371 | val_acc=0.6310 | lr=0.000976
+2026-03-07 12:20:27.326 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.8707 | val_acc=0.6793 | lr=0.000946
+2026-03-07 12:20:27.530 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.8069 | val_acc=0.6569 | lr=0.000905
+2026-03-07 12:20:27.726 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.9030 | val_acc=0.6586 | lr=0.000854
+2026-03-07 12:20:27.929 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=2.0067 | val_acc=0.5983 | lr=0.000794
+2026-03-07 12:20:28.127 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.0828 | val_acc=0.6466 | lr=0.000727
+2026-03-07 12:20:28.330 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.0393 | val_acc=0.6690 | lr=0.000655
+2026-03-07 12:20:28.528 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.1861 | val_acc=0.6500 | lr=0.000579
+2026-03-07 12:20:28.732 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.2807 | val_acc=0.6638 | lr=0.000501
+2026-03-07 12:20:28.930 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.3063 | val_acc=0.6448 | lr=0.000422
+2026-03-07 12:20:29.127 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.3716 | val_acc=0.6914 | lr=0.000346
+2026-03-07 12:20:29.341 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.5173 | val_acc=0.6621 | lr=0.000274
+2026-03-07 12:20:29.542 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.5315 | val_acc=0.6845 | lr=0.000207
+2026-03-07 12:20:29.743 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=2.6479 | val_acc=0.6741 | lr=0.000147
+2026-03-07 12:20:29.937 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=2.6952 | val_acc=0.6828 | lr=0.000096
+2026-03-07 12:20:29.937 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:20:29.937 | INFO     | models.lstm_ensemble:_train_one:167 -   [3/9] Best val_loss: 1.1629
+2026-03-07 12:20:29.984 | INFO     | models.lstm_ensemble:_train_one:126 -   [4/9] Training seed=453 — 1953 samples
+2026-03-07 12:20:30.174 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.2426 | val_acc=0.4897 | lr=0.000976
+2026-03-07 12:20:30.410 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.2454 | val_acc=0.5897 | lr=0.000905
+2026-03-07 12:20:30.619 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.3411 | val_acc=0.4776 | lr=0.000794
+2026-03-07 12:20:30.821 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.3773 | val_acc=0.5707 | lr=0.000655
+2026-03-07 12:20:31.018 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.3961 | val_acc=0.6103 | lr=0.000501
+2026-03-07 12:20:31.222 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.6479 | val_acc=0.5690 | lr=0.000346
+2026-03-07 12:20:31.424 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.5897 | val_acc=0.5672 | lr=0.000207
+2026-03-07 12:20:31.626 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.5997 | val_acc=0.5793 | lr=0.000096
+2026-03-07 12:20:31.828 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.6357 | val_acc=0.5776 | lr=0.000025
+2026-03-07 12:20:32.025 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.6469 | val_acc=0.5845 | lr=0.001000
+2026-03-07 12:20:32.227 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.6269 | val_acc=0.5328 | lr=0.000994
+2026-03-07 12:20:32.433 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.7468 | val_acc=0.5121 | lr=0.000976
+2026-03-07 12:20:32.635 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.8372 | val_acc=0.5690 | lr=0.000946
+2026-03-07 12:20:32.830 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.8597 | val_acc=0.5810 | lr=0.000905
+2026-03-07 12:20:33.046 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.9112 | val_acc=0.6448 | lr=0.000854
+2026-03-07 12:20:33.260 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=2.0458 | val_acc=0.6155 | lr=0.000794
+2026-03-07 12:20:33.461 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.1097 | val_acc=0.6155 | lr=0.000727
+2026-03-07 12:20:33.661 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.2418 | val_acc=0.6603 | lr=0.000655
+2026-03-07 12:20:33.864 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.2960 | val_acc=0.6310 | lr=0.000579
+2026-03-07 12:20:34.063 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.1962 | val_acc=0.6500 | lr=0.000501
+2026-03-07 12:20:34.269 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.3919 | val_acc=0.6293 | lr=0.000422
+2026-03-07 12:20:34.470 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.5709 | val_acc=0.6483 | lr=0.000346
+2026-03-07 12:20:34.671 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.5654 | val_acc=0.6672 | lr=0.000274
+2026-03-07 12:20:34.870 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.6526 | val_acc=0.6793 | lr=0.000207
+2026-03-07 12:20:35.071 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=2.7312 | val_acc=0.6569 | lr=0.000147
+2026-03-07 12:20:35.267 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=2.7554 | val_acc=0.6707 | lr=0.000096
+2026-03-07 12:20:35.267 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:20:35.267 | INFO     | models.lstm_ensemble:_train_one:167 -   [4/9] Best val_loss: 1.2426
+2026-03-07 12:20:35.312 | INFO     | models.lstm_ensemble:_train_one:126 -   [5/9] Training seed=590 — 1953 samples
+2026-03-07 12:20:35.510 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.2627 | val_acc=0.4069 | lr=0.000976
+2026-03-07 12:20:35.731 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.2687 | val_acc=0.5500 | lr=0.000905
+2026-03-07 12:20:35.941 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.3978 | val_acc=0.4897 | lr=0.000794
+2026-03-07 12:20:36.141 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.4781 | val_acc=0.5655 | lr=0.000655
+2026-03-07 12:20:36.356 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.5037 | val_acc=0.5897 | lr=0.000501
+2026-03-07 12:20:36.558 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.5916 | val_acc=0.5897 | lr=0.000346
+2026-03-07 12:20:36.756 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.5754 | val_acc=0.6190 | lr=0.000207
+2026-03-07 12:20:36.953 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.7037 | val_acc=0.6017 | lr=0.000096
+2026-03-07 12:20:37.187 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.6900 | val_acc=0.6172 | lr=0.000025
+2026-03-07 12:20:37.421 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.6864 | val_acc=0.6224 | lr=0.001000
+2026-03-07 12:20:37.625 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.8688 | val_acc=0.5379 | lr=0.000994
+2026-03-07 12:20:37.838 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.6329 | val_acc=0.5828 | lr=0.000976
+2026-03-07 12:20:38.037 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.9615 | val_acc=0.5534 | lr=0.000946
+2026-03-07 12:20:38.238 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.9292 | val_acc=0.6276 | lr=0.000905
+2026-03-07 12:20:38.454 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.8212 | val_acc=0.5466 | lr=0.000854
+2026-03-07 12:20:38.666 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=1.9846 | val_acc=0.6138 | lr=0.000794
+2026-03-07 12:20:38.862 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.0188 | val_acc=0.6069 | lr=0.000727
+2026-03-07 12:20:39.069 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.1921 | val_acc=0.6172 | lr=0.000655
+2026-03-07 12:20:39.271 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.2180 | val_acc=0.7138 | lr=0.000579
+2026-03-07 12:20:39.478 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.2281 | val_acc=0.6828 | lr=0.000501
+2026-03-07 12:20:39.680 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.3322 | val_acc=0.6724 | lr=0.000422
+2026-03-07 12:20:39.883 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.4227 | val_acc=0.6931 | lr=0.000346
+2026-03-07 12:20:40.088 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.5145 | val_acc=0.6897 | lr=0.000274
+2026-03-07 12:20:40.299 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.5499 | val_acc=0.7017 | lr=0.000207
+2026-03-07 12:20:40.506 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=2.6994 | val_acc=0.6897 | lr=0.000147
+2026-03-07 12:20:40.710 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=2.6418 | val_acc=0.7086 | lr=0.000096
+2026-03-07 12:20:40.710 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:20:40.710 | INFO     | models.lstm_ensemble:_train_one:167 -   [5/9] Best val_loss: 1.2627
+2026-03-07 12:20:40.750 | INFO     | models.lstm_ensemble:_train_one:126 -   [6/9] Training seed=727 — 1953 samples
+2026-03-07 12:20:40.951 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.2158 | val_acc=0.5121 | lr=0.000976
+2026-03-07 12:20:41.165 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.4664 | val_acc=0.5466 | lr=0.000905
+2026-03-07 12:20:41.370 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.4799 | val_acc=0.5741 | lr=0.000794
+2026-03-07 12:20:41.568 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.5807 | val_acc=0.5603 | lr=0.000655
+2026-03-07 12:20:41.769 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.6554 | val_acc=0.5879 | lr=0.000501
+2026-03-07 12:20:41.963 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.7418 | val_acc=0.5741 | lr=0.000346
+2026-03-07 12:20:42.170 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.7839 | val_acc=0.5345 | lr=0.000207
+2026-03-07 12:20:42.377 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.8256 | val_acc=0.5759 | lr=0.000096
+2026-03-07 12:20:42.578 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.8636 | val_acc=0.5845 | lr=0.000025
+2026-03-07 12:20:42.777 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.8552 | val_acc=0.5845 | lr=0.001000
+2026-03-07 12:20:42.976 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.7477 | val_acc=0.5379 | lr=0.000994
+2026-03-07 12:20:43.180 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.9981 | val_acc=0.4983 | lr=0.000976
+2026-03-07 12:20:43.386 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.8149 | val_acc=0.5966 | lr=0.000946
+2026-03-07 12:20:43.588 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=2.0610 | val_acc=0.5586 | lr=0.000905
+2026-03-07 12:20:43.787 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=2.0738 | val_acc=0.6483 | lr=0.000854
+2026-03-07 12:20:43.987 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=2.1554 | val_acc=0.6552 | lr=0.000794
+2026-03-07 12:20:44.189 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.0688 | val_acc=0.6310 | lr=0.000727
+2026-03-07 12:20:44.388 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.3717 | val_acc=0.6224 | lr=0.000655
+2026-03-07 12:20:44.600 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.2619 | val_acc=0.6466 | lr=0.000579
+2026-03-07 12:20:44.800 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.3137 | val_acc=0.6655 | lr=0.000501
+2026-03-07 12:20:44.998 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.5275 | val_acc=0.6741 | lr=0.000422
+2026-03-07 12:20:45.198 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.6656 | val_acc=0.6638 | lr=0.000346
+2026-03-07 12:20:45.408 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.7309 | val_acc=0.6862 | lr=0.000274
+2026-03-07 12:20:45.607 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.8256 | val_acc=0.6724 | lr=0.000207
+2026-03-07 12:20:45.813 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=2.9532 | val_acc=0.6879 | lr=0.000147
+2026-03-07 12:20:46.012 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=2.9611 | val_acc=0.6707 | lr=0.000096
+2026-03-07 12:20:46.012 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:20:46.020 | INFO     | models.lstm_ensemble:_train_one:167 -   [6/9] Best val_loss: 1.2158
+2026-03-07 12:20:46.055 | INFO     | models.lstm_ensemble:_train_one:126 -   [7/9] Training seed=864 — 1953 samples
+2026-03-07 12:20:46.262 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.0590 | val_acc=0.6724 | lr=0.000976
+2026-03-07 12:20:46.493 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.2309 | val_acc=0.6000 | lr=0.000905
+2026-03-07 12:20:46.695 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.4464 | val_acc=0.5379 | lr=0.000794
+2026-03-07 12:20:46.900 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.4606 | val_acc=0.6241 | lr=0.000655
+2026-03-07 12:20:47.093 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.4986 | val_acc=0.5879 | lr=0.000501
+2026-03-07 12:20:47.310 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.5866 | val_acc=0.6052 | lr=0.000346
+2026-03-07 12:20:47.514 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.7129 | val_acc=0.5397 | lr=0.000207
+2026-03-07 12:20:47.714 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.6505 | val_acc=0.5828 | lr=0.000096
+2026-03-07 12:20:47.908 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.6788 | val_acc=0.6121 | lr=0.000025
+2026-03-07 12:20:48.116 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.6851 | val_acc=0.6172 | lr=0.001000
+2026-03-07 12:20:48.319 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.6307 | val_acc=0.5448 | lr=0.000994
+2026-03-07 12:20:48.515 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.7640 | val_acc=0.6379 | lr=0.000976
+2026-03-07 12:20:48.720 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.8603 | val_acc=0.6328 | lr=0.000946
+2026-03-07 12:20:48.918 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.7390 | val_acc=0.6414 | lr=0.000905
+2026-03-07 12:20:49.121 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.9540 | val_acc=0.5897 | lr=0.000854
+2026-03-07 12:20:49.322 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=1.8385 | val_acc=0.6241 | lr=0.000794
+2026-03-07 12:20:49.526 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.1545 | val_acc=0.6448 | lr=0.000727
+2026-03-07 12:20:49.728 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.1235 | val_acc=0.6690 | lr=0.000655
+2026-03-07 12:20:49.924 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.2143 | val_acc=0.6603 | lr=0.000579
+2026-03-07 12:20:50.126 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.1116 | val_acc=0.6414 | lr=0.000501
+2026-03-07 12:20:50.338 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.3622 | val_acc=0.6500 | lr=0.000422
+2026-03-07 12:20:50.537 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.3943 | val_acc=0.6672 | lr=0.000346
+2026-03-07 12:20:50.737 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.3027 | val_acc=0.6603 | lr=0.000274
+2026-03-07 12:20:50.944 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.5596 | val_acc=0.6810 | lr=0.000207
+2026-03-07 12:20:51.141 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=2.5574 | val_acc=0.6914 | lr=0.000147
+2026-03-07 12:20:51.351 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=2.6570 | val_acc=0.6914 | lr=0.000096
+2026-03-07 12:20:51.351 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:20:51.351 | INFO     | models.lstm_ensemble:_train_one:167 -   [7/9] Best val_loss: 1.0590
+2026-03-07 12:20:51.388 | INFO     | models.lstm_ensemble:_train_one:126 -   [8/9] Training seed=1001 — 1953 samples
+2026-03-07 12:20:51.612 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.0789 | val_acc=0.6121 | lr=0.000976
+2026-03-07 12:20:51.830 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.3495 | val_acc=0.5448 | lr=0.000905
+2026-03-07 12:20:52.029 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.4213 | val_acc=0.5397 | lr=0.000794
+2026-03-07 12:20:52.226 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.3760 | val_acc=0.6276 | lr=0.000655
+2026-03-07 12:20:52.437 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.4084 | val_acc=0.6138 | lr=0.000501
+2026-03-07 12:20:52.641 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.6133 | val_acc=0.5862 | lr=0.000346
+2026-03-07 12:20:52.854 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.5986 | val_acc=0.5397 | lr=0.000207
+2026-03-07 12:20:53.055 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.6824 | val_acc=0.5810 | lr=0.000096
+2026-03-07 12:20:53.250 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.7042 | val_acc=0.6017 | lr=0.000025
+2026-03-07 12:20:53.460 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.7200 | val_acc=0.5983 | lr=0.001000
+2026-03-07 12:20:53.660 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.6881 | val_acc=0.6362 | lr=0.000994
+2026-03-07 12:20:53.861 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.8240 | val_acc=0.5328 | lr=0.000976
+2026-03-07 12:20:54.071 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.9456 | val_acc=0.6534 | lr=0.000946
+2026-03-07 12:20:54.267 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.8338 | val_acc=0.6190 | lr=0.000905
+2026-03-07 12:20:54.477 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=2.1044 | val_acc=0.6086 | lr=0.000854
+2026-03-07 12:20:54.680 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=2.1543 | val_acc=0.6862 | lr=0.000794
+2026-03-07 12:20:54.878 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.0582 | val_acc=0.6155 | lr=0.000727
+2026-03-07 12:20:55.087 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.0771 | val_acc=0.6190 | lr=0.000655
+2026-03-07 12:20:55.284 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.3905 | val_acc=0.6207 | lr=0.000579
+2026-03-07 12:20:55.492 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.4739 | val_acc=0.6569 | lr=0.000501
+2026-03-07 12:20:55.694 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.5307 | val_acc=0.6690 | lr=0.000422
+2026-03-07 12:20:55.894 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.5946 | val_acc=0.6862 | lr=0.000346
+2026-03-07 12:20:56.095 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.6353 | val_acc=0.6931 | lr=0.000274
+2026-03-07 12:20:56.297 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.6748 | val_acc=0.6862 | lr=0.000207
+2026-03-07 12:20:56.494 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=2.7933 | val_acc=0.6931 | lr=0.000147
+2026-03-07 12:20:56.693 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=2.8216 | val_acc=0.6966 | lr=0.000096
+2026-03-07 12:20:56.703 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:20:56.703 | INFO     | models.lstm_ensemble:_train_one:167 -   [8/9] Best val_loss: 1.0789
+2026-03-07 12:20:56.738 | INFO     | models.lstm_ensemble:_train_one:126 -   [9/9] Training seed=1138 — 1953 samples
+2026-03-07 12:20:56.940 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   0 | val_loss=1.1901 | val_acc=0.4845 | lr=0.000976
+2026-03-07 12:20:57.164 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   1 | val_loss=1.2752 | val_acc=0.7086 | lr=0.000905
+2026-03-07 12:20:57.373 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   2 | val_loss=1.5353 | val_acc=0.5172 | lr=0.000794
+2026-03-07 12:20:57.570 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   3 | val_loss=1.6049 | val_acc=0.5241 | lr=0.000655
+2026-03-07 12:20:57.771 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   4 | val_loss=1.6210 | val_acc=0.5397 | lr=0.000501
+2026-03-07 12:20:57.971 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   5 | val_loss=1.6096 | val_acc=0.5431 | lr=0.000346
+2026-03-07 12:20:58.171 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   6 | val_loss=1.6593 | val_acc=0.5586 | lr=0.000207
+2026-03-07 12:20:58.384 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   7 | val_loss=1.7325 | val_acc=0.5552 | lr=0.000096
+2026-03-07 12:20:58.584 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   8 | val_loss=1.7305 | val_acc=0.5828 | lr=0.000025
+2026-03-07 12:20:58.776 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch   9 | val_loss=1.7359 | val_acc=0.5793 | lr=0.001000
+2026-03-07 12:20:58.985 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  10 | val_loss=1.8727 | val_acc=0.4672 | lr=0.000994
+2026-03-07 12:20:59.188 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  11 | val_loss=1.6761 | val_acc=0.6448 | lr=0.000976
+2026-03-07 12:20:59.397 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  12 | val_loss=1.6339 | val_acc=0.5690 | lr=0.000946
+2026-03-07 12:20:59.604 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  13 | val_loss=1.9974 | val_acc=0.5966 | lr=0.000905
+2026-03-07 12:20:59.800 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  14 | val_loss=1.8039 | val_acc=0.5897 | lr=0.000854
+2026-03-07 12:21:00.007 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  15 | val_loss=1.9183 | val_acc=0.6086 | lr=0.000794
+2026-03-07 12:21:00.208 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  16 | val_loss=2.0139 | val_acc=0.6810 | lr=0.000727
+2026-03-07 12:21:00.410 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  17 | val_loss=2.1113 | val_acc=0.6672 | lr=0.000655
+2026-03-07 12:21:00.612 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  18 | val_loss=2.1332 | val_acc=0.6534 | lr=0.000579
+2026-03-07 12:21:00.811 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  19 | val_loss=2.3846 | val_acc=0.6517 | lr=0.000501
+2026-03-07 12:21:01.010 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  20 | val_loss=2.3310 | val_acc=0.6724 | lr=0.000422
+2026-03-07 12:21:01.213 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  21 | val_loss=2.3473 | val_acc=0.6397 | lr=0.000346
+2026-03-07 12:21:01.420 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  22 | val_loss=2.4333 | val_acc=0.6500 | lr=0.000274
+2026-03-07 12:21:01.624 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  23 | val_loss=2.5411 | val_acc=0.6879 | lr=0.000207
+2026-03-07 12:21:01.827 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  24 | val_loss=2.5936 | val_acc=0.6690 | lr=0.000147
+2026-03-07 12:21:02.027 | INFO     | models.lstm_ensemble:_train_one:153 -     Epoch  25 | val_loss=2.5759 | val_acc=0.6845 | lr=0.000096
+2026-03-07 12:21:02.028 | INFO     | models.lstm_ensemble:_train_one:163 -     Early stop at epoch 25
+2026-03-07 12:21:02.028 | INFO     | models.lstm_ensemble:_train_one:167 -   [9/9] Best val_loss: 1.1901
+2026-03-07 12:21:02.059 | INFO     | models.lstm_ensemble:train_ensemble:210 - 
+Ensemble training complete for XLM/USD_4h_fold3:
+2026-03-07 12:21:02.059 | INFO     | models.lstm_ensemble:train_ensemble:211 -   Val losses: ['1.1483', '1.1571', '1.1629', '1.2426', '1.2627', '1.2158', '1.0590', '1.0789', '1.1901']
+2026-03-07 12:21:02.059 | INFO     | models.lstm_ensemble:train_ensemble:212 -   Mean: 1.1686 | Std: 0.0647
+2026-03-07 12:21:04.935 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.5142828047275543): BUY=24 (5.3%)  SELL=29 (6.3%)  HOLD=404 (88.4%)
+2026-03-07 12:21:04.937 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 1/53 removed (98% survive) — trend=0 vol=0 volume=1 funding=0 regime=0
+2026-03-07 12:21:04.937 | INFO     | backtest.engine:_compute_metrics:224 -  Results: Return=2.54% | Ann=12.77% | Sharpe=1.48 | Calmar=4.56 | MaxDD=-2.80% | WinRate=45.45% | Trades=11 (L:4 S:7)
+2026-03-07 12:21:04.937 | INFO     | __main__:_backtest_window:94 -   TEST fold 3        [2025-07-22→2025-10-06]: net=+2.5% ann=+12.8% WR=45.5% Sh=1.48 Cal=4.56 trades=11
+2026-03-07 12:21:08.405 | INFO     | models.ensemble:generate_signals:136 - Signal distribution (threshold=0.5374897726707988): BUY=15 (2.7%)  SELL=0 (0.0%)  HOLD=533 (97.3%)
+2026-03-07 12:21:08.405 | INFO     | backtest.filters:apply_filters:120 - Filters [4h] 4/15 removed (73% survive) — trend=0 vol=0 volume=4 funding=0 regime=0
+2026-03-07 12:21:08.405 | INFO     | backtest.engine:_compute_metrics:224 -  Results: Return=-3.48% | Ann=-13.21% | Sharpe=-2.35 | Calmar=-2.45 | MaxDD=-5.39% | WinRate=14.29% | Trades=7 (L:7 S:0)
+2026-03-07 12:21:08.405 | INFO     | __main__:_backtest_window:94 -   OOT  fold 3        [2024-02-04→2024-05-05]: net=-3.5% ann=-13.2% WR=14.3% Sh=-2.35 Cal=-2.45 trades=7
+2026-03-07 12:21:08.419 | INFO     | __main__:save_results:330 - Saved -> backtest\results\oot_ensemble_XLM_USD_4h_20260307_121750.csv

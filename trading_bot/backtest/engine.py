@@ -12,8 +12,7 @@ from loguru import logger
 from config.settings import (
     INITIAL_CAPITAL, TRADING_FEE, SLIPPAGE,
     STOP_LOSS_PCT, TAKE_PROFIT_PCT, MAX_POSITION_PCT,
-    RESULTS_DIR,
-    USE_ATR_STOPS, ATR_STOP_MULT, ATR_TP_MULT,
+    RESULTS_DIR
 )
 
 
@@ -31,8 +30,6 @@ class BacktestEngine:
         self.cash        = self.initial_capital
         self.position    = 0.0   # Units held (positive = long, negative = short)
         self.entry_price = None
-        self.stop_price  = None  # Dynamic stop level
-        self.tp_price    = None  # Dynamic take-profit level
         self.side        = None  # "LONG" or "SHORT"
         self.margin_held = 0.0
         self.trades      = []
@@ -46,12 +43,25 @@ class BacktestEngine:
     def _apply_fee(self, trade_value):
         return trade_value * TRADING_FEE
 
-    def run(self, df: pd.DataFrame, signals: dict, symbol: str = "", timeframe: str = "1h") -> dict:
+    # Bars per year for each native timeframe — used for Sharpe annualisation
+    _BARS_PER_YEAR = {
+        "15m":  35040,
+        "30m":  17520,
+        "1h":   8760,
+        "4h":   2190,
+        "12h":  730,
+        "1d":   365,
+    }
+
+    def run(self, df: pd.DataFrame, signals: dict, symbol: str = "",
+            timeframe: str = "4h") -> dict:
         """
         Run backtest over a DataFrame with signals dict from ensemble.generate_signals().
         df must contain 'close', 'high', 'low' columns aligned to signals.
         Supports both long and short positions.
+        Pass timeframe so Sharpe is annualised correctly per bar frequency.
         """
+        self._timeframe = timeframe
         self.reset()
         signal_arr  = signals["signal"]
         confidence  = signals["confidence"]
@@ -60,8 +70,6 @@ class BacktestEngine:
         prices = df["close"].values[-n:]
         highs  = df["high"].values[-n:]
         lows   = df["low"].values[-n:]
-        # ATR for dynamic stop/TP sizing
-        atrs   = df["atr_14"].values[-n:] if "atr_14" in df.columns else np.full(n, np.nan)
 
         for i in range(n):
             price = prices[i]
@@ -75,20 +83,20 @@ class BacktestEngine:
 
             # ── Check stop-loss / take-profit for LONG ────────────────────
             if self.position > 0 and self.entry_price:
-                if lows[i] <= self.stop_price:
-                    self._close_position(self.stop_price, i, "STOP_LOSS")
+                if lows[i] <= self.entry_price * (1 - STOP_LOSS_PCT):
+                    self._close_position(self.entry_price * (1 - STOP_LOSS_PCT), i, "STOP_LOSS")
                     continue
-                if highs[i] >= self.tp_price:
-                    self._close_position(self.tp_price, i, "TAKE_PROFIT")
+                if highs[i] >= self.entry_price * (1 + TAKE_PROFIT_PCT):
+                    self._close_position(self.entry_price * (1 + TAKE_PROFIT_PCT), i, "TAKE_PROFIT")
                     continue
 
             # ── Check stop-loss / take-profit for SHORT ───────────────────
             elif self.position < 0 and self.entry_price:
-                if highs[i] >= self.stop_price:
-                    self._close_position(self.stop_price, i, "STOP_LOSS")
+                if highs[i] >= self.entry_price * (1 + STOP_LOSS_PCT):
+                    self._close_position(self.entry_price * (1 + STOP_LOSS_PCT), i, "STOP_LOSS")
                     continue
-                if lows[i] <= self.tp_price:
-                    self._close_position(self.tp_price, i, "TAKE_PROFIT")
+                if lows[i] <= self.entry_price * (1 - TAKE_PROFIT_PCT):
+                    self._close_position(self.entry_price * (1 - TAKE_PROFIT_PCT), i, "TAKE_PROFIT")
                     continue
 
             sig = signal_arr[i]
@@ -97,12 +105,12 @@ class BacktestEngine:
             if sig == "BUY" and self.position <= 0:
                 if self.position < 0:
                     self._close_position(price, i, "SIGNAL_FLIP")
-                self._open_long(price, i, atrs[i])
+                self._open_long(price, i)
 
             elif sig == "SELL" and self.position >= 0:
                 if self.position > 0:
                     self._close_position(price, i, "SIGNAL_FLIP")
-                self._open_short(price, i, atrs[i])
+                self._open_short(price, i)
 
             elif sig == "HOLD":
                 pass  # Hold existing position
@@ -111,10 +119,9 @@ class BacktestEngine:
         if self.position != 0:
             self._close_position(prices[-1], n-1, "END_OF_PERIOD")
 
-        self._timeframe = timeframe
         return self._compute_metrics(symbol)
 
-    def _open_long(self, price, idx, atr=None):
+    def _open_long(self, price, idx):
         exec_price       = self._apply_slippage(price, "BUY")
         trade_value      = self.cash * MAX_POSITION_PCT
         fee              = self._apply_fee(trade_value)
@@ -122,14 +129,8 @@ class BacktestEngine:
         self.cash        -= trade_value
         self.entry_price = exec_price
         self.side        = "LONG"
-        if USE_ATR_STOPS and atr is not None and atr > 0:
-            self.stop_price = exec_price - ATR_STOP_MULT * atr
-            self.tp_price   = exec_price + ATR_TP_MULT   * atr
-        else:
-            self.stop_price = exec_price * (1 - STOP_LOSS_PCT)
-            self.tp_price   = exec_price * (1 + TAKE_PROFIT_PCT)
 
-    def _open_short(self, price, idx, atr=None):
+    def _open_short(self, price, idx):
         exec_price        = self._apply_slippage(price, "SELL")
         margin            = self.cash * MAX_POSITION_PCT
         units             = margin / exec_price
@@ -140,12 +141,6 @@ class BacktestEngine:
         self.margin_held  = margin                       # track capital at risk
         self.entry_price  = exec_price
         self.side         = "SHORT"
-        if USE_ATR_STOPS and atr is not None and atr > 0:
-            self.stop_price = exec_price + ATR_STOP_MULT * atr
-            self.tp_price   = exec_price - ATR_TP_MULT   * atr
-        else:
-            self.stop_price = exec_price * (1 + STOP_LOSS_PCT)
-            self.tp_price   = exec_price * (1 - TAKE_PROFIT_PCT)
 
     def _close_position(self, price, idx, reason):
         if self.position > 0:
@@ -176,8 +171,6 @@ class BacktestEngine:
         })
         self.position    = 0.0
         self.entry_price = None
-        self.stop_price  = None
-        self.tp_price    = None
         self.side        = None
 
     def _compute_metrics(self, symbol) -> dict:
@@ -191,10 +184,8 @@ class BacktestEngine:
         n_longs      = len([t for t in self.trades if t.get("side") == "LONG"])
         n_shorts     = len([t for t in self.trades if t.get("side") == "SHORT"])
 
-        # Sharpe ratio — annualised correctly per bar frequency
-        _BARS_PER_YEAR = {"15m": 35040, "1h": 8760, "2h": 4380,
-                          "4h": 2190, "8h": 1095, "1d": 365}
-        bars_per_year = _BARS_PER_YEAR.get(getattr(self, "_timeframe", "1h"), 8760)
+        # Sharpe ratio — annualised using correct bars-per-year for this timeframe
+        bars_per_year = self._BARS_PER_YEAR.get(getattr(self, "_timeframe", "4h"), 2190)
         sharpe = (returns.mean() / (returns.std() + 1e-9)) * np.sqrt(bars_per_year)
 
         # Max drawdown
@@ -207,22 +198,32 @@ class BacktestEngine:
         gross_loss   = abs(sum(t["pnl"] for t in self.trades if t["pnl"] < 0))
         profit_factor = gross_profit / (gross_loss + 1e-9)
 
+        # Calmar ratio — annualised return / max drawdown (better than Sharpe for trend-following)
+        # Use hours_per_bar to annualise net return first
+        hours_per_bar = {"15m": 0.25, "30m": 0.5, "1h": 1.0, "4h": 4.0, "12h": 12.0, "1d": 24.0}
+        n_bars     = len(equity)
+        test_years = max(n_bars * hours_per_bar.get(getattr(self, "_timeframe", "4h"), 4.0) / 8760, 1/365)
+        ann_ret    = (1 + total_return) ** (1 / test_years) - 1
+        calmar     = ann_ret / (abs(max_dd) + 1e-9)
+
         metrics = {
             "symbol":        symbol,
             "final_equity":  equity[-1],
             "total_return":  total_return,
+            "ann_return":    ann_ret,
             "n_trades":      n_trades,
             "n_longs":       n_longs,
             "n_shorts":      n_shorts,
             "win_rate":      win_rate,
             "sharpe_ratio":  sharpe,
+            "calmar_ratio":  calmar,
             "max_drawdown":  max_dd,
             "profit_factor": profit_factor,
         }
 
         logger.info(
-            f"{symbol} Results: Return={total_return:.2%} | "
-            f"Sharpe={sharpe:.2f} | MaxDD={max_dd:.2%} | "
+            f" Results: Return={total_return:.2%} | Ann={ann_ret:.2%} | "
+            f"Sharpe={sharpe:.2f} | Calmar={calmar:.2f} | MaxDD={max_dd:.2%} | "
             f"WinRate={win_rate:.2%} | Trades={n_trades} "
             f"(L:{n_longs} S:{n_shorts})"
         )

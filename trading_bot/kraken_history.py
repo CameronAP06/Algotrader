@@ -102,6 +102,29 @@ TF_TO_MINUTES = {
 
 NEEDS_RESAMPLE = {"8h", "1w", "2w"}
 
+# Minimum bars required per timeframe for auto-discovery
+# Filters out newly listed pairs with insufficient history
+MIN_BARS_FOR_DISCOVERY = {
+    "15m": 8000,   # ~83 days
+    "30m": 5000,   # ~104 days
+    "1h":  4000,   # ~167 days
+    "4h":  2000,   # ~333 days
+    "12h": 700,    # ~350 days
+    "1d":  365,    # 1 year
+}
+
+# Known legacy Kraken CSV name → ccxt-style symbol
+# Used to reverse-map filenames during auto-discovery
+KRAKEN_TO_SYMBOL = {v: k for k, v in SYMBOL_TO_KRAKEN.items()}
+
+# Additional legacy prefixes Kraken uses (X prefix for some metals/crypto)
+_KRAKEN_LEGACY_PREFIX = {
+    "XBT": "BTC",
+    "XDG": "DOGE",
+    "XET": "ETH",   # rare
+    "XLT": "LTC",   # rare
+}
+
 # ── History caps (max days of data to use per timeframe) ─────────────────────
 # Older data trains across too many market regimes, hurting generalisation.
 # Caps are intentionally tighter for shorter timeframes where regime drift
@@ -210,6 +233,13 @@ def _resample(df: pd.DataFrame, timeframe: str) -> pd.DataFrame:
         epoch = pd.Timestamp("1970-01-01")
         hours = (ts - epoch).dt.total_seconds() / 3600
         df["_bucket"] = (hours // 8).astype(int)
+
+    elif timeframe == "12h":
+        # Group 4h → 12h: every 3 bars; align to 00:00 / 12:00 UTC boundaries
+        ts = df["timestamp"]
+        epoch = pd.Timestamp("1970-01-01")
+        hours = (ts - epoch).dt.total_seconds() / 3600
+        df["_bucket"] = (hours // 12).astype(int)
 
     elif timeframe == "1w":
         # Align to Monday boundaries
@@ -323,6 +353,14 @@ def fetch_ohlcv_full(
 def _api_only_fallback(symbol: str, timeframe: str) -> pd.DataFrame:
     """Last resort — just use the API (720 bar limit applies)."""
     import ccxt
+    # 12h is not accepted by Kraken's ccxt API — resample from 4h
+    if timeframe == "12h":
+        logger.warning(f"API-only fetch for {symbol} 12h: resampling from 4h (Kraken API doesn't support 12h)")
+        df_4h = _api_only_fallback(symbol, "4h")
+        if df_4h.empty:
+            return pd.DataFrame()
+        return _resample(df_4h, "12h")
+
     api_tf_map = {"8h": "4h", "1w": "1d", "2w": "1d"}
     api_tf = api_tf_map.get(timeframe, timeframe)
 
@@ -344,9 +382,147 @@ def _api_only_fallback(symbol: str, timeframe: str) -> pd.DataFrame:
     return df
 
 
-# ── Integration helper ────────────────────────────────────────────────────────
+# ── Auto-discovery ────────────────────────────────────────────────────────────
 
-def get_history_dir() -> str | None:
+def auto_discover_pairs(
+    history_dir: str,
+    timeframe: str = "4h",
+    quote: str = "USD",
+    min_bars: int | None = None,
+    exclude: set | None = None,
+) -> list[str]:
+    """
+    Scan the Kraken CSV directory and return all tradeable pairs that have
+    enough history for the given timeframe.
+
+    Args:
+        history_dir:  Path to OHLC_Kraken directory
+        timeframe:    Timeframe to check bar count against (default: "4h")
+        quote:        Quote currency filter — only return {BASE}/{quote} pairs
+        min_bars:     Minimum bar count required. Defaults to MIN_BARS_FOR_DISCOVERY[timeframe]
+        exclude:      Set of ccxt symbols to exclude e.g. {"BTC/USD"}
+
+    Returns:
+        Sorted list of ccxt-style symbols e.g. ["AAVE/USD", "ADA/USD", ...]
+
+    Example:
+        pairs = auto_discover_pairs("data/OHLC_Kraken", timeframe="4h")
+        # Returns all USD pairs with 2000+ 4h bars
+    """
+    if min_bars is None:
+        min_bars = MIN_BARS_FOR_DISCOVERY.get(timeframe, 2000)
+
+    minutes = TF_TO_MINUTES.get(timeframe)
+    if minutes is None:
+        raise ValueError(f"Unknown timeframe: {timeframe}")
+
+    # For resampled timeframes, find the source timeframe's CSV
+    if timeframe in NEEDS_RESAMPLE:
+        src_minutes = TF_TO_MINUTES[timeframe]
+    else:
+        src_minutes = minutes
+
+    quote_suffix = quote  # e.g. "USD"
+    pattern = os.path.join(history_dir, f"*{quote_suffix}_{src_minutes}.csv")
+    csv_files = glob.glob(pattern)
+
+    # Also search recursively in subdirectories
+    if not csv_files:
+        csv_files = glob.glob(
+            os.path.join(history_dir, "**", f"*{quote_suffix}_{src_minutes}.csv"),
+            recursive=True
+        )
+
+    if not csv_files:
+        logger.warning(f"auto_discover_pairs: no *{quote_suffix}_{src_minutes}.csv files found in {history_dir}")
+        return []
+
+    exclude = exclude or set()
+    discovered = []
+    skipped_short = 0
+    skipped_exclude = 0
+
+    for csv_path in sorted(csv_files):
+        fname = os.path.basename(csv_path)
+        # Extract Kraken name: e.g. "XBTUSD_240.csv" → "XBTUSD"
+        kraken_name = fname.replace(f"_{src_minutes}.csv", "")
+
+        # Convert to ccxt symbol
+        if kraken_name in KRAKEN_TO_SYMBOL:
+            # Known legacy mapping
+            symbol = KRAKEN_TO_SYMBOL[kraken_name]
+        else:
+            # Auto-derive: strip quote suffix → base → add "/USD"
+            if kraken_name.endswith(quote_suffix):
+                base = kraken_name[:-len(quote_suffix)]
+                # Handle X-prefixed legacy names
+                for legacy, modern in _KRAKEN_LEGACY_PREFIX.items():
+                    if base == legacy:
+                        base = modern
+                        break
+                symbol = f"{base}/{quote}"
+            else:
+                continue  # Not a USD pair
+
+        if symbol in exclude:
+            skipped_exclude += 1
+            continue
+
+        # Check bar count — count lines in CSV (fast, no full parse)
+        try:
+            with open(csv_path, "rb") as f:
+                n_bars = sum(1 for _ in f)
+            if n_bars < min_bars:
+                skipped_short += 1
+                continue
+        except Exception:
+            continue
+
+        discovered.append(symbol)
+
+    discovered = sorted(set(discovered))
+    logger.info(
+        f"auto_discover_pairs [{timeframe} {quote}]: {len(discovered)} pairs found "
+        f"(skipped {skipped_short} short history, {skipped_exclude} excluded) "
+        f"from {len(csv_files)} CSV files"
+    )
+    return discovered
+
+
+def discover_all_timeframes(
+    history_dir: str,
+    timeframes: list[str] | None = None,
+    quote: str = "USD",
+    exclude: set | None = None,
+) -> dict[str, list[str]]:
+    """
+    Run auto_discover_pairs for multiple timeframes.
+    Returns dict of {timeframe: [symbols]} — useful for seeing which pairs
+    have enough history at each timeframe.
+
+    Example:
+        available = discover_all_timeframes("data/OHLC_Kraken")
+        # available["4h"] → all pairs with 2000+ 4h bars
+        # available["1d"] → all pairs with 365+ 1d bars
+    """
+    if timeframes is None:
+        timeframes = ["30m", "1h", "4h", "12h", "1d"]
+
+    result = {}
+    for tf in timeframes:
+        result[tf] = auto_discover_pairs(
+            history_dir, timeframe=tf, quote=quote, exclude=exclude
+        )
+
+    # Summary
+    logger.info("Discovery summary:")
+    for tf, pairs in result.items():
+        logger.info(f"  {tf:>4}: {len(pairs):>4} pairs")
+
+    return result
+
+
+
     """
     Returns the Kraken OHLC history directory.
     Structure: trading_bot/data/OHLC_Kraken/{TICKERNAME}/
