@@ -31,7 +31,14 @@ import numpy as np
 from pathlib import Path
 
 from config.settings import TRADING_PAIRS, LOG_DIR, RESULTS_DIR
-from data.alt_data import fetch_all_alt_data, merge_alt_data, compute_btc_dom_proxy
+try:
+    from data.alt_data import fetch_all_alt_data, merge_alt_data, compute_btc_dom_proxy
+    _ALT_DATA_AVAILABLE = True
+except ImportError:
+    _ALT_DATA_AVAILABLE = False
+    # expanded_scan.py imports fetch_ohlcv_timeframe from this module but never
+    # calls fetch_all_alt_data / merge_alt_data. Silently degrade so that
+    # expanded_scan can import cleanly even when alt_data.py is not present.
 from data.feature_engineer import build_features, get_feature_columns
 from utils.splitter import time_split, save_scaler
 from models import catboost_model, cnn_model, lstm_model
@@ -217,21 +224,48 @@ SYMBOL_MAP = {
 
 def fetch_ohlcv_timeframe(symbol: str, timeframe: str, history_days: int) -> pd.DataFrame:
     """Fetch OHLCV data at a specific timeframe from Kraken.
-    Uses full historical CSV if available, falls back to API (720 bar limit).
+
+    Priority:
+      1. Full historical CSVs via kraken_history (25GB dataset — all native timeframes
+         including 1h, 4h, 12h, 1d, 30m — NO resampling for these)
+      2. Local cache (data/raw/) — used when CSV data is fresh enough
+      3. API fallback — 720-bar limit, only used when CSV data genuinely absent
+
+    NOTE: 12h is a native Kraken timeframe (_720.csv files exist). Do NOT resample
+    from 4h — always load the native CSV via this function.
     """
     import ccxt
     from datetime import datetime, timedelta
 
-    # Try full history loader first
+    # Try full history loader first — covers ALL native timeframes.
+    # Inject the directory containing this file so kraken_history.py is always
+    # findable regardless of the caller's working directory.
     try:
+        _this_dir = os.path.dirname(os.path.abspath(__file__))
+        if _this_dir not in sys.path:
+            sys.path.insert(0, _this_dir)
         from kraken_history import fetch_ohlcv_full, get_history_dir
         history_dir = get_history_dir()
         if history_dir:
             df = fetch_ohlcv_full(symbol, timeframe, history_dir)
             if df is not None and len(df) > 0:
                 return df
+            else:
+                logger.warning(
+                    f"{symbol} {timeframe}: kraken_history returned empty — "
+                    f"CSV may be missing from {history_dir}. Falling back to API (720 bar limit)."
+                )
+        else:
+            logger.warning(
+                f"{symbol} {timeframe}: Kraken history directory not found. "
+                f"Set KRAKEN_HISTORY_DIR env var to point to your data directory. "
+                f"Falling back to API (720 bar limit — will likely be skipped as too few bars)."
+            )
     except ImportError:
-        pass
+        logger.error(
+            f"kraken_history.py not found. Expected alongside timeframe_comparison.py. "
+            f"Falling back to API for {symbol} {timeframe}."
+        )
 
     kraken_symbol = symbol  # Kraken uses USD pairs natively, no remapping needed
     cache_path = Path(f"data/raw/{symbol.replace('/','_')}_{timeframe}.csv")
@@ -360,24 +394,33 @@ def resample_to_12h(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def fetch_ohlcv_12h(symbol: str, history_days: int) -> pd.DataFrame:
-    """Fetch 4h data from Kraken and resample to 12h.
-    Kraken's ccxt interface rejects '12h' as a timeframe — we synthesise it."""
+    """Load native 12h OHLCV data from the Kraken CSV dataset.
+
+    12h is a native Kraken timeframe — files are named e.g. XBTUSD_720.csv.
+    We load these directly via fetch_ohlcv_timeframe (which calls kraken_history).
+
+    Resampling from 4h is only used as a last resort when the native CSV is
+    genuinely absent — this should be rare given the 25GB dataset.
+    """
+    # Prefer native 12h CSV — fast and accurate
+    df = fetch_ohlcv_timeframe(symbol, "12h", history_days)
+    if df is not None and len(df) > 10:
+        return df
+
+    # Fallback: resample from 4h only if native CSV missing
+    logger.warning(
+        f"{symbol}: no native 12h CSV found — resampling from 4h as fallback. "
+        f"Check that your Kraken dataset includes *_720.csv files."
+    )
     df_4h = fetch_ohlcv_timeframe(symbol, "4h", history_days)
     if df_4h is None or len(df_4h) < 2:
         return pd.DataFrame()
     df_12h = resample_to_12h(df_4h)
-    logger.info(f"{symbol} 12h (resampled from 4h): {len(df_12h)} candles")
+    logger.info(f"{symbol} 12h (resampled from 4h fallback): {len(df_12h)} candles")
     return df_12h
 
 
 
-    import ccxt
-    df_4h = fetch_ohlcv_timeframe(symbol, "4h", history_days)
-    if df_4h is None or len(df_4h) < 2:
-        return pd.DataFrame()
-    df_8h = resample_to_8h(df_4h)
-    logger.info(f"{symbol} 8h (resampled): {len(df_8h)} candles")
-    return df_8h
 
 
 # ─── Single Pipeline Run ─────────────────────────────────────────────────────

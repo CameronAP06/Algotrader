@@ -24,13 +24,14 @@ from config.settings import (
 )
 
 # Longer timeframes get looser thresholds — fewer bars, coarser signal
+# 1d is most relaxed: ADX threshold drops to 30% of base, volume filter disabled
 TF_RELAX = {
     "15m": 1.00, "30m": 1.00,
     "1h":  1.00,               # baseline
     "2h":  0.85,
     "4h":  0.70,
     "8h":  0.55,
-    "1d":  0.40,
+    "1d":  0.30,   # was 0.40 — further relaxed; daily ADX threshold now very low
 }
 
 
@@ -40,7 +41,7 @@ def apply_filters(df: pd.DataFrame, signals: dict,
     n          = len(signal_arr)
     df_aligned = df.tail(n).reset_index(drop=True)
     filtered_count = {"trend": 0, "volatility": 0, "volume": 0,
-                      "funding": 0, "regime": 0}
+                      "funding": 0, "regime": 0, "choppiness": 0}
 
     relax = TF_RELAX.get(timeframe, 1.0)
 
@@ -110,6 +111,20 @@ def apply_filters(df: pd.DataFrame, signals: dict,
             if sig == "BUY"  and regime_val == 2:  # confirmed downtrend
                 signal_arr[i] = "HOLD"; filtered_count["regime"] += 1; continue
             if sig == "SELL" and regime_val == 1:  # confirmed uptrend
+                signal_arr[i] = "HOLD"; filtered_count["regime"] += 1; continue
+
+        # Filter 6: Choppiness Index — skip signals in pure-noise markets
+        if "choppiness" in df_aligned.columns and "is_choppy" in df_aligned.columns:
+            if df_aligned["is_choppy"].iloc[i] > 0.5:
+                signal_arr[i] = "HOLD"; filtered_count["regime"] += 1; continue
+
+        # Filter 7: Market Efficiency Ratio — require minimum directional efficiency
+        # Disabled for 1d: daily bars have low MER by construction (large moves are
+        # infrequent) and the filter would compound with regime/choppiness to zero out
+        # almost all 1d signals.
+        if "efficiency_ratio" in df_aligned.columns and timeframe != "1d":
+            er = df_aligned["efficiency_ratio"].iloc[i]
+            if er < 0.10:   # less than 10% efficient — pure random walk
                 signal_arr[i] = "HOLD"; filtered_count["regime"] += 1; continue
 
     total_filtered   = sum(filtered_count.values())

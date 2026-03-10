@@ -1,0 +1,100 @@
+2026-03-08 09:26:18.897 | INFO     | models.lstm_ensemble:<module>:39 - Ensemble using cuda
+2026-03-08 09:26:18.899 | INFO     | __main__:main:642 - Using explicit symbol list: 6 symbols
+2026-03-08 09:26:18.901 | INFO     | __main__:main:734 - [1/18] AVAX/USD 1h
+2026-03-08 09:26:19.383 | WARNING  | timeframe_comparison:fetch_ohlcv_timeframe:253 - kraken_history module not found — falling back to API for AVAX/USD 1h
+2026-03-08 09:26:19.383 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:267 - Fetching AVAX/USD [1h] — 365 days...
+2026-03-08 09:26:25.452 | SUCCESS  | timeframe_comparison:fetch_ohlcv_timeframe:312 - AVAX/USD 1h: 720 candles (2026-02-06 -> 2026-03-08)
+2026-03-08 09:26:25.460 | WARNING  | __main__:run_symbol:264 - AVAX/USD 1h: 720 bars — skipping
+2026-03-08 09:26:25.461 | INFO     | __main__:main:734 - [2/18] AVAX/USD 4h
+2026-03-08 09:26:25.461 | WARNING  | timeframe_comparison:fetch_ohlcv_timeframe:253 - kraken_history module not found — falling back to API for AVAX/USD 4h
+2026-03-08 09:26:25.461 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:267 - Fetching AVAX/USD [4h] — 730 days...
+2026-03-08 09:26:34.519 | SUCCESS  | timeframe_comparison:fetch_ohlcv_timeframe:312 - AVAX/USD 4h: 721 candles (2025-11-08 -> 2026-03-08)
+2026-03-08 09:26:34.526 | WARNING  | __main__:run_symbol:264 - AVAX/USD 4h: 721 bars — skipping
+2026-03-08 09:26:34.527 | INFO     | __main__:main:734 - [3/18] AVAX/USD 12h
+2026-03-08 09:26:34.527 | WARNING  | timeframe_comparison:fetch_ohlcv_timeframe:253 - kraken_history module not found — falling back to API for AVAX/USD 12h
+2026-03-08 09:26:34.527 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:267 - Fetching AVAX/USD [12h] — 730 days...
+2026-03-08 09:26:40.574 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:283 - Fetch error AVAX/USD 12h: kraken {"error":["EGeneral:Invalid arguments"]}
+2026-03-08 09:26:45.616 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:283 - Fetch error AVAX/USD 12h: kraken {"error":["EGeneral:Invalid arguments"]}
+2026-03-08 09:26:50.682 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:283 - Fetch error AVAX/USD 12h: kraken {"error":["EGeneral:Invalid arguments"]}
+2026-03-08 09:26:50.683 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:303 - No data returned for AVAX/USD 12h
+2026-03-08 09:26:50.699 | WARNING  | __main__:run_symbol:264 - AVAX/USD 12h: 0 bars — skipping
+2026-03-08 09:26:50.700 | INFO     | __main__:main:734 - [4/18] XLM/USD 1h
+2026-03-08 09:26:50.700 | WARNING  | timeframe_comparison:fetch_ohlcv_timeframe:253 - kraken_history module not found — falling back to API for XLM/USD 1h
+2026-03-08 09:26:50.701 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:267 - Fetching XLM/USD [1h] — 365 days...
+2026-03-08 09:26:56.764 | SUCCESS  | timeframe_comparison:fetch_ohlcv_timeframe:312 - XLM/USD 1h: 720 candles (2026-02-06 -> 2026-03-08)
+2026-03-08 09:26:56.772 | WARNING  | __main__:run_symbol:264 - XLM/USD 1h: 720 bars — skipping
+2026-03-08 09:26:56.772 | INFO     | __main__:main:734 - [5/18] XLM/USD 4h
+2026-03-08 09:26:56.773 | WARNING  | timeframe_comparison:fetch_ohlcv_timeframe:253 - kraken_history module not found — falling back to API for XLM/USD 4h
+2026-03-08 09:26:56.773 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:267 - Fetching XLM/USD [4h] — 730 days...
+2026-03-08 09:27:05.822 | SUCCESS  | timeframe_comparison:fetch_ohlcv_timeframe:312 - XLM/USD 4h: 721 candles (2025-11-08 -> 2026-03-08)
+2026-03-08 09:27:05.830 | WARNING  | __main__:run_symbol:264 - XLM/USD 4h: 721 bars — skipping
+2026-03-08 09:27:05.831 | INFO     | __main__:main:734 - [6/18] XLM/USD 12h
+2026-03-08 09:27:05.831 | WARNING  | timeframe_comparison:fetch_ohlcv_timeframe:253 - kraken_history module not found — falling back to API for XLM/USD 12h
+2026-03-08 09:27:05.831 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:267 - Fetching XLM/USD [12h] — 730 days...
+2026-03-08 09:27:11.874 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:283 - Fetch error XLM/USD 12h: kraken {"error":["EGeneral:Invalid arguments"]}
+2026-03-08 09:27:16.933 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:283 - Fetch error XLM/USD 12h: kraken {"error":["EGeneral:Invalid arguments"]}
+2026-03-08 09:27:21.972 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:283 - Fetch error XLM/USD 12h: kraken {"error":["EGeneral:Invalid arguments"]}
+2026-03-08 09:27:21.972 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:303 - No data returned for XLM/USD 12h
+2026-03-08 09:27:21.983 | WARNING  | __main__:run_symbol:264 - XLM/USD 12h: 0 bars — skipping
+2026-03-08 09:27:21.984 | INFO     | __main__:main:734 - [7/18] ALGO/USD 1h
+2026-03-08 09:27:21.984 | WARNING  | timeframe_comparison:fetch_ohlcv_timeframe:253 - kraken_history module not found — falling back to API for ALGO/USD 1h
+2026-03-08 09:27:21.985 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:267 - Fetching ALGO/USD [1h] — 365 days...
+2026-03-08 09:27:28.048 | SUCCESS  | timeframe_comparison:fetch_ohlcv_timeframe:312 - ALGO/USD 1h: 720 candles (2026-02-06 -> 2026-03-08)
+2026-03-08 09:27:28.057 | WARNING  | __main__:run_symbol:264 - ALGO/USD 1h: 720 bars — skipping
+2026-03-08 09:27:28.057 | INFO     | __main__:main:734 - [8/18] ALGO/USD 4h
+2026-03-08 09:27:28.058 | WARNING  | timeframe_comparison:fetch_ohlcv_timeframe:253 - kraken_history module not found — falling back to API for ALGO/USD 4h
+2026-03-08 09:27:28.058 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:267 - Fetching ALGO/USD [4h] — 730 days...
+2026-03-08 09:27:37.120 | SUCCESS  | timeframe_comparison:fetch_ohlcv_timeframe:312 - ALGO/USD 4h: 721 candles (2025-11-08 -> 2026-03-08)
+2026-03-08 09:27:37.128 | WARNING  | __main__:run_symbol:264 - ALGO/USD 4h: 721 bars — skipping
+2026-03-08 09:27:37.129 | INFO     | __main__:main:734 - [9/18] ALGO/USD 12h
+2026-03-08 09:27:37.129 | WARNING  | timeframe_comparison:fetch_ohlcv_timeframe:253 - kraken_history module not found — falling back to API for ALGO/USD 12h
+2026-03-08 09:27:37.130 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:267 - Fetching ALGO/USD [12h] — 730 days...
+2026-03-08 09:27:43.174 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:283 - Fetch error ALGO/USD 12h: kraken {"error":["EGeneral:Invalid arguments"]}
+2026-03-08 09:27:48.214 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:283 - Fetch error ALGO/USD 12h: kraken {"error":["EGeneral:Invalid arguments"]}
+2026-03-08 09:27:53.249 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:283 - Fetch error ALGO/USD 12h: kraken {"error":["EGeneral:Invalid arguments"]}
+2026-03-08 09:27:53.250 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:303 - No data returned for ALGO/USD 12h
+2026-03-08 09:27:53.260 | WARNING  | __main__:run_symbol:264 - ALGO/USD 12h: 0 bars — skipping
+2026-03-08 09:27:53.261 | INFO     | __main__:main:734 - [10/18] TIA/USD 1h
+2026-03-08 09:27:53.261 | WARNING  | timeframe_comparison:fetch_ohlcv_timeframe:253 - kraken_history module not found — falling back to API for TIA/USD 1h
+2026-03-08 09:27:53.261 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:267 - Fetching TIA/USD [1h] — 365 days...
+2026-03-08 09:27:59.378 | SUCCESS  | timeframe_comparison:fetch_ohlcv_timeframe:312 - TIA/USD 1h: 720 candles (2026-02-06 -> 2026-03-08)
+2026-03-08 09:27:59.387 | WARNING  | __main__:run_symbol:264 - TIA/USD 1h: 720 bars — skipping
+2026-03-08 09:27:59.387 | INFO     | __main__:main:734 - [11/18] TIA/USD 4h
+2026-03-08 09:27:59.388 | WARNING  | timeframe_comparison:fetch_ohlcv_timeframe:253 - kraken_history module not found — falling back to API for TIA/USD 4h
+2026-03-08 09:27:59.388 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:267 - Fetching TIA/USD [4h] — 730 days...
+2026-03-08 09:28:08.433 | SUCCESS  | timeframe_comparison:fetch_ohlcv_timeframe:312 - TIA/USD 4h: 721 candles (2025-11-08 -> 2026-03-08)
+2026-03-08 09:28:08.443 | WARNING  | __main__:run_symbol:264 - TIA/USD 4h: 721 bars — skipping
+2026-03-08 09:28:08.444 | INFO     | __main__:main:734 - [12/18] TIA/USD 12h
+2026-03-08 09:28:08.444 | WARNING  | timeframe_comparison:fetch_ohlcv_timeframe:253 - kraken_history module not found — falling back to API for TIA/USD 12h
+2026-03-08 09:28:08.446 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:267 - Fetching TIA/USD [12h] — 730 days...
+2026-03-08 09:28:14.483 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:283 - Fetch error TIA/USD 12h: kraken {"error":["EGeneral:Invalid arguments"]}
+2026-03-08 09:28:19.520 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:283 - Fetch error TIA/USD 12h: kraken {"error":["EGeneral:Invalid arguments"]}
+2026-03-08 09:28:24.556 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:283 - Fetch error TIA/USD 12h: kraken {"error":["EGeneral:Invalid arguments"]}
+2026-03-08 09:28:24.556 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:303 - No data returned for TIA/USD 12h
+2026-03-08 09:28:24.568 | WARNING  | __main__:run_symbol:264 - TIA/USD 12h: 0 bars — skipping
+2026-03-08 09:28:24.568 | INFO     | __main__:main:734 - [13/18] BONK/USD 1h
+2026-03-08 09:28:24.570 | WARNING  | timeframe_comparison:fetch_ohlcv_timeframe:253 - kraken_history module not found — falling back to API for BONK/USD 1h
+2026-03-08 09:28:24.570 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:267 - Fetching BONK/USD [1h] — 365 days...
+2026-03-08 09:28:30.633 | SUCCESS  | timeframe_comparison:fetch_ohlcv_timeframe:312 - BONK/USD 1h: 720 candles (2026-02-06 -> 2026-03-08)
+2026-03-08 09:28:30.640 | WARNING  | __main__:run_symbol:264 - BONK/USD 1h: 720 bars — skipping
+2026-03-08 09:28:30.641 | INFO     | __main__:main:734 - [14/18] BONK/USD 4h
+2026-03-08 09:28:30.641 | WARNING  | timeframe_comparison:fetch_ohlcv_timeframe:253 - kraken_history module not found — falling back to API for BONK/USD 4h
+2026-03-08 09:28:30.642 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:267 - Fetching BONK/USD [4h] — 730 days...
+2026-03-08 09:28:39.745 | SUCCESS  | timeframe_comparison:fetch_ohlcv_timeframe:312 - BONK/USD 4h: 721 candles (2025-11-08 -> 2026-03-08)
+2026-03-08 09:28:39.755 | WARNING  | __main__:run_symbol:264 - BONK/USD 4h: 721 bars — skipping
+2026-03-08 09:28:39.756 | INFO     | __main__:main:734 - [15/18] BONK/USD 12h
+2026-03-08 09:28:39.756 | WARNING  | timeframe_comparison:fetch_ohlcv_timeframe:253 - kraken_history module not found — falling back to API for BONK/USD 12h
+2026-03-08 09:28:39.756 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:267 - Fetching BONK/USD [12h] — 730 days...
+2026-03-08 09:28:45.792 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:283 - Fetch error BONK/USD 12h: kraken {"error":["EGeneral:Invalid arguments"]}
+2026-03-08 09:28:50.830 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:283 - Fetch error BONK/USD 12h: kraken {"error":["EGeneral:Invalid arguments"]}
+2026-03-08 09:28:55.868 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:283 - Fetch error BONK/USD 12h: kraken {"error":["EGeneral:Invalid arguments"]}
+2026-03-08 09:28:55.869 | ERROR    | timeframe_comparison:fetch_ohlcv_timeframe:303 - No data returned for BONK/USD 12h
+2026-03-08 09:28:55.878 | WARNING  | __main__:run_symbol:264 - BONK/USD 12h: 0 bars — skipping
+2026-03-08 09:28:55.878 | INFO     | __main__:main:734 - [16/18] ENS/USD 1h
+2026-03-08 09:28:55.879 | WARNING  | timeframe_comparison:fetch_ohlcv_timeframe:253 - kraken_history module not found — falling back to API for ENS/USD 1h
+2026-03-08 09:28:55.879 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:267 - Fetching ENS/USD [1h] — 365 days...
+2026-03-08 09:29:01.935 | SUCCESS  | timeframe_comparison:fetch_ohlcv_timeframe:312 - ENS/USD 1h: 720 candles (2026-02-06 -> 2026-03-08)
+2026-03-08 09:29:01.943 | WARNING  | __main__:run_symbol:264 - ENS/USD 1h: 720 bars — skipping
+2026-03-08 09:29:01.944 | INFO     | __main__:main:734 - [17/18] ENS/USD 4h
+2026-03-08 09:29:01.944 | WARNING  | timeframe_comparison:fetch_ohlcv_timeframe:253 - kraken_history module not found — falling back to API for ENS/USD 4h
+2026-03-08 09:29:01.944 | INFO     | timeframe_comparison:fetch_ohlcv_timeframe:267 - Fetching ENS/USD [4h] — 730 days...

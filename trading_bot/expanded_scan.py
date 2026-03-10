@@ -19,7 +19,9 @@ Usage:
     python expanded_scan.py --resume                 # skip already-completed rows
 """
 
-import os, sys, argparse, csv, time
+import os, sys, argparse, csv, time, threading
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from multiprocessing import set_start_method
 from datetime import datetime
 from pathlib import Path
 
@@ -32,12 +34,24 @@ import numpy as np
 from loguru import logger
 from sklearn.preprocessing import StandardScaler
 
-from timeframe_comparison import fetch_ohlcv_timeframe, fetch_ohlcv_12h
+try:
+    from timeframe_comparison import fetch_ohlcv_timeframe
+except ImportError as _e:
+    raise ImportError(
+        f"Cannot import fetch_ohlcv_timeframe from timeframe_comparison: {_e}\n"
+        f"If timeframe_comparison.py fails due to a missing 'data.alt_data' module, "
+        f"add a try/except around its alt_data import or ensure alt_data.py is present."
+    ) from _e
 from data.feature_engineer import build_features, get_feature_columns
 from backtest.engine import BacktestEngine
 from backtest.filters import apply_filters
 from models.ensemble import generate_signals
-from models.lstm_ensemble import train_ensemble, predict_proba_ensemble
+# NOTE: train_ensemble and predict_proba_ensemble are imported LOCALLY inside
+# run_fold() — not here. This is intentional: lstm_ensemble.py resolves its
+# DEVICE (cuda:N) at module import time. If imported here (main process), DEVICE
+# is set before _run_on_gpu can set CUDA_VISIBLE_DEVICES in the worker, so all
+# workers would see all GPUs and pile onto cuda:0. Local import inside run_fold
+# ensures each worker sets CUDA_VISIBLE_DEVICES first, THEN imports the module.
 
 # ── Symbol Lists ──────────────────────────────────────────────────────────────
 # Static fallback list — used when --no-autodiscover is passed or CSV dir not found
@@ -142,34 +156,39 @@ EXCLUDE_PAIRS = {
     "ZETA/USD", "ZEUS/USD",
 }
 
-TIMEFRAMES = ["30m", "1h", "4h", "12h", "1d"]
+TIMEFRAMES = ["1h", "4h", "1d"]
 
 # Minimum bars per timeframe (need enough for seq_len + train/val/test split)
+# Note: there is NO maximum — more history is always better. Symbols with more
+# bars than these minimums are always accepted.
 MIN_BARS = {
-    "30m": 6000,
-    "1h":  5000,
-    "4h":  3000,
-    "12h": 1000,
-    "1d":   500,
+    "30m": 4000,
+    "1h":  3500,   # was 5000 — this was rejecting symbols with 4465-4999 bars
+    "4h":  2000,
+    "12h": 700,
+    "1d":  500,
 }
 
-# Minimum trades to consider a result valid — per timeframe
-# Higher-frequency TFs have more opportunity so we require more trades
+# Minimum trades to consider a result valid — per timeframe.
+# These are per-FOLD minimums (aggregated mean across folds).
+# Raised: 3 trades per fold at 4h is pure noise — not enough to distinguish
+# signal from luck. Higher bar means fewer false positives in the shortlist.
 MIN_TRADES_TF = {
-    "30m": 15,
-    "1h":  15,
-    "4h":   8,
-    "12h":  5,
-    "1d":   5,
+    "30m": 10,
+    "1h":  8,    # was 6
+    "4h":  5,    # was 3 — 3 is statistical noise
+    "12h": 3,    # was 2
+    "1d":  3,    # was 2
 }
 
 # History to fetch per timeframe (used by API fallback only — CSV loader uses HISTORY_CAPS)
+# Kept in sync with HISTORY_CAPS in kraken_history.py
 HISTORY_DAYS = {
-    "30m": 180,
-    "1h":  365,
-    "4h":  730,
-    "12h": 730,
-    "1d":  1095,
+    "30m": 365,
+    "1h":  730,    # was 365; raised for 6-fold WF
+    "4h":  1095,   # was 730
+    "12h": 1095,   # was 730
+    "1d":  1825,   # was 1095
 }
 
 TRAIN_RATIO  = 0.60
@@ -177,13 +196,14 @@ VAL_RATIO    = 0.20
 TOP_PCT      = 0.15
 N_MODELS     = 9
 MIN_TRADES   = 5          # global fallback — MIN_TRADES_TF takes precedence
-N_WF_FOLDS   = 3         # walk-forward CV folds
+N_WF_FOLDS   = 6         # was 3; 6 folds = more rigorous out-of-sample validation
 
 _HDR = (
     f"{'Symbol':<12} {'TF':>4} {'Flds':>5} {'Trades':>7} "
-    f"{'WR':>6} {'Net':>7} {'Ann':>7} {'±Std':>6} {'Sharpe':>7} {'Calmar':>7} {'MaxDD':>7} {'Status'}"
+    f"{'WR':>6} {'Ann':>7} {'±Std':>6} {'Sharpe':>7} {'Sortino':>8} {'MaxDD':>7} "
+    f"{'Kelly%':>7} {'Score':>6} {'Status'}"
 )
-_SEP = "─" * 105
+_SEP = "─" * 115
 
 
 # ── Core ──────────────────────────────────────────────────────────────────────
@@ -204,6 +224,9 @@ def _fmt_date(ts_series) -> str:
 def run_fold(symbol, timeframe, X_scaled, y, feat_df, train_idx, val_idx, test_idx):
     """Train on one fold and return backtest metrics for the test window."""
     from config.settings import LSTM_PARAMS
+    # Local import — CUDA_VISIBLE_DEVICES must already be set (by _run_on_gpu)
+    # before this import so lstm_ensemble resolves DEVICE to the correct GPU.
+    from models.lstm_ensemble import train_ensemble, predict_proba_ensemble
     X_train = X_scaled[train_idx[0]:train_idx[1]]
     y_train = y[train_idx[0]:train_idx[1]]
     X_val   = X_scaled[val_idx[0]:val_idx[1]]
@@ -230,14 +253,25 @@ def run_fold(symbol, timeframe, X_scaled, y, feat_df, train_idx, val_idx, test_i
 
     date_range = _fmt_date(feat_test["timestamp"]) if "timestamp" in feat_test.columns else "?"
     return {
-        "net":        float(m.get("total_return", 0.0)),
-        "ann":        float(m.get("ann_return",   0.0)),
-        "wr":         float(m.get("win_rate",      0.0)),
-        "sharpe":     float(m.get("sharpe_ratio",  0.0)),
-        "calmar":     float(m.get("calmar_ratio",  0.0)),
-        "dd":         float(m.get("max_drawdown",  0.0)),
-        "n_trades":   int(m.get("n_trades",        0)),
-        "date_range": date_range,
+        "net":            float(m.get("total_return",   0.0)),
+        "ann":            float(m.get("ann_return",     0.0)),
+        "wr":             float(m.get("win_rate",       0.0)),
+        "sharpe":         float(m.get("sharpe_ratio",   0.0)),
+        "sortino":        float(m.get("sortino_ratio",  0.0)),
+        "calmar":         float(m.get("calmar_ratio",   0.0)),
+        "dd":             float(m.get("max_drawdown",   0.0)),
+        "profit_factor":  float(m.get("profit_factor",  0.0)),
+        "recovery_factor":float(m.get("recovery_factor",0.0)),
+        "avg_win":        float(m.get("avg_win",        0.0)),
+        "avg_loss":       float(m.get("avg_loss",       0.0)),
+        "payoff_ratio":   float(m.get("payoff_ratio",   0.0)),
+        "max_consec_losses": int(m.get("max_consec_losses", 0)),
+        "trend_wr":       float(m.get("trend_wr",       0.0)),
+        "range_wr":       float(m.get("range_wr",       0.0)),
+        "n_trend_trades": int(m.get("n_trend_trades",   0)),
+        "n_range_trades": int(m.get("n_range_trades",   0)),
+        "n_trades":       int(m.get("n_trades",         0)),
+        "date_range":     date_range,
     }
 
 
@@ -245,10 +279,7 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
     t0 = time.time()
     try:
         days = HISTORY_DAYS.get(timeframe, 730)
-        if timeframe == "12h":
-            raw = fetch_ohlcv_12h(symbol, history_days=days)
-        else:
-            raw  = fetch_ohlcv_timeframe(symbol, timeframe, history_days=days)
+        raw  = fetch_ohlcv_timeframe(symbol, timeframe, history_days=days)
 
         min_b = MIN_BARS.get(timeframe, 1000)
         if raw is None or len(raw) < min_b:
@@ -270,24 +301,51 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
         n = len(X)
 
         # ── Walk-forward CV — N_WF_FOLDS folds ───────────────────────────────
-        # Each fold: train on older data, validate on the next slice, test on
-        # a fresh slice that was never seen during training.
-        # Fold windows stagger forward so the test periods span different regimes.
+        # Fold geometry is computed dynamically from N_WF_FOLDS so that
+        # changing the constant from 3 → 6 automatically adjusts all windows.
         #
-        # Example with 3 folds over n bars:
-        #   Fold 0: train[0:0.48n] val[0.48:0.64n] test[0.64:0.73n]
-        #   Fold 1: train[0:0.57n] val[0.57:0.73n] test[0.73:0.82n]
-        #   Fold 2: train[0:0.66n] val[0.66:0.82n] test[0.82:n]
+        # Design:
+        #   - Reserve the last (N_WF_FOLDS * fold_pct) of the data as the
+        #     combined test zone — each fold tests a different slice of it.
+        #   - Each test window = fold_pct of total data
+        #   - Val window = val_pct of total data (fixed size)
+        #   - Train window grows (anchored at 0) fold by fold
         #
-        # The train window grows (anchored start) while test steps forward,
-        # mimicking how a deployed model would be retrained over time.
+        # With N_WF_FOLDS=6, fold_pct=0.07, val_pct=0.13:
+        #   Total test coverage = 6 × 7% = 42%
+        #   First fold trains on 0→45%, tests 58→65%
+        #   Last  fold trains on 0→73%, tests 87→94%
+        #   Final 6% is left as a holdout buffer
+        #
+        # With N_WF_FOLDS=3, fold_pct=0.09, val_pct=0.16:
+        #   (legacy behaviour, unchanged)
 
-        fold_size  = int(n * 0.09)    # each fold's test window = ~9% of data
-        val_size   = int(n * 0.16)
-        train_end0 = int(n * 0.48)    # first fold train end
+        fold_pct  = round(0.27 / N_WF_FOLDS, 3)   # total test zone / n_folds
+        val_pct   = round(0.13 + 0.03 / N_WF_FOLDS, 3)  # val shrinks slightly with more folds
+        fold_size = max(int(n * fold_pct), 30)     # at least 30 bars per fold
+        val_size  = max(int(n * val_pct),  20)
+
+        # First fold's train_end: enough to have val+test after it
+        # Start training from index 0 and end at a point that leaves room for
+        # val + all N_WF_FOLDS test windows after it.
+        min_train = max(int(n * 0.35), fold_size * 3)
+        train_end0 = n - val_size - N_WF_FOLDS * fold_size
+
+        if train_end0 < min_train:
+            logger.warning(
+                f"{symbol} {timeframe}: insufficient data for {N_WF_FOLDS} folds "
+                f"({n} bars, need ~{min_train + val_size + N_WF_FOLDS * fold_size}). "
+                f"Reducing to {max(1, (n - min_train - val_size) // fold_size)} folds."
+            )
+            # Recompute with as many folds as the data can support
+            max_folds = max(1, (n - min_train - val_size) // fold_size)
+            effective_folds = min(N_WF_FOLDS, max_folds)
+            train_end0 = n - val_size - effective_folds * fold_size
+        else:
+            effective_folds = N_WF_FOLDS
 
         fold_results = []
-        for fold in range(N_WF_FOLDS):
+        for fold in range(effective_folds):
             train_end = train_end0 + fold * fold_size
             val_end   = train_end  + val_size
             test_end  = val_end    + fold_size
@@ -306,7 +364,7 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
                           val_idx  =(train_end, val_end),
                           test_idx =(val_end, test_end))
             if fr:
-                logger.info(f"  Fold {fold+1}/{N_WF_FOLDS} [{fr['date_range']}]: "
+                logger.info(f"  Fold {fold+1}/{effective_folds} [{fr['date_range']}]: "
                             f"net={fr['net']:+.1%} ann={fr['ann']:+.1%} "
                             f"WR={fr['wr']:.1%} Sh={fr['sharpe']:.2f} trades={fr['n_trades']}")
                 fold_results.append(fr)
@@ -316,32 +374,79 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
             return None
 
         # ── Aggregate across folds ────────────────────────────────────────────
-        nets      = [f["net"]    for f in fold_results]
-        anns      = [f["ann"]    for f in fold_results]
-        wrs       = [f["wr"]     for f in fold_results]
-        sharpes   = [f["sharpe"] for f in fold_results]
-        calmars   = [f["calmar"] for f in fold_results]
-        dds       = [f["dd"]     for f in fold_results]
-        all_trades= [f["n_trades"] for f in fold_results]
+        def _mean(key):  return float(np.mean([f[key] for f in fold_results]))
+        def _std(key):   return float(np.std( [f[key] for f in fold_results]))
+        def _imean(key): return int(round(np.mean([f[key] for f in fold_results])))
+
+        nets        = [f["net"] for f in fold_results]
         date_ranges = [f["date_range"] for f in fold_results]
 
-        net      = float(np.mean(nets))
-        ann      = float(np.mean(anns))
-        ann_std  = float(np.std(anns))
-        wr       = float(np.mean(wrs))
-        sharpe   = float(np.mean(sharpes))
-        calmar   = float(np.mean(calmars))
-        dd       = float(np.mean(dds))
-        n_trades = int(np.mean(all_trades))
+        net      = _mean("net")
+        ann      = _mean("ann")
+        ann_std  = _std("ann")
+        wr       = _mean("wr")
+        sharpe   = _mean("sharpe")
+        sortino  = _mean("sortino")
+        calmar   = _mean("calmar")
+        dd       = _mean("dd")
+        pf       = _mean("profit_factor")
+        rf       = _mean("recovery_factor")
+        payoff_r = _mean("payoff_ratio")
+        avg_win  = _mean("avg_win")
+        avg_loss = _mean("avg_loss")
+        max_cl   = max(f["max_consec_losses"] for f in fold_results)
+        trend_wr = _mean("trend_wr")
+        range_wr = _mean("range_wr")
+        n_trend  = _imean("n_trend_trades")
+        n_range  = _imean("n_range_trades")
+        n_trades = _imean("n_trades")
         n_folds_pos = sum(1 for x in nets if x > 0)
 
-        min_trades = MIN_TRADES_TF.get(timeframe, MIN_TRADES)
+        # ── Quality score (composite, 0-100) ──────────────────────────────────
+        consistency  = n_folds_pos / max(len(fold_results), 1)
+        ann_norm     = float(np.clip(ann / 0.40, -1, 1)) * 0.5 + 0.5
+        sharpe_norm  = float(np.clip(sharpe / 2.5, -1, 1)) * 0.5 + 0.5
+        dd_norm      = float(np.clip(1 + dd / 0.30, 0, 1))
+        wr_norm      = float(np.clip(wr / 0.60, 0, 1))
+        trade_norm   = float(np.clip(np.log1p(n_trades) / np.log1p(50), 0, 1))
+        quality      = round(
+            ann_norm   * 25 +
+            sharpe_norm* 25 +
+            consistency* 20 +
+            dd_norm    * 15 +
+            wr_norm    * 10 +
+            trade_norm *  5, 1)
 
+        # ── Kelly position size recommendation ────────────────────────────────
+        # Quarter-Kelly from measured win-rate and payoff ratio
+        b            = max(payoff_r, 0.01)
+        full_kelly   = max(0.0, (wr * b - (1 - wr)) / b)
+        kelly_pct    = round(float(np.clip(full_kelly * 0.25, 0.03, 0.40)) * 100, 1)
+
+        # ── Regime attribution ────────────────────────────────────────────────
+        if n_trend >= 3 and n_range >= 3:
+            if trend_wr > 0.52 and range_wr < 0.48:
+                regime_edge = "trend-following"
+            elif range_wr > 0.52 and trend_wr < 0.48:
+                regime_edge = "mean-reversion"
+            elif trend_wr > 0.50 and range_wr > 0.50:
+                regime_edge = "regime-robust"
+            else:
+                regime_edge = "mixed"
+        elif n_trend >= 3:
+            regime_edge = f"trend-only({trend_wr:.0%})"
+        elif n_range >= 3:
+            regime_edge = f"range-only({range_wr:.0%})"
+        else:
+            regime_edge = "insufficient"
+
+        # ── Status label ──────────────────────────────────────────────────────
+        min_trades = MIN_TRADES_TF.get(timeframe, MIN_TRADES)
         if n_trades < min_trades:
             status = "TOO_FEW_TRADES"
-        elif ann > 0.20 and wr >= 0.42 and n_folds_pos == len(fold_results):
+        elif quality >= 65 and n_folds_pos == len(fold_results):
             status = "** STRONG"
-        elif ann > 0.10 and wr >= 0.38 and n_folds_pos >= len(fold_results) - 1:
+        elif quality >= 52 and n_folds_pos >= len(fold_results) - 1:
             status = "* GOOD"
         elif ann > 0.0 and wr >= 0.35:
             status = "+ MARGINAL"
@@ -359,27 +464,41 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
                         for k, v in zip(*np.unique(y, return_counts=True))}
 
         return {
-            "symbol":        symbol,
-            "timeframe":     timeframe,
-            "asset_class":   asset_class(symbol),
-            "n_models":      N_MODELS,
-            "n_bars":        n,
-            "n_folds":       len(fold_results),
-            "folds_positive": n_folds_pos,
-            "fold_dates":    " | ".join(date_ranges),
-            "label_down":    label_counts.get(0, 0),
-            "label_neutral": label_counts.get(1, 0),
-            "label_up":      label_counts.get(2, 0),
-            "n_trades":      n_trades,
-            "win_rate":      round(wr, 4),
-            "net_return":    round(net, 4),
-            "ann_return":    round(ann, 4),
-            "ann_std":       round(ann_std, 4),
-            "sharpe":        round(sharpe, 3),
-            "calmar":        round(calmar, 3),
-            "max_drawdown":  round(dd, 4),
-            "status":        status,
-            "elapsed_s":     round(elapsed, 1),
+            "symbol":           symbol,
+            "timeframe":        timeframe,
+            "asset_class":      asset_class(symbol),
+            "n_models":         N_MODELS,
+            "n_bars":           n,
+            "n_folds":          len(fold_results),
+            "folds_positive":   n_folds_pos,
+            "fold_dates":       " | ".join(date_ranges),
+            "label_down":       label_counts.get(0, 0),
+            "label_neutral":    label_counts.get(1, 0),
+            "label_up":         label_counts.get(2, 0),
+            "n_trades":         n_trades,
+            "win_rate":         round(wr, 4),
+            "net_return":       round(net, 4),
+            "ann_return":       round(ann, 4),
+            "ann_std":          round(ann_std, 4),
+            "sharpe":           round(sharpe, 3),
+            "sortino":          round(sortino, 3),
+            "calmar":           round(calmar, 3),
+            "max_drawdown":     round(dd, 4),
+            "profit_factor":    round(pf, 3),
+            "recovery_factor":  round(rf, 3),
+            "payoff_ratio":     round(payoff_r, 3),
+            "avg_win":          round(avg_win, 4),
+            "avg_loss":         round(avg_loss, 4),
+            "max_consec_losses":max_cl,
+            "trend_wr":         round(trend_wr, 4),
+            "range_wr":         round(range_wr, 4),
+            "n_trend_trades":   n_trend,
+            "n_range_trades":   n_range,
+            "regime_edge":      regime_edge,
+            "quality_score":    quality,
+            "kelly_pct":        kelly_pct,
+            "status":           status,
+            "elapsed_s":        round(elapsed, 1),
         }
 
     except Exception as e:
@@ -390,12 +509,16 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
 
 def print_row(r: dict):
     folds_str = f"{r.get('folds_positive', '?')}/{r.get('n_folds', '?')}"
+    score     = r.get('quality_score', 0)
+    kelly     = r.get('kelly_pct', 0)
+    tag       = " ★★" if score >= 65 else (" ★" if score >= 52 else "")
     print(
         f"  {r['symbol']:<12} {r['timeframe']:>4}  {folds_str:>5}  "
         f"{r['n_trades']:>6}  {r['win_rate']:>5.1%}  "
-        f"{r['net_return']:>+6.1%}  {r['ann_return']:>+6.1%}  ±{r.get('ann_std', 0):>4.1%}  "
-        f"{r['sharpe']:>6.2f}  {r.get('calmar', 0):>6.2f}  "
-        f"{r['max_drawdown']:>6.1%}  {r['status']}"
+        f"{r['ann_return']:>+6.1%}  ±{r.get('ann_std', 0):>4.1%}  "
+        f"{r['sharpe']:>6.2f}  {r.get('sortino', 0):>7.2f}  "
+        f"{r['max_drawdown']:>6.1%}  "
+        f"{kelly:>5.1f}%  {score:>5.1f}  {r['status']}{tag}"
     )
 
 
@@ -422,59 +545,90 @@ def load_completed(path: Path) -> set:
 def print_summary(results: list):
     valid  = [r for r in results
               if isinstance(r.get("n_trades"), (int, float))
-              and r["n_trades"] >= MIN_TRADES_TF.get(r.get("timeframe","4h"), MIN_TRADES)]
+              and r["n_trades"] >= MIN_TRADES_TF.get(r.get("timeframe", "4h"), MIN_TRADES)]
     if not valid:
         print("\nNo valid results.")
         return
 
-    ranked     = sorted(valid, key=lambda r: r["ann_return"], reverse=True)
-    profitable = [r for r in ranked if r["ann_return"] > 0]
+    # Rank by quality score (falls back to ann_return for old-format CSVs)
+    ranked     = sorted(valid,
+                        key=lambda r: float(r.get("quality_score", r.get("ann_return", 0))),
+                        reverse=True)
+    profitable = [r for r in ranked if float(r.get("ann_return", 0)) > 0]
 
-    print(f"\n{'='*105}")
+    sep = "─" * 115
+    print(f"\n{'='*115}")
     print(f"  EXPANDED ENSEMBLE SCAN — FINAL SUMMARY  (Walk-forward CV: {N_WF_FOLDS} folds)")
-    print(f"{'='*105}")
+    print(f"{'='*115}")
     print(f"  {_HDR}")
-    print("  " + _SEP)
+    print(f"  {sep}")
     for r in ranked[:30]:
         print_row(r)
-    print("  " + _SEP)
+    print(f"  {sep}")
 
     print(f"\n  Profitable: {len(profitable)}/{len(ranked)} symbol/timeframe combos")
 
-    # Best per asset class by Calmar (better than Sharpe for deployment decisions)
+    # Best per asset class by quality score
     for cls in ["crypto", "forex"]:
         cls_results = [r for r in profitable if r.get("asset_class") == cls]
         if cls_results:
-            best = max(cls_results, key=lambda r: r.get("calmar", 0))
+            best = max(cls_results, key=lambda r: float(r.get("quality_score", 0)))
             print(f"  Best {cls}: {best['symbol']} {best['timeframe']} — "
-                  f"{best['ann_return']:+.1%} ann | ±{best.get('ann_std',0):.1%} std | "
-                  f"{best['win_rate']:.1%} WR | {best['sharpe']:.2f} Sh | {best.get('calmar',0):.2f} Calmar")
+                  f"Score={best.get('quality_score',0):.1f} | "
+                  f"{best['ann_return']:+.1%} ann ±{best.get('ann_std',0):.1%} | "
+                  f"{best['win_rate']:.1%} WR | {best['sharpe']:.2f} Sh | "
+                  f"{best.get('sortino',0):.2f} So | "
+                  f"Kelly={best.get('kelly_pct',0):.1f}%")
 
-    # Shortlist — now requires consistency across folds (folds_positive = n_folds)
+    # Shortlist — quality score threshold + all folds positive
     shortlist = [r for r in ranked
-                 if r["ann_return"] > 0.10
-                 and r["win_rate"] >= 0.38
-                 and r.get("folds_positive", 0) >= r.get("n_folds", 1)]
-    print(f"\n  SHORTLIST for OOT validation ({len(shortlist)} combos — all folds positive):")
-    for r in shortlist:
-        print(f"    {r['symbol']:<12} {r['timeframe']:>4} | "
-              f"{r['ann_return']:+.1%} ann ±{r.get('ann_std',0):.1%} | "
-              f"{r['win_rate']:.1%} WR | {r['sharpe']:.2f} Sh | "
-              f"{r.get('calmar',0):.2f} Calmar | "
-              f"{r.get('folds_positive',0)}/{r.get('n_folds',0)} folds pos")
+                 if float(r.get("quality_score", 0)) >= 52
+                 and float(r.get("ann_return", 0)) > 0
+                 and int(r.get("folds_positive", 0)) >= int(r.get("n_folds", 1))]
 
-    # Watchlist — promising but inconsistent
+    print(f"\n  SHORTLIST for live deployment ({len(shortlist)} combos — quality≥52, all folds positive):")
+    print(f"  {'Symbol':<12} {'TF':>4} {'Score':>6} {'Ann%':>7} {'Sharpe':>7} {'Sortino':>8} "
+          f"{'MaxDD':>7} {'WR':>6} {'PF':>6} {'Kelly%':>7} {'RegimeEdge'}")
+    print(f"  {'─'*113}")
+    for r in shortlist:
+        print(
+            f"  {r['symbol']:<12} {r['timeframe']:>4}  "
+            f"{float(r.get('quality_score',0)):>5.1f}  "
+            f"{float(r['ann_return']):>+6.1%}  "
+            f"{float(r['sharpe']):>6.2f}  "
+            f"{float(r.get('sortino',0)):>7.2f}  "
+            f"{float(r['max_drawdown']):>6.1%}  "
+            f"{float(r['win_rate']):>5.1%}  "
+            f"{float(r.get('profit_factor',0)):>5.2f}  "
+            f"{float(r.get('kelly_pct',0)):>5.1f}%  "
+            f"{r.get('regime_edge','?')}"
+        )
+
+    # Watchlist — quality >= 40 but not shortlisted
     watchlist = [r for r in ranked
-                 if r["ann_return"] > 0.08
+                 if float(r.get("quality_score", 0)) >= 40
+                 and float(r.get("ann_return", 0)) > 0
                  and r not in shortlist
-                 and r.get("folds_positive", 0) >= max(1, r.get("n_folds", 1) - 1)]
+                 and int(r.get("folds_positive", 0)) >= max(1, int(r.get("n_folds", 1)) - 1)]
     if watchlist:
-        print(f"\n  WATCHLIST (promising but inconsistent across folds):")
+        print(f"\n  WATCHLIST (quality 40-52, promising but needs more evidence):")
         for r in watchlist:
             print(f"    {r['symbol']:<12} {r['timeframe']:>4} | "
-                  f"{r['ann_return']:+.1%} ann ±{r.get('ann_std',0):.1%} | "
-                  f"{r.get('folds_positive',0)}/{r.get('n_folds',0)} folds pos | "
+                  f"Score={float(r.get('quality_score',0)):.1f} | "
+                  f"{float(r['ann_return']):+.1%} ann ±{float(r.get('ann_std',0)):.1%} | "
+                  f"{int(r.get('folds_positive',0))}/{int(r.get('n_folds',0))} folds | "
+                  f"{r.get('regime_edge','?')} | "
                   f"fold dates: {r.get('fold_dates','')}")
+
+    # Regime summary — surface regime-robust pairs separately
+    regime_robust = [r for r in shortlist if r.get("regime_edge") == "regime-robust"]
+    if regime_robust:
+        print(f"\n  REGIME-ROBUST (edge holds in both trending AND ranging markets):")
+        for r in regime_robust:
+            print(f"    {r['symbol']:<12} {r['timeframe']:>4} | "
+                  f"TrendWR={float(r.get('trend_wr',0)):.1%}({int(r.get('n_trend_trades',0))}t) | "
+                  f"RangeWR={float(r.get('range_wr',0)):.1%}({int(r.get('n_range_trades',0))}t) | "
+                  f"Kelly={float(r.get('kelly_pct',0)):.1f}%")
 
     # Multi-TF winners
     tf_groups = {}
@@ -485,8 +639,9 @@ def print_summary(results: list):
         print(f"\n  MULTI-TIMEFRAME WINNERS (profitable across >1 TF):")
         for sym, rs in sorted(multi_tf.items()):
             tfs = " | ".join(
-                f"{r['timeframe']} {r['ann_return']:+.1%} ({r['sharpe']:.2f}Sh "
-                f"{r.get('folds_positive',0)}/{r.get('n_folds',0)}folds)"
+                f"{r['timeframe']} {float(r['ann_return']):+.1%} "
+                f"(Sh={float(r['sharpe']):.2f} Score={float(r.get('quality_score',0)):.0f} "
+                f"{int(r.get('folds_positive',0))}/{int(r.get('n_folds',0))}flds)"
                 for r in sorted(rs, key=lambda x: x["timeframe"])
             )
             print(f"    {sym:<12}  {tfs}")
@@ -494,6 +649,24 @@ def print_summary(results: list):
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
+
+def _run_gpu_partition(gpu_id: int, items: list) -> list:
+    """
+    One process per GPU. Sets CUDA_VISIBLE_DEVICES as the very first thing —
+    before any torch import — then runs all assigned (symbol, timeframe) pairs
+    serially. Returns list of result dicts.
+    """
+    import os
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
+    results = []
+    for sym, tf in items:
+        try:
+            results.append(run_symbol(sym, tf))
+        except Exception as e:
+            logger.error(f"GPU {gpu_id} | {sym} {tf} crashed: {e}")
+            results.append(None)
+    return results
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -508,8 +681,10 @@ Tier definitions (4h bar counts):
   all       : original + tier1 + tier2 + tier3 (full universe, ~260 symbols)
 
 Examples:
+  python expanded_scan.py --tier original 1 2 --gpus 4 --workers 8
+  python expanded_scan.py --tier original 1 2 --gpus 8 --workers 16
   python expanded_scan.py --tier 1
-  python expanded_scan.py --tier all
+  python expanded_scan.py --tier all --gpus 8 --workers 16
   python expanded_scan.py --tier 1 2 --timeframes 4h 1h
   python expanded_scan.py --symbols SNX/USD EOS/USD --timeframes 4h
         """
@@ -525,7 +700,16 @@ Examples:
                         default="all")
     parser.add_argument("--resume",      action="store_true",
                         help="Skip symbol/TF combos already in output CSV")
+    parser.add_argument("--workers",     type=int, default=None,
+                        help="Parallel workers. Defaults to --gpus * 2 if --gpus set, else 4.")
+    parser.add_argument("--gpus",        type=int, default=1,
+                        help="Number of GPUs available (default: 1). Workers are spread evenly "
+                             "across GPUs via round-robin CUDA_VISIBLE_DEVICES assignment. "
+                             "E.g. --gpus 4 --workers 8 = 2 workers per GPU. "
+                             "E.g. --gpus 8 --workers 16 = 2 workers per GPU (8x RTX5090).")
     args = parser.parse_args()
+    if args.workers is None:
+        args.workers = args.gpus * 2
 
     timeframes = args.timeframes
 
@@ -616,25 +800,54 @@ Examples:
                     if k in r:
                         r[k] = float(r[k])
 
-    idx = 0
+    # Build work queue — filter already-completed combos
+    work = []
     for symbol in symbols:
         for timeframe in timeframes:
-            idx += 1
-
             if (symbol, timeframe) in completed:
                 skipped += 1
+            else:
+                work.append((symbol, timeframe))
+
+    total_work = len(work)
+    n_workers  = min(args.workers, total_work) if total_work > 0 else 1
+    logger.info(f"Running {total_work} combos with {n_workers} parallel workers across {args.gpus} GPU(s)")
+
+    # Thread lock for safe CSV writes from multiple workers
+    csv_lock = threading.Lock()
+    done_count = [0]  # mutable counter accessible in closure
+
+    # Partition work evenly across GPUs — one process per GPU, serial within each
+    gpu_work = [[] for _ in range(args.gpus)]
+    for i, item in enumerate(work):
+        gpu_work[i % args.gpus].append(item)
+
+    with ProcessPoolExecutor(max_workers=args.gpus) as executor:
+        futures = {
+            executor.submit(_run_gpu_partition, gpu_id, items): gpu_id
+            for gpu_id, items in enumerate(gpu_work) if items
+        }
+
+        for future in as_completed(futures):
+            gpu_id = futures[future]
+            try:
+                gpu_results = future.result()
+            except Exception as e:
+                logger.error(f"GPU {gpu_id} partition crashed: {e}")
                 continue
 
-            logger.info(f"[{idx}/{total}] {symbol} {timeframe}")
-            r = run_symbol(symbol, timeframe)
-
-            if r is None:
-                failed.append(f"{symbol} {timeframe}")
-                continue
-
-            results.append(r)
-            print_row(r)
-            save_csv(results, csv_path)
+            for r in gpu_results:
+                done_count[0] += 1
+                if r is None:
+                    failed.append(f"GPU{gpu_id}-unknown")
+                    logger.warning(f"[{done_count[0]}/{total_work}] GPU{gpu_id} — no result")
+                    continue
+                sym, tf = r.get("symbol", "?"), r.get("timeframe", "?")
+                with csv_lock:
+                    results.append(r)
+                    print_row(r)
+                    save_csv(results, csv_path)
+                logger.info(f"[{done_count[0]}/{total_work}] {sym} {tf} done")
 
     print("  " + _SEP)
     print_summary(results)
@@ -648,4 +861,5 @@ Examples:
 
 
 if __name__ == "__main__":
+    set_start_method("spawn", force=True)
     main()

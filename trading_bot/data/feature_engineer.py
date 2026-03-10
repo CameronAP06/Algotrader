@@ -55,14 +55,15 @@ def get_label_params(timeframe: str = "1h") -> tuple:
     thresholds = {
         "15m": 0.006,   # 0.6%  — covers fees+slippage, targets clean intraday scalp
         "30m": 0.008,   # 0.8%  — slightly larger move required at 30m
-        "1h":  0.018,   # 1.8%  — 1h crypto typically moves 0.8-1.5%, need headroom
-        "2h":  0.025,   # 2.5%
-        "4h":  0.035,   # 3.5%  — meaningful 4h move
-        "8h":  0.045,   # 4.5%  — half-day directional move
-        "12h": 0.055,   # 5.5%  — between 8h and 1d
-        "1d":  0.060,   # 6.0%  — daily candle with real conviction
-        "1w":  0.120,   # 12.0% — weekly crypto move with real conviction
-        "2w":  0.180,   # 18.0% — two-week directional move
+        "1h":  0.015,   # 1.5%  — was 1.8%; slightly more signals, still above fee floor
+        "2h":  0.022,   # 2.2%
+        "4h":  0.030,   # 3.0%  — was 3.5%; meaningful 4h move, more label diversity
+        "8h":  0.040,   # 4.0%  — half-day directional move
+        "12h": 0.045,   # 4.5%  — between 8h and 1d
+        "1d":  0.035,   # 3.5%  — was 6.0% (too high → 90%+ neutral). Daily crypto
+                        #          routinely moves 3-5%; 3.5% gives ~25% UP/DOWN split
+        "1w":  0.080,   # 8.0%  — was 12%; weekly with real conviction
+        "2w":  0.120,   # 12.0% — was 18%
     }
     threshold = thresholds.get(timeframe, 0.012)
 
@@ -80,13 +81,9 @@ def create_labels(df: pd.DataFrame,
     """
     Creates 3-class labels using TIMEFRAME-AWARE, VOLATILITY-ADJUSTED thresholds.
 
-    When called with a timeframe, get_label_params() overrides the defaults so
-    that:
-      - horizon always represents ~24h of real time
-      - threshold is calibrated to the typical ATR at that bar size
-
-    ATR-scaling is also applied on top so that in high-vol periods a larger
-    move is needed to classify as UP/DOWN, reducing whipsaw labels.
+    NOTE: the `horizon` and `threshold` default args are overridden by
+    get_label_params(timeframe) for ALL supported timeframes. They exist only
+    as fallback defaults for unknown/custom timeframes passed without a string.
 
     Labels:
       2 = UP   (future return > dynamic threshold)
@@ -104,8 +101,10 @@ def create_labels(df: pd.DataFrame,
     # ATR-scaling: in high-vol regimes require a larger move to label UP/DOWN
     if "atr_14" in df.columns:
         atr_pct = df["atr_14"] / df["close"]
-        # Add 30% of ATR on top of base threshold, capped at 2x threshold
-        dynamic_threshold = (threshold + atr_pct * 0.3).clip(threshold, threshold * 2.5)
+        # Add 20% of ATR on top of base threshold, capped at 1.5x threshold.
+        # Was 30% / 2.5x — too aggressive, especially for 1d where daily ATR
+        # can push threshold to 15%+, creating near-zero non-neutral labels.
+        dynamic_threshold = (threshold + atr_pct * 0.20).clip(threshold, threshold * 1.5)
     else:
         dynamic_threshold = threshold
 
@@ -214,26 +213,26 @@ def add_lagged_features(df: pd.DataFrame, n_lags: int = 5) -> pd.DataFrame:
 
 def add_regime_features(df: pd.DataFrame,
                         window: int = REGIME_WINDOW,
-                        adx_threshold: float = REGIME_ADX_THRESHOLD) -> pd.DataFrame:
+                        adx_threshold: float = REGIME_ADX_THRESHOLD,
+                        timeframe: str = "1h") -> pd.DataFrame:
     """
-    Adds market regime features using ADX and trend structure.
+    Enhanced market regime detection.
 
-    ADX > 25 = trending (models work well here)
-    ADX < 20 = ranging/choppy (models perform poorly here)
-
-    Features added:
-      - adx: trend strength (directionless)
-      - plus_di / minus_di: directional indicators
-      - di_diff: positive = uptrend pressure, negative = downtrend
-      - adx_trend: binary — is market currently trending?
-      - regime: 0=ranging, 1=trending up, 2=trending down
-      - hurst_approx: >0.5 trending, <0.5 mean-reverting
-      - vol_regime: current volatility vs recent average
+    Signals computed:
+      ADX / DI system         — classic trend strength + direction
+      Hurst exponent proxy    — >0.5 trending, <0.5 mean-reverting
+      GARCH volatility proxy  — exponentially-weighted variance ratio
+        (high vol_regime = elevated risk, lower Kelly fraction warranted)
+      Choppiness Index        — 100 = pure noise, 0 = pure trend
+      Market efficiency ratio — how efficiently price moved vs total path
+      Volatility regime       — current ATR vs long-run average
+      Regime transition score — rate of change of ADX (regime change warning)
     """
     high  = df["high"]
     low   = df["low"]
     close = df["close"]
 
+    # ── ADX / DI ──────────────────────────────────────────────────────────────
     tr = pd.concat([
         high - low,
         (high - close.shift()).abs(),
@@ -249,9 +248,8 @@ def add_regime_features(df: pd.DataFrame,
     atr_w    = tr.rolling(window).mean()
     plus_di  = 100 * pd.Series(plus_dm,  index=df.index).rolling(window).mean() / (atr_w + 1e-9)
     minus_di = 100 * pd.Series(minus_dm, index=df.index).rolling(window).mean() / (atr_w + 1e-9)
-
-    dx  = 100 * (plus_di - minus_di).abs() / (plus_di + minus_di + 1e-9)
-    adx = dx.rolling(window).mean()
+    dx       = 100 * (plus_di - minus_di).abs() / (plus_di + minus_di + 1e-9)
+    adx      = dx.rolling(window).mean()
 
     df["adx"]       = adx
     df["plus_di"]   = plus_di
@@ -260,30 +258,157 @@ def add_regime_features(df: pd.DataFrame,
     df["adx_trend"] = (adx > adx_threshold).astype(float)
 
     regime = pd.Series(0, index=df.index)
-    regime[(adx > adx_threshold) & (plus_di > minus_di)]  = 1
-    regime[(adx > adx_threshold) & (minus_di > plus_di)]  = 2
+    regime[(adx > adx_threshold) & (plus_di > minus_di)]  = 1   # trending up
+    regime[(adx > adx_threshold) & (minus_di > plus_di)]  = 2   # trending down
     df["regime"]     = regime
     df["regime_sin"] = np.sin(2 * np.pi * regime / 3)
     df["regime_cos"] = np.cos(2 * np.pi * regime / 3)
 
-    # Hurst exponent approximation
-    returns = close.pct_change()
-    var_1   = returns.rolling(window).var()
-    var_4   = returns.rolling(window * 4).var() / 4
-    df["hurst_approx"] = (np.log(var_4 + 1e-9) / np.log(var_1 + 1e-9)).clip(0, 2)
+    # Regime transition warning — rate of change of ADX
+    df["adx_roc_5"]  = adx.pct_change(5).fillna(0)
+    df["adx_roc_14"] = adx.pct_change(14).fillna(0)
 
-    # Volatility regime ratio
-    atr_pct = df["atr_14"] / close if "atr_14" in df.columns else tr.rolling(14).mean() / close
-    df["vol_regime"] = atr_pct / (atr_pct.rolling(168).mean() + 1e-9)
+    # ── Hurst Exponent (R/S approximation) ────────────────────────────────────
+    # Compare variance at different time scales. H>0.5 = trending, H<0.5 = mean-reverting.
+    returns     = close.pct_change()
+    var_short   = returns.rolling(window).var() + 1e-12
+    var_long    = returns.rolling(window * 4).var() / 4 + 1e-12
+    df["hurst_approx"] = (np.log(var_long) / np.log(var_short)).clip(0, 2)
+
+    # ── GARCH-proxy: EWMA volatility ratio ────────────────────────────────────
+    # Short-span EWMA vol / long-span EWMA vol.
+    # >1 = vol expanding (regime uncertainty), <1 = vol contracting (stable)
+    ewm_short = returns.ewm(span=10).std()
+    ewm_long  = returns.ewm(span=60).std()
+    df["vol_regime"]       = (ewm_short / (ewm_long + 1e-9)).clip(0, 5)
+    df["vol_regime_trend"] = df["vol_regime"].rolling(5).mean()  # smoothed
+
+    # ── Choppiness Index ──────────────────────────────────────────────────────
+    # CI = 100 * log10(sum(ATR_1) / (max_high - min_low)) / log10(n)
+    # 100 = perfect chop, ~38 = perfect trend. Values above 61.8 = ranging.
+    n = window
+    atr_1_sum = tr.rolling(n).sum()
+    highest   = high.rolling(n).max()
+    lowest    = low.rolling(n).min()
+    ci_range  = (highest - lowest).clip(lower=1e-9)
+    df["choppiness"] = (100 * np.log10(atr_1_sum / ci_range + 1e-9)
+                        / np.log10(n)).clip(0, 100)
+    df["is_choppy"]  = (df["choppiness"] > 61.8).astype(float)
+
+    # ── Market Efficiency Ratio (MER) ─────────────────────────────────────────
+    # How efficiently price moved from start to end of window vs sum of all moves.
+    # High MER = strong directional trend. Low MER = whipsaw.
+    price_change = (close - close.shift(n)).abs()
+    path_length  = close.diff().abs().rolling(n).sum() + 1e-9
+    df["efficiency_ratio"] = (price_change / path_length).clip(0, 1)
+
+    # ── ATR volatility regime ─────────────────────────────────────────────────
+    # Rolling window = ~1 week of bars in real time, regardless of timeframe.
+    # 168 was hardcoded (= 1 week at 1h) but equals 28 days at 4h and 168 days
+    # at 1d — meaningless. Now computed as bars-per-week for the given timeframe.
+    _bars_per_week = {
+        "15m": 672, "30m": 336, "1h": 168, "2h": 84,
+        "4h": 42,   "8h": 21,   "12h": 14, "1d": 7, "1w": 1,
+    }
+    vol_lookback = max(_bars_per_week.get(timeframe, 168), 14)
+    atr_pct = df["atr_14"] / close if "atr_14" in df.columns else (
+        tr.rolling(14).mean() / close)
+    df["atr_vol_regime"] = (atr_pct / (atr_pct.rolling(vol_lookback).mean() + 1e-9)).clip(0, 5)
 
     return df
 
 
-def add_alt_data_features(df: pd.DataFrame) -> pd.DataFrame:
+def add_sentiment_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Derive sentiment and crowd-positioning proxy features from price/volume data.
+
+    When external sentiment data (fear_greed, funding_rate) is present these
+    are enhanced; otherwise we synthesise crowd sentiment proxies from OHLCV.
+
+    Features:
+      - Synthetic Fear & Greed proxy from vol + momentum + RSI
+      - Volume-weighted sentiment (up-vol vs down-vol momentum)
+      - Put/call proxy (open interest unavailable, so we use price gap analysis)
+      - Sentiment momentum (rate of change of sentiment score)
+      - Divergence: price making new highs while sentiment weakening
+    """
+    close  = df["close"]
+    volume = df["volume"]
+
+    # ── Synthetic Fear & Greed proxy ─────────────────────────────────────────
+    # Blend of: RSI momentum + vol spike + price vs 30d high
+    rsi14   = df["rsi_14"] if "rsi_14" in df.columns else pd.Series(50.0, index=df.index)
+    vol_rat = df["vol_ratio_14"] if "vol_ratio_14" in df.columns else pd.Series(1.0, index=df.index)
+
+    # Normalise each component to 0-1
+    rsi_norm    = rsi14 / 100.0
+    vol_norm    = (vol_rat - 1.0).clip(-2, 2) / 4.0 + 0.5
+    price_30h   = close.rolling(30).max()
+    price_norm  = (close / (price_30h + 1e-9)).clip(0.5, 1.0)
+    # Directional momentum
+    roc14       = close.pct_change(14)
+    roc_norm    = (roc14 / 0.20 + 0.5).clip(0, 1)  # ±20% maps to 0-1
+
+    # Composite score: high = greed, low = fear
+    fg_proxy = (rsi_norm * 0.35 + vol_norm * 0.20 +
+                price_norm * 0.25 + roc_norm * 0.20).clip(0, 1)
+    df["sentiment_fg_proxy"] = fg_proxy
+
+    # Use real Fear & Greed if available
+    if "fear_greed" in df.columns:
+        fg_real = df["fear_greed"] / 100.0
+        # Blend: real data dominates but proxy fills gaps
+        df["sentiment_score"] = fg_real.fillna(fg_proxy)
+    else:
+        df["sentiment_score"] = fg_proxy
+
+    # Sentiment momentum (5-bar and 14-bar ROC)
+    df["sentiment_roc_5"]  = df["sentiment_score"].diff(5)
+    df["sentiment_roc_14"] = df["sentiment_score"].diff(14)
+
+    # ── Volume-weighted directional sentiment ─────────────────────────────────
+    # Up-volume: bars where close > open weighted by volume
+    # Down-volume: bars where close < open weighted by volume
+    direction     = np.sign(close.diff())
+    up_vol   = volume.where(direction > 0, 0).rolling(14).sum()
+    down_vol = volume.where(direction < 0, 0).rolling(14).sum()
+    df["vol_sentiment"] = (up_vol - down_vol) / (up_vol + down_vol + 1e-9)
+    df["vol_sent_ma7"]  = df["vol_sentiment"].rolling(7).mean()
+
+    # ── Sentiment vs price divergence ─────────────────────────────────────────
+    # Classic: price at new 20-bar high but sentiment declining → bearish divergence
+    price_20h = close.rolling(20).max()
+    is_near_high  = (close >= price_20h * 0.97).astype(float)
+    sent_falling  = (df["sentiment_roc_5"] < -0.03).astype(float)
+    df["bearish_divergence"] = is_near_high * sent_falling
+
+    price_20l = close.rolling(20).min()
+    is_near_low  = (close <= price_20l * 1.03).astype(float)
+    sent_rising  = (df["sentiment_roc_5"] > 0.03).astype(float)
+    df["bullish_divergence"] = is_near_low * sent_rising
+
+    # ── Funding rate features (if available) ─────────────────────────────────
     if "fear_greed" in df.columns and "rsi_14" in df.columns:
-        df["sentiment_rsi_divergence"] = df["fear_greed"] / 100.0 - df["rsi_14"] / 100.0
+        df["sentiment_rsi_divergence"] = (df["fear_greed"] / 100.0
+                                          - df["rsi_14"] / 100.0)
+
+    return df
+
+
+def add_alt_data_features(df: pd.DataFrame, timeframe: str = "1h") -> pd.DataFrame:
+    # NOTE: sentiment_rsi_divergence is intentionally NOT computed here —
+    # add_sentiment_features() already handles it. Computing it again would
+    # silently overwrite the result with an identical value (dead duplication).
     if "btc_dominance" in df.columns:
-        df["btc_dom_ma7"]    = df["btc_dominance"].rolling(168).mean()
+        # Lookback = ~1 week of bars in real time, regardless of timeframe.
+        # rolling(168) was hardcoded (= 1 week at 1h) but equals 168 DAYS at 1d.
+        # Same fix applied here as in add_regime_features.
+        _bars_per_week = {
+            "15m": 672, "30m": 336, "1h": 168, "2h": 84,
+            "4h": 42,   "8h": 21,   "12h": 14, "1d": 7, "1w": 1,
+        }
+        lookback = max(_bars_per_week.get(timeframe, 168), 7)
+        df["btc_dom_ma7"]    = df["btc_dominance"].rolling(lookback).mean()
         df["btc_dom_vs_avg"] = df["btc_dominance"] - df["btc_dom_ma7"]
     return df
 
@@ -301,7 +426,7 @@ def add_funding_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 
-def add_raw_ohlcv_sequences(df: pd.DataFrame, windows: list = [5, 10, 20]) -> pd.DataFrame:
+def add_raw_ohlcv_sequences(df: pd.DataFrame, windows: list = None) -> pd.DataFrame:
     """
     Add normalised raw OHLCV rolling windows as features.
 
@@ -314,6 +439,8 @@ def add_raw_ohlcv_sequences(df: pd.DataFrame, windows: list = [5, 10, 20]) -> pd
     The TFT's VariableSelectionNetwork will learn which of these windows
     and which OHLCV dimensions actually matter per symbol.
     """
+    if windows is None:
+        windows = [5, 10, 20]
     for w in windows:
         roll_close = df["close"].rolling(w)
         roll_vol   = df["volume"].rolling(w)
@@ -353,10 +480,11 @@ def build_features(df: pd.DataFrame, symbol: str = "", timeframe: str = "1h") ->
     df = add_candle_patterns(df)
     df = add_time_features(df)
     df = add_lagged_features(df)
-    df = add_raw_ohlcv_sequences(df)  # B: raw input for self-supervised learning
-    df = add_regime_features(df)   # Lever 3
+    df = add_raw_ohlcv_sequences(df)  # raw sequences for self-supervised learning
+    df = add_regime_features(df, timeframe=timeframe)      # ADX, Hurst, choppiness, efficiency ratio
+    df = add_sentiment_features(df)   # Fear/greed proxy, vol sentiment, divergences
     df = add_funding_features(df)
-    df = add_alt_data_features(df)
+    df = add_alt_data_features(df, timeframe=timeframe)
 
     # Lever 1 + 2: timeframe-aware, volatility-adjusted labels
     df["label"] = create_labels(df, timeframe=timeframe)

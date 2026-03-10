@@ -116,8 +116,24 @@ def _train_one(X_train, y_train, X_val, y_val,
     scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
         optimizer, T_0=10, T_mult=2, eta_min=1e-6
     )
-    class_weights = torch.FloatTensor([2.0, 0.5, 2.0]).to(DEVICE)
-    criterion     = nn.CrossEntropyLoss(weight=class_weights)
+
+    # Compute class weights from actual label distribution.
+    # Hardcoded [2.0, 0.5, 2.0] broke when NEUTRAL dominated (e.g. 90%+ at 1d)
+    # because weight=0.5 on a 90% class still made the model predict NEUTRAL always.
+    # Inverse-frequency weighting ensures all classes get equal gradient attention
+    # regardless of how imbalanced the labels are.
+    counts = np.bincount(y_train, minlength=3).astype(float)
+    counts = np.maximum(counts, 1.0)           # avoid div-by-zero for missing classes
+    inv_freq = 1.0 / counts
+    inv_freq /= inv_freq.mean()                # normalise so mean weight = 1.0
+    # Cap: don't let any class get more than 4x weight (prevents instability on
+    # tiny class counts in short folds)
+    inv_freq = np.clip(inv_freq, 0.25, 4.0)
+    class_weights = torch.FloatTensor(inv_freq).to(DEVICE)
+    logger.info(f"  [{model_idx+1}/{N_MODELS}] Class weights: "
+                f"DOWN={inv_freq[0]:.2f} NEUTRAL={inv_freq[1]:.2f} UP={inv_freq[2]:.2f} "
+                f"(from counts: {counts.astype(int).tolist()})")
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
 
     best_val_loss    = float("inf")
     patience_counter = 0
@@ -163,6 +179,14 @@ def _train_one(X_train, y_train, X_val, y_val,
                 logger.info(f"    Early stop at epoch {epoch}")
                 break
 
+    # Guard: if no epoch ever improved val_loss (e.g. epochs=0 or empty train_dl),
+    # best_state stays None → load_state_dict(None) would raise AttributeError.
+    # Fall back to the current model weights rather than crashing.
+    if best_state is None:
+        logger.warning(f"  [{model_idx+1}/{N_MODELS}] best_state is None "
+                       f"(no epoch completed) — using final model weights as fallback")
+        best_state = {k: v.cpu().clone() for k, v in model.state_dict().items()}
+
     model.load_state_dict(best_state)
     logger.info(f"  [{model_idx+1}/{N_MODELS}] Best val_loss: {best_val_loss:.4f}")
     return model
@@ -197,15 +221,19 @@ def train_ensemble(X_train: np.ndarray, y_train: np.ndarray,
         seq_len = LSTM_PARAMS["sequence_length"]
         val_ds  = SequenceDataset(X_val, y_val, seq_len)
         val_dl  = DataLoader(val_ds, batch_size=LSTM_PARAMS["batch_size"])
+        # Recompute dynamic weights from val labels for the final loss check
+        val_counts  = np.bincount(y_val, minlength=3).astype(float)
+        val_counts  = np.maximum(val_counts, 1.0)
+        val_inv     = np.clip(1.0 / val_counts / (1.0 / val_counts).mean(), 0.25, 4.0)
         criterion = nn.CrossEntropyLoss(
-            weight=torch.FloatTensor([2.0, 0.5, 2.0]).to(DEVICE)
+            weight=torch.FloatTensor(val_inv).to(DEVICE)
         )
         vl = 0
         with torch.no_grad():
             for X_b, y_b in val_dl:
                 X_b, y_b = X_b.to(DEVICE), y_b.to(DEVICE)
                 vl += criterion(m(X_b), y_b).item()
-        val_losses.append(vl / len(val_dl))
+        val_losses.append(vl / len(val_dl) if len(val_dl) > 0 else float("inf"))
 
     logger.info(f"\nEnsemble training complete for {symbol}:")
     logger.info(f"  Val losses: {[f'{v:.4f}' for v in val_losses]}")

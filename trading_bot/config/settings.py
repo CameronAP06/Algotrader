@@ -68,15 +68,20 @@ LSTM_PARAMS = {
     "sequence_length": 60, "hidden_size": 128,
     "num_layers": 2, "dropout": 0.2,
     "epochs": 100, "batch_size": 64,
-    "learning_rate": 0.001, "patience": 25,
+    "learning_rate": 0.001,
+    "patience": 30,   # was 25 — must be >= T_0*(1+T_mult)=30 so early stopping
+                      # never fires before the first full cosine LR restart cycle
+                      # completes (cycle 1=10 epochs, cycle 2=20 epochs → total 30).
+                      # Stopping mid-cycle risks getting trapped in a local optimum.
 }
 
 ENSEMBLE_WEIGHTS = {"lgbm": 0.40, "xgb": 0.35, "lstm": 0.25}
 
 # ── Backtesting ───────────────────────────────────────────────────────────────
 INITIAL_CAPITAL  = 10_000
-TRADING_FEE      = 0.001   # Binance standard spot fee
-SLIPPAGE         = 0.001
+TRADING_FEE      = 0.001   # Kraken taker fee (0.1% per leg = 0.2% round-trip)
+SLIPPAGE         = 0.001   # Conservative 0.1% per leg for mid-cap alts (0.2% round-trip)
+                            # Total round-trip friction: 0.4% — modelled per leg in engine.py
 SIGNAL_THRESHOLD = 0.38   # Default threshold
 
 # Per-symbol overrides — lower for symbols with compressed probability distributions
@@ -89,7 +94,9 @@ SIGNAL_THRESHOLDS = {
     "SOL/USD":  0.36,
     "AVAX/USD": 0.36,
 }
-MAX_POSITION_PCT = 0.25  # 25% per trade — limits single-trade drawdown to ~2-4%
+MAX_POSITION_PCT = 0.25   # 25% per trade — cap when Kelly is OFF (use_kelly=False)
+                           # When Kelly is ON, KELLY_MAX_PCT (below) is the active cap.
+                           # Both set to 0.25 so behaviour is consistent either way.
 
 # ── Risk Management ───────────────────────────────────────────────────────────
 # Fixed % stops — used as fallback when ATR stops are disabled or ATR is unavailable
@@ -101,24 +108,37 @@ MAX_OPEN_TRADES    = 3
 # ATR-based dynamic stops (recommended — scales with actual volatility)
 # Stop  = entry_price ± ATR × ATR_STOP_MULT
 # TP    = entry_price ± ATR × ATR_TP_MULT
-# 2:1 ratio (3.0 TP / 1.5 stop) requires >33% win rate — same as fixed %
-# but stops are proportional to volatility so fewer noise-driven stopouts
+# 2:1 ratio (2.4 TP / 1.2 stop) requires >33% win rate to be positive expectancy.
+# engine.py imports these directly — change here to affect backtest behaviour.
 USE_ATR_STOPS   = True
-ATR_STOP_MULT   = 1.2   # stop = 1.2 × ATR from entry
-ATR_TP_MULT     = 2.4   # TP   = 2.4 × ATR from entry  (2:1 reward:risk)
+ATR_STOP_MULT   = 1.5   # stop = 1.5 × ATR from entry  (wider stop = fewer noise-outs)
+ATR_TP_MULT     = 3.0   # TP   = 3.0 × ATR from entry  (2:1 reward:risk maintained)
 
-# ── Signal Filters ───────────────────────────────────────────────────────────
-# Each filter can be independently toggled. All default ON.
-# See backtest/filters.py for per-timeframe automatic relaxation.
+# Kelly position sizing caps — imported by engine.py
+# KELLY_MAX_PCT: hard cap on fraction Kelly can allocate per trade (Kelly ON path)
+# Aligned to MAX_POSITION_PCT so both sizing modes cap at the same level.
+KELLY_MAX_PCT    = 0.25   # was 0.40 hardcoded in engine.py
+
+# Kelly ADX regime threshold — halve position size in choppy markets (ADX below this)
+# Aligned to REGIME_ADX_THRESHOLD (18) so the regime label and Kelly penalty
+# use the same boundary. engine.py imports KELLY_REGIME_ADX from here.
+KELLY_REGIME_ADX = 18.0   # was 20.0 hardcoded in engine.py
+
+# ── Signal Filters ────────────────────────────────────────────────────────────
+# Each filter can be independently toggled.
+# See backtest/filters.py for per-timeframe automatic relaxation via TF_RELAX.
 #
 # DIAGNOSIS: filters were removing 95.4% of signals (avg 3.8 trades/fold).
 # Loosened defaults target 15-30 trades/fold at 1h, 8-20 at 4h.
 
 USE_TREND_FILTER      = False   # SMA alignment — disabled: hurts at longer TFs
-USE_VOLATILITY_FILTER = True    # Skip very low ATR bars
-USE_VOLUME_FILTER     = True    # Require minimum volume
-USE_FUNDING_FILTER    = False   # Funding rate extremes (Binance perp only)
-USE_REGIME_FILTER     = False   # ADX regime detection — disabled: edge scanner validated signals without it
+USE_VOLATILITY_FILTER = True    # Skip very low ATR bars (bottom VOLATILITY_FILTER_PCT)
+USE_VOLUME_FILTER     = True    # Require minimum volume (VOLUME_FILTER_PCT × avg)
+USE_FUNDING_FILTER    = False   # Funding rate extremes (Kraken perp only)
+USE_REGIME_FILTER     = False   # Disables ADX Filter 5 only.
+                                 # Choppiness (Filter 6) and Market Efficiency Ratio
+                                 # (Filter 7) are unconditional and remain active.
+                                 # Edge scanner validated signals without ADX gating.
 
 # Volatility filter: skip bars in bottom X% of ATR distribution
 # Was 0.20 (bottom 20%) — lowered to bottom 10%

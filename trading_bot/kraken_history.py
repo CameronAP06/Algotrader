@@ -126,25 +126,47 @@ _KRAKEN_LEGACY_PREFIX = {
 }
 
 # ── History caps (max days of data to use per timeframe) ─────────────────────
-# Older data trains across too many market regimes, hurting generalisation.
-# Caps are intentionally tighter for shorter timeframes where regime drift
-# is faster, and looser for weekly/daily which need more bars to be useful.
+# Raised for 6-fold walk-forward scan — need enough bars so all 6 folds have
+# meaningful train/val/test windows without the test periods being too short.
+# Rule of thumb: need at least 2x(N_FOLDS * fold_size_pct) of the total data
+# available as test-eligible bars. At 6 folds × 9% = 54%, aim for 2000+ 1h bars.
 HISTORY_CAPS = {
-    "15m": 180,    # 6 months  — intraday patterns change fast
-    "30m": 180,    # 6 months
-    "1h":  365,    # 1 year    — one full market cycle
-    "4h":  730,    # 2 years   — multiple cycles, avoids 2017-era noise
-    "12h": 730,    # 2 years
-    "1d":  1095,   # 3 years   — needs more bars to be statistically meaningful
+    "15m": 365,    # 1 year  — intraday patterns change fast, 365d = ~35k bars
+    "30m": 365,    # 1 year
+    "1h":  730,    # 2 years — was 365; raised for 6-fold WF to get 17k+ bars
+    "4h":  1095,   # 3 years — was 730; more folds need more data
+    "12h": 1095,   # 3 years
+    "1d":  1825,   # 5 years — was 1095; 1d needs many more bars for label diversity
 }
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# ── Symbols whose API top-up is known to fail ────────────────────────────────
+# These symbols have historical CSV data but Kraken's live API rejects the
+# symbol name (different naming convention, delisted from spot, etc.).
+# Skipping the top-up saves ~90s of retry storm per combo and keeps logs clean.
+# The CSV data alone is sufficient — these are still valid scan candidates.
+API_TOPUP_SUPPRESSED = {
+    "EOS/USD",   # EOSUSD CSV exists but API rejects symbol
+    "ETHW/USD",  # In EXCLUDE list but guard here too
+    "GAL/USD",
+    "KAR/USD",
+    "KILT/USD",
+    "KINT/USD",
+    "NODL/USD",
+    "OXY/USD",
+    "PSTAKE/USD",
+    "TVK/USD",
+    "ZETA/USD",
+    "ZEUS/USD",
+}
+
+
 
 def _find_csv(history_dir: str, kraken_name: str, minutes: int) -> str | None:
     """
-    Locate the CSV file in the flat OHLC_Kraken directory.
-    Files are named {PAIR}_{MINUTES}.csv e.g. XBTUSD_240.csv
+    Locate the CSV file in the Kraken data directory.
+    Files are named {TICKER}_{MINUTES}.csv e.g. XBTUSD_240.csv
+    Searches the directory and one level of subdirectories.
     """
     candidates = [
         f"{kraken_name}_{minutes}.csv",
@@ -154,6 +176,11 @@ def _find_csv(history_dir: str, kraken_name: str, minutes: int) -> str | None:
         path = os.path.join(history_dir, fname)
         if os.path.exists(path):
             return path
+    # Also search subdirectories
+    for fname in candidates:
+        matches = glob.glob(os.path.join(history_dir, "**", fname), recursive=True)
+        if matches:
+            return matches[0]
     return None
 
 
@@ -186,6 +213,10 @@ def _topup_from_api(symbol: str, timeframe: str, after: pd.Timestamp) -> pd.Data
 
     if timeframe in ("1w", "2w"):
         logger.debug(f"  Skipping API top-up for {timeframe} — CSV history is sufficient")
+        return pd.DataFrame()
+
+    if symbol in API_TOPUP_SUPPRESSED:
+        logger.debug(f"  Skipping API top-up for {symbol} — known incompatible with Kraken API naming")
         return pd.DataFrame()
 
     tf_hours = {"15m": 0.25, "30m": 0.5, "1h": 1, "4h": 4, "12h": 12, "1d": 24}
@@ -328,15 +359,29 @@ def fetch_ohlcv_full(
         df_hist = df_hist[df_hist["timestamp"] >= cutoff].reset_index(drop=True)
         logger.info(f"  History cap {cap_days}d: {before} → {len(df_hist)} bars (from {df_hist['timestamp'].iloc[0].date()})")
 
-    # 3. Top up with API to get recent bars
+    # 3. Top up with API to get recent bars.
+    # Kraken REST API supported intervals (minutes): 1, 5, 15, 30, 60, 240, 1440, 10080, 21600
+    # 720 (12h) is NOT supported — top-up is impossible for this timeframe.
+    # The CSV covers to end of 2025; we accept the ~67-day gap rather than corrupt
+    # the data with resampled candles.
     last_ts  = df_hist["timestamp"].max()
-    df_topup = _topup_from_api(symbol, timeframe if timeframe not in NEEDS_RESAMPLE else "1d", last_ts)
+    if timeframe == "12h":
+        logger.info(f"  12h top-up skipped — Kraken API does not support 720min interval. "
+                    f"Using CSV data as-is (ends {last_ts.date()}).")
+        df_topup = pd.DataFrame()
+    else:
+        # Map resampled timeframes to the source timeframe needed for the API top-up.
+        # 8h is resampled FROM 4h, so we top-up with 4h bars (not 1d).
+        # 1w and 2w are resampled FROM 1d, so we top-up with 1d bars.
+        _api_tf_map = {"8h": "4h", "1w": "1d", "2w": "1d"}
+        api_tf   = _api_tf_map.get(timeframe, timeframe)
+        df_topup = _topup_from_api(symbol, api_tf, last_ts)
 
     if not df_topup.empty:
         df_hist = pd.concat([df_hist, df_topup], ignore_index=True)
         df_hist = df_hist.drop_duplicates("timestamp").sort_values("timestamp").reset_index(drop=True)
 
-    # 4. Resample if needed
+    # 4. Resample if needed (only for timeframes that have no native Kraken CSV)
     if timeframe in NEEDS_RESAMPLE:
         logger.info(f"  Resampling to {timeframe}...")
         df_hist = _resample(df_hist, timeframe)
@@ -522,16 +567,24 @@ def discover_all_timeframes(
     return result
 
 
-
+def get_history_dir() -> str | None:
     """
     Returns the Kraken OHLC history directory.
-    Structure: trading_bot/data/OHLC_Kraken/{TICKERNAME}/
-    Returns the OHLC_Kraken root — _find_csv searches subdirs recursively.
+
+    Checks in order:
+      1. KRAKEN_HISTORY_DIR environment variable  (most explicit — set this)
+      2. data/OHLC_Kraken relative to cwd
+      3. data/OHLC_Kraken relative to this file's directory
+      4. Parent directory's data/OHLC_Kraken  (for trading_bot/ subdir layouts)
+
+    Returns None if no directory containing CSV files is found.
     """
+    _here = os.path.dirname(os.path.abspath(__file__))
     candidates = [
         os.environ.get("KRAKEN_HISTORY_DIR", ""),
-        "data/OHLC_Kraken",                          # relative — standard location
-        os.path.join(os.path.dirname(__file__), "data", "OHLC_Kraken"),  # absolute
+        "data/OHLC_Kraken",
+        os.path.join(_here, "data", "OHLC_Kraken"),
+        os.path.join(_here, "..", "data", "OHLC_Kraken"),
     ]
     for path in candidates:
         if path and os.path.isdir(path):

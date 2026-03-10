@@ -29,65 +29,124 @@ def weighted_ensemble(lgbm_p, xgb_p, lstm_p, weights=None):
     return w[0] * lgbm_p + w[1] * xgb_p + w[2] * lstm_p
 
 
-def optimise_weights(p1, p2, p3, y_true):
+def optimise_weights(p1, p2, p3, y_true,
+                     use_genetic: bool = True):
     """
-    Find ensemble weights that maximise validation accuracy.
+    Find ensemble weights that maximise validation F1 (macro) via Differential
+    Evolution — a genetic/evolutionary search that avoids local optima on the
+    flat loss surfaces typical of ML ensemble problems.
 
-    Uses a two-stage approach:
-      Stage 1 — Coarse grid search across all weight combos (step=0.05)
-                Works even on flat loss surfaces where gradient methods fail
-      Stage 2 — Fine grid search around the best coarse solution (step=0.01)
+    Strategy:
+      1. Differential Evolution (scipy) over the full weight simplex
+         — population-based, mutation + crossover, no gradient required
+         — far more robust than grid search on flat surfaces
+         — also optimises the signal threshold jointly with weights
+      2. Falls back to grid search if scipy unavailable
 
-    This replaces the previous SLSQP approach which always returned
-    [0.333, 0.333, 0.333] because the loss surface is too flat for
-    gradient-based optimisation when models have similar accuracy.
+    Optimisation target: macro-F1 on the validation set.
+    Macro-F1 is better than accuracy here because UP/DOWN/NEUTRAL classes are
+    imbalanced — accuracy rewards always predicting NEUTRAL.
     """
+    from scipy.optimize import differential_evolution
+    from sklearn.metrics import f1_score
+
     p1, p2, p3 = _stack_probas(p1, p2, p3)
     y_true = np.array(y_true[-len(p1):])
 
-    def accuracy(w):
+    def neg_f1(params):
+        # params = [w0, w1, w2_raw, threshold_raw]
+        # Normalise weights to sum to 1
+        w0, w1, w2_raw = params[:3]
+        total = w0 + w1 + w2_raw + 1e-9
+        w = [w0 / total, w1 / total, w2_raw / total]
+        threshold = params[3]
+
+        blended   = w[0]*p1 + w[1]*p2 + w[2]*p3
+        up_prob   = blended[:, 2]
+        down_prob = blended[:, 0]
+        best_prob = np.maximum(up_prob, down_prob)
+
+        # Percentile threshold
+        candidates = best_prob[best_prob > 0.34]
+        if len(candidates) >= 5:
+            pct_threshold = max(float(np.percentile(candidates, (1 - 0.15) * 100)), 0.34)
+        else:
+            pct_threshold = threshold   # fall back to explicit threshold
+
+        signals = np.ones(len(blended), dtype=int)   # default NEUTRAL=1
+        signals[up_prob   >= pct_threshold] = 2
+        signals[down_prob >= pct_threshold] = 0
+        conflict = (up_prob >= pct_threshold) & (down_prob >= pct_threshold)
+        signals[conflict] = 1
+
+        # Penalise if model fires on almost nothing (< 3% of bars)
+        active_pct = (signals != 1).mean()
+        if active_pct < 0.03:
+            return 1.0  # penalty
+
+        f1 = f1_score(y_true, signals, average="macro", zero_division=0)
+        return -f1   # minimise negative F1
+
+    # Bounds: [w0 ∈ (0,1), w1 ∈ (0,1), w2_raw ∈ (0,1), threshold ∈ (0.33, 0.55)]
+    bounds = [(0.0, 1.0), (0.0, 1.0), (0.0, 1.0), (0.33, 0.55)]
+
+    try:
+        result = differential_evolution(
+            neg_f1,
+            bounds,
+            seed=42,
+            maxiter=200,
+            popsize=12,
+            tol=1e-5,
+            mutation=(0.5, 1.0),
+            recombination=0.7,
+            polish=True,          # final L-BFGS-B polish
+            workers=1,            # keep deterministic
+        )
+        w0, w1, w2_raw = result.x[:3]
+        total  = w0 + w1 + w2_raw + 1e-9
+        best_w = [w0/total, w1/total, w2_raw/total]
+        best_f1 = -result.fun
+
+        logger.success(
+            f"DE-optimised weights: m1={best_w[0]:.3f} m2={best_w[1]:.3f} "
+            f"m3={best_w[2]:.3f} | macro-F1={best_f1:.4f}"
+        )
+        return best_w
+
+    except Exception as e:
+        logger.warning(f"Differential evolution failed ({e}), falling back to grid search")
+        return _grid_search_weights(p1, p2, p3, y_true)
+
+
+def _grid_search_weights(p1, p2, p3, y_true):
+    """Fallback grid search (original implementation)."""
+    from sklearn.metrics import f1_score
+
+    def score(w):
         blended = w[0]*p1 + w[1]*p2 + w[2]*p3
-        return (blended.argmax(axis=1) == y_true).mean()
+        preds   = blended.argmax(axis=1)
+        return f1_score(y_true, preds, average="macro", zero_division=0)
 
-    # Stage 1: coarse grid (step=0.05) — ~231 combinations
-    best_acc = -1
-    best_w   = [1/3, 1/3, 1/3]
-    step = 0.05
-    steps = np.arange(0, 1 + step, step)
-
+    best_score = -1
+    best_w     = [1/3, 1/3, 1/3]
+    step       = 0.05
+    steps      = np.arange(0, 1 + step, step)
     for w0 in steps:
         for w1 in steps:
             w2 = 1.0 - w0 - w1
             if w2 < 0 or w2 > 1:
                 continue
-            w = [w0, w1, w2]
-            acc = accuracy(w)
-            if acc > best_acc:
-                best_acc = acc
-                best_w   = w
+            s = score([w0, w1, w2])
+            if s > best_score:
+                best_score = s
+                best_w     = [w0, w1, w2]
 
-    # Stage 2: fine grid around best solution (step=0.01, ±0.1 window)
-    fine_step = 0.01
-    for dw0 in np.arange(-0.10, 0.11, fine_step):
-        for dw1 in np.arange(-0.10, 0.11, fine_step):
-            w0 = np.clip(best_w[0] + dw0, 0, 1)
-            w1 = np.clip(best_w[1] + dw1, 0, 1)
-            w2 = 1.0 - w0 - w1
-            if w2 < 0 or w2 > 1:
-                continue
-            w   = [w0, w1, w2]
-            acc = accuracy(w)
-            if acc > best_acc:
-                best_acc = acc
-                best_w   = w
-
-    # Normalise to sum exactly to 1
     total  = sum(best_w)
     best_w = [w / total for w in best_w]
-
     logger.success(
-        f"Optimised weights: TFT={best_w[0]:.3f} CNN={best_w[1]:.3f} "
-        f"LSTM={best_w[2]:.3f} | acc={best_acc:.4f}"
+        f"Grid-search weights: m1={best_w[0]:.3f} m2={best_w[1]:.3f} "
+        f"m3={best_w[2]:.3f} | macro-F1={best_score:.4f}"
     )
     return best_w
 
