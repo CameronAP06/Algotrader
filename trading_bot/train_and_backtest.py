@@ -27,7 +27,7 @@ from loguru import logger
 import pandas as pd
 import numpy as np
 
-from config.settings import TRADING_PAIRS, LOG_DIR
+from config.settings import TRADING_PAIRS, LOG_DIR, TIMEFRAME
 from data.kraken_fetcher import fetch_all_pairs
 from data.feature_engineer import build_features, get_feature_columns
 from utils.splitter import time_split, save_scaler
@@ -37,6 +37,7 @@ from models.ensemble import (
     generate_signals, save_weights
 )
 from backtest.engine import BacktestEngine
+from backtest.filters import apply_filters
 from backtest.plot_results import plot_all
 
 
@@ -48,12 +49,16 @@ logger.add(f"{LOG_DIR}/train_{{time}}.log", rotation="10 MB", level="INFO")
 
 # ─── Per-Symbol Pipeline ────────────────────────────────────────────────────
 
-def run_pipeline(symbol: str, raw_df: pd.DataFrame) -> dict:
-    """Full pipeline for one trading pair."""
+def run_pipeline(symbol: str, raw_df: pd.DataFrame,
+                 timeframe: str = TIMEFRAME) -> tuple:
+    """
+    Full pipeline for one trading pair.
+    Returns (metrics, equity_curve, trades).
+    """
     logger.info(f"\n{'='*60}\nProcessing: {symbol}\n{'='*60}")
 
-    # 1. Feature Engineering
-    feat_df = build_features(raw_df, symbol)
+    # 1. Feature Engineering (uses cache when available)
+    feat_df = build_features(raw_df, symbol, timeframe=timeframe)
     feature_cols = get_feature_columns(feat_df)
     logger.info(f"Features: {len(feature_cols)} columns")
 
@@ -74,7 +79,7 @@ def run_pipeline(symbol: str, raw_df: pd.DataFrame) -> dict:
     # 4. Validation Probabilities
     cat_val_p  = catboost_model.predict_proba(cat, X_val)
     cnn_val_p  = cnn_model.predict_proba(cnn,  X_val)
-    lstm_val_p = lstm_model.predict_proba(lstm,  X_val)
+    lstm_val_p = lstm_model.predict_proba(lstm, X_val)
 
     # 5. Optimise Ensemble Weights on Validation Set
     best_weights = optimise_weights(cat_val_p, cnn_val_p, lstm_val_p, y_val)
@@ -83,33 +88,36 @@ def run_pipeline(symbol: str, raw_df: pd.DataFrame) -> dict:
     # 6. Test Set Predictions
     cat_test_p  = catboost_model.predict_proba(cat, X_test)
     cnn_test_p  = cnn_model.predict_proba(cnn,  X_test)
-    lstm_test_p = lstm_model.predict_proba(lstm,  X_test)
+    lstm_test_p = lstm_model.predict_proba(lstm, X_test)
 
     blended = weighted_ensemble(cat_test_p, cnn_test_p, lstm_test_p, best_weights)
-    signals = generate_signals(blended)
+    signals = generate_signals(blended, symbol=symbol)
 
     # 7. Evaluate Signal Quality
-    preds      = blended.argmax(axis=1)
+    preds       = blended.argmax(axis=1)
     test_labels = y_test[-len(preds):]
-    test_acc   = (preds == test_labels).mean()
+    test_acc    = (preds == test_labels).mean()
     logger.info(f"Test accuracy: {test_acc:.4f}")
 
-    # 8. Backtest
-    test_df = feat_df.tail(len(preds)).reset_index(drop=True)
+    # 8. Apply confirmation filters then backtest
+    test_df  = feat_df.tail(len(preds)).reset_index(drop=True)
+    filtered = apply_filters(test_df, signals, timeframe=timeframe)
+
     engine  = BacktestEngine()
-    metrics = engine.run(test_df, signals, symbol)
+    metrics = engine.run(test_df, filtered, symbol, timeframe=timeframe)
     engine.save_results(metrics, symbol)
 
-    return metrics
+    return metrics, engine.equity_curve, engine.trades
 
 
 # ─── Main ───────────────────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser(description="Train and backtest ML trading bot")
-    parser.add_argument("--refresh", action="store_true",  help="Force re-download data")
-    parser.add_argument("--symbol",  type=str, default=None, help="Run single symbol (e.g. BTC/USD)")
-    parser.add_argument("--no-plot", action="store_true",  help="Skip chart output")
+    parser.add_argument("--refresh",   action="store_true", help="Force re-download data")
+    parser.add_argument("--symbol",    type=str, default=None, help="Run single symbol (e.g. BTC/USD)")
+    parser.add_argument("--timeframe", type=str, default=TIMEFRAME, help="Candle timeframe (default from settings)")
+    parser.add_argument("--no-plot",   action="store_true", help="Skip chart output")
     args = parser.parse_args()
 
     symbols = [args.symbol] if args.symbol else TRADING_PAIRS
@@ -117,14 +125,19 @@ def main():
     # Fetch data
     raw_data = fetch_all_pairs(force_refresh=args.refresh)
     all_metrics = []
+    all_equity  = {}
+    all_trades  = {}
 
     for symbol in symbols:
         if symbol not in raw_data:
             logger.warning(f"No data for {symbol}, skipping")
             continue
         try:
-            metrics = run_pipeline(symbol, raw_data[symbol])
+            metrics, equity, trades = run_pipeline(symbol, raw_data[symbol],
+                                                   timeframe=args.timeframe)
             all_metrics.append(metrics)
+            all_equity[metrics["symbol"]] = equity
+            all_trades[metrics["symbol"]] = trades
         except Exception as e:
             logger.error(f"Pipeline failed for {symbol}: {e}")
             import traceback; traceback.print_exc()
@@ -161,7 +174,7 @@ def main():
                 f"{m['max_drawdown']:>7.2%} "
                 f"{m['win_rate']:>7.2%} "
                 f"{int(m['n_trades']):>7} "
-                f"£{ev:>7.2f}"
+                f"${ev:>7.2f}"
             )
             rows.append(row)
         summary_lines = [sep, "BACKTEST SUMMARY", sep, hdr, sep2] + rows + [sep]

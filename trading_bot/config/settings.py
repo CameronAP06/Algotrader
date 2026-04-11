@@ -75,7 +75,7 @@ LSTM_PARAMS = {
                       # Stopping mid-cycle risks getting trapped in a local optimum.
 }
 
-ENSEMBLE_WEIGHTS = {"lgbm": 0.40, "xgb": 0.35, "lstm": 0.25}
+ENSEMBLE_WEIGHTS = {"catboost": 0.40, "cnn": 0.35, "lstm": 0.25}
 
 # ── Backtesting ───────────────────────────────────────────────────────────────
 INITIAL_CAPITAL  = 10_000

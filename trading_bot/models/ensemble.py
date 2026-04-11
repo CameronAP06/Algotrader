@@ -13,24 +13,23 @@ from loguru import logger
 from config.settings import ENSEMBLE_WEIGHTS, SIGNAL_THRESHOLD, SIGNAL_THRESHOLDS, MODEL_DIR
 
 
-def _stack_probas(lgbm_p, xgb_p, lstm_p):
-    """Align all three probability arrays to the same length (LSTM has padding)."""
-    n = min(len(lgbm_p), len(xgb_p), len(lstm_p))
-    return lgbm_p[-n:], xgb_p[-n:], lstm_p[-n:]
+def _stack_probas(p1, p2, p3):
+    """Align all three probability arrays to the same length (seq models have padding)."""
+    n = min(len(p1), len(p2), len(p3))
+    return p1[-n:], p2[-n:], p3[-n:]
 
 
-def weighted_ensemble(lgbm_p, xgb_p, lstm_p, weights=None):
-    """Blend three (n, 3) probability arrays."""
+def weighted_ensemble(p1, p2, p3, weights=None):
+    """Blend three (n, 3) probability arrays. Model order: catboost, cnn, lstm."""
     if weights is None:
         w = list(ENSEMBLE_WEIGHTS.values())
     else:
         w = weights
-    lgbm_p, xgb_p, lstm_p = _stack_probas(lgbm_p, xgb_p, lstm_p)
-    return w[0] * lgbm_p + w[1] * xgb_p + w[2] * lstm_p
+    p1, p2, p3 = _stack_probas(p1, p2, p3)
+    return w[0] * p1 + w[1] * p2 + w[2] * p3
 
 
-def optimise_weights(p1, p2, p3, y_true,
-                     use_genetic: bool = True):
+def optimise_weights(p1, p2, p3, y_true, use_genetic: bool = True):
     """
     Find ensemble weights that maximise validation F1 (macro) via Differential
     Evolution — a genetic/evolutionary search that avoids local optima on the
@@ -95,7 +94,7 @@ def optimise_weights(p1, p2, p3, y_true,
             neg_f1,
             bounds,
             seed=42,
-            maxiter=200,
+            maxiter=100,
             popsize=12,
             tol=1e-5,
             mutation=(0.5, 1.0),

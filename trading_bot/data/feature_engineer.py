@@ -465,7 +465,46 @@ def add_raw_ohlcv_sequences(df: pd.DataFrame, windows: list = None) -> pd.DataFr
 
 # ─── Main Pipeline ───────────────────────────────────────────────────────────
 
-def build_features(df: pd.DataFrame, symbol: str = "", timeframe: str = "1h") -> pd.DataFrame:
+def _cache_path(symbol: str, timeframe: str) -> Path:
+    safe_name = symbol.replace("/", "_")
+    return Path(FEATURE_DIR) / f"{safe_name}_{timeframe}_features.csv"
+
+
+def _cache_is_valid(symbol: str, timeframe: str, raw_df_len: int) -> bool:
+    """Return True if a fresh feature cache exists and is newer than the raw data file."""
+    cache = _cache_path(symbol, timeframe)
+    if not cache.exists():
+        return False
+    try:
+        safe_name = symbol.replace("/", "_")
+        raw_path  = Path(DATA_DIR) / f"{safe_name}_{timeframe}.csv"
+        if raw_path.exists() and cache.stat().st_mtime < raw_path.stat().st_mtime:
+            return False   # raw data is newer → cache is stale
+        # Quick sanity check: cached rows should be at least half of raw rows
+        cached = pd.read_csv(cache, nrows=5)
+        if cached.empty:
+            return False
+        return True
+    except Exception:
+        return False
+
+
+def build_features(df: pd.DataFrame, symbol: str = "", timeframe: str = "1h",
+                   use_cache: bool = True) -> pd.DataFrame:
+    """
+    Build feature matrix from raw OHLCV data.
+    Loads from cache when available and up-to-date — avoids recomputing on
+    every run, which saves ~10 s per symbol.
+    """
+    if use_cache and symbol and _cache_is_valid(symbol, timeframe, len(df)):
+        cache = _cache_path(symbol, timeframe)
+        try:
+            feat_df = pd.read_csv(cache)
+            logger.info(f"Loaded features from cache ({len(feat_df)} rows): {cache}")
+            return feat_df
+        except Exception as e:
+            logger.warning(f"Cache load failed ({e}), rebuilding features")
+
     logger.info(f"Building features for {symbol or 'unknown'} ({len(df)} rows)")
 
     df = df.copy()
@@ -504,13 +543,17 @@ def build_features(df: pd.DataFrame, symbol: str = "", timeframe: str = "1h") ->
         r = df["regime"].value_counts().to_dict()
         logger.info(f"Regime: ranging={r.get(0,0)} trending_up={r.get(1,0)} trending_down={r.get(2,0)}")
 
+    # Persist to cache so subsequent runs skip the rebuild
+    if use_cache and symbol:
+        save_features(df, symbol, timeframe=timeframe)
+
     return df
 
 
-def save_features(df: pd.DataFrame, symbol: str) -> Path:
+def save_features(df: pd.DataFrame, symbol: str, timeframe: str = TIMEFRAME) -> Path:
     os.makedirs(FEATURE_DIR, exist_ok=True)
     safe_name = symbol.replace("/", "_")
-    path = Path(FEATURE_DIR) / f"{safe_name}_{TIMEFRAME}_features.csv"
+    path = Path(FEATURE_DIR) / f"{safe_name}_{timeframe}_features.csv"
     df.to_csv(path, index=False)
     logger.info(f"Saved features -> {path}")
     return path

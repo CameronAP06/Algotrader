@@ -286,7 +286,7 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
             logger.warning(f"{symbol} {timeframe}: {len(raw) if raw is not None else 0} bars — skipping")
             return None
 
-        feat_df   = build_features(raw, timeframe=timeframe)
+        feat_df   = build_features(raw, symbol=symbol, timeframe=timeframe)
         feat_cols = get_feature_columns(feat_df)
 
         from config.settings import LSTM_PARAMS
@@ -701,15 +701,18 @@ Examples:
     parser.add_argument("--resume",      action="store_true",
                         help="Skip symbol/TF combos already in output CSV")
     parser.add_argument("--workers",     type=int, default=None,
-                        help="Parallel workers. Defaults to --gpus * 2 if --gpus set, else 4.")
+                        help="Number of parallel worker processes. Each gets its own "
+                             "CUDA_VISIBLE_DEVICES assignment (round-robin across --gpus). "
+                             "On AMD/DirectML, CUDA_VISIBLE_DEVICES has no effect — use "
+                             "--workers 1 to avoid GPU memory contention. "
+                             "Default: same as --gpus (1 worker per GPU).")
     parser.add_argument("--gpus",        type=int, default=1,
-                        help="Number of GPUs available (default: 1). Workers are spread evenly "
-                             "across GPUs via round-robin CUDA_VISIBLE_DEVICES assignment. "
-                             "E.g. --gpus 4 --workers 8 = 2 workers per GPU. "
-                             "E.g. --gpus 8 --workers 16 = 2 workers per GPU (8x RTX5090).")
+                        help="Number of CUDA GPUs available (default: 1). Used for "
+                             "CUDA_VISIBLE_DEVICES round-robin assignment across workers. "
+                             "On AMD/DirectML ignore this — set --workers 1 instead.")
     args = parser.parse_args()
     if args.workers is None:
-        args.workers = args.gpus * 2
+        args.workers = args.gpus  # 1 worker per GPU by default
 
     timeframes = args.timeframes
 
@@ -811,36 +814,46 @@ Examples:
 
     total_work = len(work)
     n_workers  = min(args.workers, total_work) if total_work > 0 else 1
-    logger.info(f"Running {total_work} combos with {n_workers} parallel workers across {args.gpus} GPU(s)")
+    logger.info(
+        f"Running {total_work} combos with {n_workers} parallel worker(s) "
+        f"across {args.gpus} GPU(s)"
+    )
 
     # Thread lock for safe CSV writes from multiple workers
     csv_lock = threading.Lock()
     done_count = [0]  # mutable counter accessible in closure
 
-    # Partition work evenly across GPUs — one process per GPU, serial within each
-    gpu_work = [[] for _ in range(args.gpus)]
+    # Partition work evenly across workers.
+    # Each worker sets CUDA_VISIBLE_DEVICES = gpu_id % args.gpus so work
+    # is spread evenly across available GPUs.
+    # On AMD/DirectML, CUDA_VISIBLE_DEVICES has no effect — use --workers 1.
+    gpu_work = [[] for _ in range(n_workers)]
     for i, item in enumerate(work):
-        gpu_work[i % args.gpus].append(item)
+        gpu_work[i % n_workers].append(item)
 
-    with ProcessPoolExecutor(max_workers=args.gpus) as executor:
+    # Map each worker to a GPU (round-robin)
+    worker_gpu = {w: w % args.gpus for w in range(n_workers)}
+
+    with ProcessPoolExecutor(max_workers=n_workers) as executor:
         futures = {
-            executor.submit(_run_gpu_partition, gpu_id, items): gpu_id
-            for gpu_id, items in enumerate(gpu_work) if items
+            executor.submit(_run_gpu_partition, worker_gpu[worker_id], items): worker_id
+            for worker_id, items in enumerate(gpu_work) if items
         }
 
         for future in as_completed(futures):
-            gpu_id = futures[future]
+            worker_id = futures[future]
+            gpu_id    = worker_gpu[worker_id]
             try:
                 gpu_results = future.result()
             except Exception as e:
-                logger.error(f"GPU {gpu_id} partition crashed: {e}")
+                logger.error(f"Worker {worker_id} (GPU {gpu_id}) partition crashed: {e}")
                 continue
 
             for r in gpu_results:
                 done_count[0] += 1
                 if r is None:
-                    failed.append(f"GPU{gpu_id}-unknown")
-                    logger.warning(f"[{done_count[0]}/{total_work}] GPU{gpu_id} — no result")
+                    failed.append(f"W{worker_id}-unknown")
+                    logger.warning(f"[{done_count[0]}/{total_work}] Worker {worker_id} — no result")
                     continue
                 sym, tf = r.get("symbol", "?"), r.get("timeframe", "?")
                 with csv_lock:

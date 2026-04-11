@@ -234,44 +234,47 @@ def run_fold(feat_df: pd.DataFrame, feature_cols: list,
                                threshold=sig_thresh,
                                use_percentile=True, top_pct=top_pct)
 
-    # Apply Optuna-tuned filter params if available
     import config.settings as s
-    if optuna_params and "filter_params" in optuna_params:
-        fp = optuna_params["filter_params"]
-        orig_vol   = s.VOLUME_FILTER_PCT
-        orig_adx   = s.REGIME_ADX_THRESHOLD
-        orig_volflt = s.VOLATILITY_FILTER_PCT
-        s.VOLUME_FILTER_PCT     = fp.get("volume_pct",    s.VOLUME_FILTER_PCT)
-        s.REGIME_ADX_THRESHOLD  = fp.get("adx_threshold", s.REGIME_ADX_THRESHOLD)
-        s.VOLATILITY_FILTER_PCT = fp.get("volatility_pct",s.VOLATILITY_FILTER_PCT)
 
-    # Apply Optuna-tuned ATR params if available
-    if optuna_params and "atr_params" in optuna_params:
-        ap = optuna_params["atr_params"]
-        orig_stop_mult = s.ATR_STOP_MULT
-        orig_tp_mult   = s.ATR_TP_MULT
-        s.ATR_STOP_MULT = ap.get("atr_stop_mult", s.ATR_STOP_MULT)
-        s.ATR_TP_MULT   = ap.get("atr_tp_mult",   s.ATR_TP_MULT)
-    else:
-        orig_stop_mult = orig_tp_mult = None
+    # Snapshot globals that may be mutated by Optuna params
+    orig_vol      = s.VOLUME_FILTER_PCT
+    orig_adx      = s.REGIME_ADX_THRESHOLD
+    orig_volflt   = s.VOLATILITY_FILTER_PCT
+    orig_stop_mult = s.ATR_STOP_MULT
+    orig_tp_mult   = s.ATR_TP_MULT
 
-    preds    = blended.argmax(axis=1)
-    y_test_a = y_test[-len(preds):]
-    accuracy = (preds == y_test_a).mean()
+    try:
+        # Apply Optuna-tuned filter params if available
+        if optuna_params and "filter_params" in optuna_params:
+            fp = optuna_params["filter_params"]
+            s.VOLUME_FILTER_PCT     = fp.get("volume_pct",     orig_vol)
+            s.REGIME_ADX_THRESHOLD  = fp.get("adx_threshold",  orig_adx)
+            s.VOLATILITY_FILTER_PCT = fp.get("volatility_pct", orig_volflt)
 
-    test_df  = feat_df.iloc[val_end:test_end].reset_index(drop=True)
-    test_df  = test_df.tail(len(preds)).reset_index(drop=True)
-    filtered = apply_filters(test_df, signals, timeframe=config.get("timeframe", "1h"))
-    if optuna_params and "filter_params" in optuna_params:
+        # Apply Optuna-tuned ATR params if available
+        if optuna_params and "atr_params" in optuna_params:
+            ap = optuna_params["atr_params"]
+            s.ATR_STOP_MULT = ap.get("atr_stop_mult", orig_stop_mult)
+            s.ATR_TP_MULT   = ap.get("atr_tp_mult",   orig_tp_mult)
+
+        preds    = blended.argmax(axis=1)
+        y_test_a = y_test[-len(preds):]
+        accuracy = (preds == y_test_a).mean()
+
+        test_df  = feat_df.iloc[val_end:test_end].reset_index(drop=True)
+        test_df  = test_df.tail(len(preds)).reset_index(drop=True)
+        filtered = apply_filters(test_df, signals, timeframe=config.get("timeframe", "1h"))
+
+        engine  = BacktestEngine()
+        metrics = engine.run(test_df, filtered, symbol, timeframe=config.get("timeframe", "1h"))
+
+    finally:
+        # Always restore globals — even on exception
         s.VOLUME_FILTER_PCT     = orig_vol
         s.REGIME_ADX_THRESHOLD  = orig_adx
         s.VOLATILITY_FILTER_PCT = orig_volflt
-    if orig_stop_mult is not None:
-        s.ATR_STOP_MULT = orig_stop_mult
-        s.ATR_TP_MULT   = orig_tp_mult
-
-    engine  = BacktestEngine()
-    metrics = engine.run(test_df, filtered, symbol, timeframe=config.get("timeframe", "1h"))
+        s.ATR_STOP_MULT         = orig_stop_mult
+        s.ATR_TP_MULT           = orig_tp_mult
 
     result = {
         "fold":         fold_num,

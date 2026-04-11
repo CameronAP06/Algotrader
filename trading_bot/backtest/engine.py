@@ -22,6 +22,7 @@ from loguru import logger
 from config.settings import (
     INITIAL_CAPITAL, TRADING_FEE, SLIPPAGE,
     STOP_LOSS_PCT, TAKE_PROFIT_PCT, MAX_POSITION_PCT,
+    MAX_DAILY_DRAWDOWN,
     RESULTS_DIR,
     ATR_STOP_MULT, ATR_TP_MULT,       # ATR stop/TP multipliers — editable in settings
     KELLY_MAX_PCT, KELLY_REGIME_ADX,   # Kelly caps — editable in settings
@@ -169,6 +170,7 @@ class BacktestEngine:
         })
         self.position = 0.0; self.entry_price = None
         self.stop_price = None; self.tp_price = None; self.side = None
+        self.margin_held = 0.0
 
     # ── Main loop ──────────────────────────────────────────────────────────────
 
@@ -189,6 +191,11 @@ class BacktestEngine:
         payoff_ratio = 2.0
         wins, losses = [], []
 
+        # Daily drawdown guard — block new entries if daily loss >= MAX_DAILY_DRAWDOWN
+        bars_per_day = max(1, round(self._BARS_PER_YEAR.get(timeframe, 2190) / 365))
+        day_start_eq  = float(self.initial_capital)
+        daily_blocked = False
+
         for i in range(n):
             price = prices[i]
             adx   = float(adx_arr[i])
@@ -198,7 +205,21 @@ class BacktestEngine:
                       else self.cash - abs(self.position) * price)
             self.equity_curve.append(equity)
 
-            # Stop / TP checks
+            # Reset daily high-water mark at the start of each new day
+            if i % bars_per_day == 0:
+                day_start_eq  = equity
+                daily_blocked = False
+
+            # Block new entries if daily loss exceeds threshold
+            daily_loss_pct = (day_start_eq - equity) / (day_start_eq + 1e-9)
+            if daily_loss_pct >= MAX_DAILY_DRAWDOWN and not daily_blocked:
+                logger.debug(
+                    f"[{symbol}] Daily drawdown limit hit at bar {i}: "
+                    f"{daily_loss_pct:.2%} >= {MAX_DAILY_DRAWDOWN:.2%}"
+                )
+                daily_blocked = True
+
+            # Stop / TP checks — always allowed regardless of daily block
             if self.position > 0 and self.stop_price is not None:
                 if lows[i] <= self.stop_price:
                     self._close_position(self.stop_price, i, "STOP_LOSS")
@@ -224,19 +245,23 @@ class BacktestEngine:
 
             if sig == "BUY" and self.position <= 0:
                 if self.position < 0:
+                    # Always close existing short on signal flip
                     self._close_position(price, i, "SIGNAL_FLIP")
                     t = self.trades[-1]
                     (wins if t["pnl"] > 0 else losses).append(abs(t["pnl"]))
                     win_rate_est, payoff_ratio = _recalc_kelly(wins, losses)
-                self._open_long(price, i, conf, win_rate_est, payoff_ratio, adx, atr)
+                if not daily_blocked:
+                    self._open_long(price, i, conf, win_rate_est, payoff_ratio, adx, atr)
 
             elif sig == "SELL" and self.position >= 0:
                 if self.position > 0:
+                    # Always close existing long on signal flip
                     self._close_position(price, i, "SIGNAL_FLIP")
                     t = self.trades[-1]
                     (wins if t["pnl"] > 0 else losses).append(abs(t["pnl"]))
                     win_rate_est, payoff_ratio = _recalc_kelly(wins, losses)
-                self._open_short(price, i, conf, win_rate_est, payoff_ratio, adx, atr)
+                if not daily_blocked:
+                    self._open_short(price, i, conf, win_rate_est, payoff_ratio, adx, atr)
 
         if self.position != 0:
             self._close_position(prices[-1], n - 1, "END_OF_PERIOD")

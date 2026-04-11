@@ -132,7 +132,7 @@ def train(X_train: np.ndarray, y_train: np.ndarray,
         model.train()
         for X_b, y_b in train_dl:
             X_b, y_b = X_b.to(DEVICE), y_b.to(DEVICE)
-            optimizer.zero_grad()
+            optimizer.zero_grad(set_to_none=True)
             loss = criterion(model(X_b), y_b)
             loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), 1.0)
@@ -202,15 +202,37 @@ def load(symbol: str) -> CNNClassifier:
     return model
 
 
-def predict_proba(model: CNNClassifier, X: np.ndarray) -> np.ndarray:
+def predict_proba(model: CNNClassifier, X: np.ndarray, batch_size: int = 512) -> np.ndarray:
+    """
+    Batched sliding-window inference.
+    CNN expects (batch, channels=features, seq_len) so axes 1 and 2 are transposed
+    after building the sliding-window view.
+    """
     seq_len = CNN_PARAMS["sequence_length"]
     model.eval()
-    probs = []
+
+    X = np.ascontiguousarray(X, dtype=np.float32)
+    n, n_features = X.shape
+    n_windows = n - seq_len + 1
+
+    if n_windows <= 0:
+        return np.full((n, 3), [0.0, 1.0, 0.0], dtype=np.float32)
+
+    # Zero-copy sliding-window view: (n_windows, seq_len, n_features)
+    windows = np.lib.stride_tricks.as_strided(
+        X,
+        shape=(n_windows, seq_len, n_features),
+        strides=(X.strides[0], X.strides[0], X.strides[1]),
+    )
+
+    all_probs = []
     with torch.no_grad():
-        for i in range(seq_len, len(X) + 1):
-            seq = torch.FloatTensor(X[i-seq_len:i].T).unsqueeze(0).to(DEVICE)
-            p   = torch.softmax(model(seq), dim=1).cpu().detach().numpy()[0]
-            probs.append(p)
-    # Pad start with neutral probability to match input length
-    pad = np.full((seq_len - 1, 3), [0.0, 1.0, 0.0])
-    return np.vstack([pad, np.array(probs)])
+        for start in range(0, n_windows, batch_size):
+            # Transpose to (batch, n_features, seq_len) for Conv1d
+            batch_np = np.array(windows[start:start + batch_size]).transpose(0, 2, 1)
+            batch = torch.from_numpy(batch_np).to(DEVICE)
+            probs = torch.softmax(model(batch), dim=1).cpu().numpy()
+            all_probs.append(probs)
+
+    pad = np.full((seq_len - 1, 3), [0.0, 1.0, 0.0], dtype=np.float32)
+    return np.vstack([pad, np.vstack(all_probs)])

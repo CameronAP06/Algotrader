@@ -13,21 +13,52 @@ from pathlib import Path
 from loguru import logger
 from config.settings import TRADING_PAIRS, TIMEFRAME, HISTORY_DAYS, DATA_DIR
 
-# Kraken -> Binance symbol mapping
+# Kraken -> Binance symbol mapping (all pairs in TRADING_PAIRS)
+# Binance uses USDT instead of USD for all spot pairs.
 SYMBOL_MAP = {
-    "BTC/USD":  "BTC/USDT",
-    "ETH/USD":  "ETH/USDT",
-    "XRP/USD":  "XRP/USDT",
-    "SOL/USD":  "SOL/USDT",
+    # Mega caps
+    "BTC/USD":   "BTC/USDT",
+    "ETH/USD":   "ETH/USDT",
+    # Large cap L1s
+    "SOL/USD":   "SOL/USDT",
+    "ADA/USD":   "ADA/USDT",
+    "DOT/USD":   "DOT/USDT",
     "AVAX/USD":  "AVAX/USDT",
-    "LINK/USD":  "LINK/USDT",
-    "MATIC/USD":  "MATIC/USDT",
-    "INJ/USD":  "INJ/USDT",
-    "ARB/USD":  "ARB/USDT",
-    "OP/USD":   "OP/USDT",
-    "RUNE/USD":  "RUNE/USDT",
+    # Meme / retail
     "DOGE/USD":  "DOGE/USDT",
-    "ADA/USD":  "ADA/USDT",
+    "SHIB/USD":  "SHIB/USDT",
+    # DeFi
+    "UNI/USD":   "UNI/USDT",
+    "AAVE/USD":  "AAVE/USDT",
+    "CRV/USD":   "CRV/USDT",
+    "SNX/USD":   "SNX/USDT",
+    "COMP/USD":  "COMP/USDT",
+    "MKR/USD":   "MKR/USDT",
+    "1INCH/USD": "1INCH/USDT",
+    # Payments / long history
+    "XRP/USD":   "XRP/USDT",
+    "LTC/USD":   "LTC/USDT",
+    "XLM/USD":   "XLM/USDT",
+    "TRX/USD":   "TRX/USDT",
+    "DASH/USD":  "DASH/USDT",
+    "ZEC/USD":   "ZEC/USDT",
+    "BCH/USD":   "BCH/USDT",
+    "ETC/USD":   "ETC/USDT",
+    # Ecosystem / L2
+    "LINK/USD":  "LINK/USDT",
+    "MATIC/USD": "MATIC/USDT",
+    "INJ/USD":   "INJ/USDT",
+    "ARB/USD":   "ARB/USDT",
+    "OP/USD":    "OP/USDT",
+    "ATOM/USD":  "ATOM/USDT",
+    "NEAR/USD":  "NEAR/USDT",
+    "FTM/USD":   "FTM/USDT",
+    "ALGO/USD":  "ALGO/USDT",
+    "VET/USD":   "VET/USDT",
+    "FIL/USD":   "FIL/USDT",
+    "XTZ/USD":   "XTZ/USDT",
+    "GRT/USD":   "GRT/USDT",
+    "RUNE/USD":  "RUNE/USDT",
 }
 
 
@@ -42,7 +73,8 @@ def get_exchange():
 
 
 def fetch_ohlcv(exchange, symbol, timeframe=TIMEFRAME, days=HISTORY_DAYS):
-    binance_symbol = SYMBOL_MAP.get(symbol, symbol)
+    # Fall back to replacing /USD with /USDT for any pair not explicitly mapped
+    binance_symbol = SYMBOL_MAP.get(symbol, symbol.replace("/USD", "/USDT"))
     since_ms  = int((datetime.utcnow() - timedelta(days=days)).timestamp() * 1000)
     until_ms  = int(datetime.utcnow().timestamp() * 1000)
     all_candles = []

@@ -140,6 +140,17 @@ def make_objective(X_train, y_train, X_val, y_val, all_cols,
     import config.settings as s
 
     def objective(trial: optuna.Trial) -> float:
+        import models.tft_model as tft_mod
+        top_pct = 0.15  # top 15% most confident bars fire a signal
+
+        # Snapshot all globals that this trial may mutate
+        orig_tft    = tft_mod.TFT_PARAMS.copy()
+        orig_vol    = s.VOLUME_FILTER_PCT
+        orig_adx    = s.REGIME_ADX_THRESHOLD
+        orig_volflt = s.VOLATILITY_FILTER_PCT
+        orig_stop   = s.ATR_STOP_MULT
+        orig_tp     = s.ATR_TP_MULT
+
         try:
             # 1. Feature selection
             selected_cols = select_features(all_cols, trial)
@@ -152,47 +163,28 @@ def make_objective(X_train, y_train, X_val, y_val, all_cols,
 
             # 2. TFT hyperparameters
             tft_p = suggest_tft_params(trial)
-
-            # Override global TFT params for this trial
-            import models.tft_model as tft_mod
-            orig_params = tft_mod.TFT_PARAMS.copy()
             tft_mod.TFT_PARAMS.update(tft_p)
 
             model = tft_mod.train(X_tr, y_train, X_v, y_val, "optuna_trial")
             probs = tft_mod.predict_proba(model, X_v)
-
-            # Restore params
-            tft_mod.TFT_PARAMS.update(orig_params)
 
             # 3. Signal threshold
             threshold = suggest_signal_threshold(trial)
 
             # 4. Filter params
             filter_p = suggest_filter_params(trial)
-            orig_vol    = s.VOLUME_FILTER_PCT
-            orig_adx    = s.REGIME_ADX_THRESHOLD
-            orig_volflt = s.VOLATILITY_FILTER_PCT
             s.VOLUME_FILTER_PCT     = filter_p["volume_pct"]
             s.REGIME_ADX_THRESHOLD  = filter_p["adx_threshold"]
             s.VOLATILITY_FILTER_PCT = filter_p["volatility_pct"]
 
             # 4b. ATR stop/TP multipliers
             atr_p = suggest_atr_params(trial)
-            orig_stop_mult = s.ATR_STOP_MULT
-            orig_tp_mult   = s.ATR_TP_MULT
             s.ATR_STOP_MULT = atr_p["atr_stop_mult"]
             s.ATR_TP_MULT   = atr_p["atr_tp_mult"]
 
             signals = generate_signals(probs, threshold=threshold,
-                                        use_percentile=True, top_pct=top_pct)
+                                       use_percentile=True, top_pct=top_pct)
             filtered = apply_filters(feat_df_val, signals, timeframe=timeframe)
-
-            # Restore filter + ATR params
-            s.VOLUME_FILTER_PCT     = orig_vol
-            s.REGIME_ADX_THRESHOLD  = orig_adx
-            s.VOLATILITY_FILTER_PCT = orig_volflt
-            s.ATR_STOP_MULT         = orig_stop_mult
-            s.ATR_TP_MULT           = orig_tp_mult
 
             # 5. Backtest on validation bars
             engine  = BacktestEngine()
@@ -208,21 +200,25 @@ def make_objective(X_train, y_train, X_val, y_val, all_cols,
             win_rate = metrics["win_rate"]
             ret      = metrics["total_return"]
 
-            # Composite score rewarding:
-            # 1. Win rate above breakeven (33% at 2:1) — most important
-            # 2. Positive return
-            # 3. Trade count in sweet spot (3-30) — not too few, not too many
-            # 4. Sharpe as tiebreaker but capped to avoid outlier games
-            wr_bonus      = max(0.0, (win_rate - 0.33) * 10)   # 0 at breakeven, +1 at 43%
+            wr_bonus      = max(0.0, (win_rate - 0.33) * 10)
             ret_bonus     = 2.0 if ret > 0 else 0.0
-            count_bonus   = min(2.0, n_trades / 15)             # peaks at 30 trades, no bonus beyond
-            sharpe_capped = max(-3.0, min(3.0, sharpe))         # cap to ±3 to avoid outliers
+            count_bonus   = min(2.0, n_trades / 15)
+            sharpe_capped = max(-3.0, min(3.0, sharpe))
 
             return sharpe_capped + wr_bonus + ret_bonus + count_bonus
 
         except Exception as e:
             logger.debug(f"Trial failed: {e}")
             return -999.0
+
+        finally:
+            # Always restore globals — even on exception or early return
+            tft_mod.TFT_PARAMS.update(orig_tft)
+            s.VOLUME_FILTER_PCT     = orig_vol
+            s.REGIME_ADX_THRESHOLD  = orig_adx
+            s.VOLATILITY_FILTER_PCT = orig_volflt
+            s.ATR_STOP_MULT         = orig_stop
+            s.ATR_TP_MULT           = orig_tp
 
     return objective
 

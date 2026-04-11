@@ -146,7 +146,7 @@ def _train_one(X_train, y_train, X_val, y_val,
         model.train()
         for X_b, y_b in train_dl:
             X_b, y_b = X_b.to(DEVICE), y_b.to(DEVICE)
-            optimizer.zero_grad()
+            optimizer.zero_grad(set_to_none=True)
             loss = criterion(model(X_b), y_b)
             loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), 1.0)
@@ -245,35 +245,53 @@ def train_ensemble(X_train: np.ndarray, y_train: np.ndarray,
 # ── Inference ─────────────────────────────────────────────────────────────────
 
 def predict_proba_ensemble(models: list, X: np.ndarray,
-                           seq_len: int = None) -> np.ndarray:
+                           seq_len: int = None,
+                           batch_size: int = 512) -> np.ndarray:
     """
-    Average probability predictions across all ensemble models.
-    Returns array of shape (n_samples, 3) — averaged softmax probabilities.
+    Batched sliding-window inference averaged across all ensemble models.
+
+    Replaces the old sample-by-sample loop. With 9 models and 600 test bars
+    the old approach made 9 × 600 = 5 400 individual GPU forward passes.
+    This version makes 9 × ceil(600/512) = 18 passes — ~300x fewer.
+
+    Uses numpy stride tricks for a zero-copy sliding-window view, identical
+    to the approach in lstm_model.py and cnn_model.py.
     """
     if seq_len is None:
         seq_len = LSTM_PARAMS["sequence_length"]
 
-    all_probas = []
+    X = np.ascontiguousarray(X, dtype=np.float32)
+    n, n_features = X.shape
+    n_windows = n - seq_len + 1
 
+    pad = np.full((seq_len - 1, 3), [0.0, 1.0, 0.0], dtype=np.float32)
+
+    if n_windows <= 0:
+        # X shorter than seq_len — return neutral predictions
+        return np.tile([0.0, 1.0, 0.0], (n, 1)).astype(np.float32)
+
+    # Build zero-copy sliding-window view: (n_windows, seq_len, n_features)
+    windows = np.lib.stride_tricks.as_strided(
+        X,
+        shape=(n_windows, seq_len, n_features),
+        strides=(X.strides[0], X.strides[0], X.strides[1]),
+    )
+
+    all_probas = []
     for model in models:
         model.eval()
-        probs = []
+        model_probs = []
         with torch.no_grad():
-            for i in range(seq_len, len(X) + 1):
-                seq = torch.FloatTensor(X[i-seq_len:i]).unsqueeze(0).to(DEVICE)
-                p   = torch.softmax(model(seq), dim=1).cpu().numpy()[0]
-                probs.append(p)
-
-        pad = np.full((seq_len - 1, 3), [0.0, 1.0, 0.0])
-        if len(probs) == 0:
-            # X_test shorter than seq_len — return all-neutral predictions
-            all_probas.append(pad[:len(X)] if len(X) > 0 else pad)
-            continue
-        all_probas.append(np.vstack([pad, np.array(probs)]))
+            for start in range(0, n_windows, batch_size):
+                batch = torch.from_numpy(
+                    np.array(windows[start:start + batch_size])
+                ).to(DEVICE)
+                p = torch.softmax(model(batch), dim=1).cpu().numpy()
+                model_probs.append(p)
+        all_probas.append(np.vstack([pad, np.vstack(model_probs)]))
 
     # Average across all models — this is where variance cancels
-    ensemble_proba = np.mean(all_probas, axis=0)
-    return ensemble_proba
+    return np.mean(all_probas, axis=0)
 
 
 # ── Save / Load ───────────────────────────────────────────────────────────────

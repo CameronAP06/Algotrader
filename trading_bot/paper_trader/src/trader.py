@@ -22,7 +22,7 @@ from sklearn.preprocessing import StandardScaler
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
-SYMBOLS       = ["DOGE/USD", "LINK/USD", "AAVE/USD", "XMR/USD"]
+SYMBOLS       = ["DOGE/USD", "LINK/USD", "AAVE/USD"]
 TIMEFRAME     = "4h"
 HISTORY_DAYS  = 400  # 52w features need 365+ days
 SEQ_LEN       = 24
@@ -46,7 +46,7 @@ def safe_name(symbol: str) -> str:
     return symbol.replace("/", "_").lower()
 
 
-# ── LSTM Architecture ─────────────────────────────────────────────────────────
+# ── Model Architectures (must match train_and_backtest.py exactly) ────────────
 
 class MIOpenSafeLayerNorm(nn.Module):
     def __init__(self, normalized_shape, eps=1e-5):
@@ -73,6 +73,33 @@ class LSTMClassifier(nn.Module):
     def forward(self, x):
         out, _ = self.lstm(x)
         return self.fc(self.dropout(self.norm(out[:, -1, :])))
+
+
+class CNNClassifier(nn.Module):
+    def __init__(self, input_size, num_filters, kernel_size, num_layers,
+                 num_classes, dropout):
+        super().__init__()
+        layers = []
+        in_ch  = input_size
+        for i in range(num_layers):
+            out_ch = num_filters * (2 ** min(i, 1))
+            layers += [
+                nn.Conv1d(in_ch, out_ch, kernel_size, padding=kernel_size // 2),
+                nn.BatchNorm1d(out_ch),
+                nn.ReLU(),
+                nn.Dropout(dropout),
+            ]
+            in_ch = out_ch
+        self.conv_layers = nn.Sequential(*layers)
+        self.avg_pool    = nn.AdaptiveAvgPool1d(1)
+        self.max_pool    = nn.AdaptiveMaxPool1d(1)
+        self.fc          = nn.Linear(in_ch * 2, num_classes)
+
+    def forward(self, x):
+        x   = self.conv_layers(x)
+        avg = self.avg_pool(x).squeeze(-1)
+        mx  = self.max_pool(x).squeeze(-1)
+        return self.fc(torch.cat([avg, mx], dim=1))
 
 
 # ── Data ──────────────────────────────────────────────────────────────────────
@@ -103,78 +130,133 @@ def fetch_candles(symbol: str) -> pd.DataFrame:
 # ── Model ─────────────────────────────────────────────────────────────────────
 
 def load_ensemble(symbol: str) -> tuple:
-    """Load all N models for a symbol. Returns (models, scaler, device, info)."""
-    name   = safe_name(symbol)
+    """
+    Load the CatBoost + CNN + LSTM ensemble saved by train_and_backtest.py.
+    File naming matches the main pipeline conventions:
+      {SYMBOL_UPPER}_catboost.cbm / _cnn.pt / _lstm.pt / _scaler.pkl
+    """
+    upper  = symbol.replace("/", "_")
     device = torch.device("cpu")
-    info   = joblib.load(MODEL_DIR / f"lstm_{name}_info.pkl")
-    scaler = joblib.load(MODEL_DIR / f"scaler_{name}.pkl")
-    n_models = info.get("n_models", 9)
 
-    models = []
-    for i in range(n_models):
-        m = LSTMClassifier(
-            input_size  = info["input_size"],
-            hidden_size = info["hidden_size"],
-            num_layers  = info["num_layers"],
-            num_classes = 3,
-            dropout     = info["dropout"],
-        ).to(device)
-        m.load_state_dict(torch.load(MODEL_DIR / f"lstm_{name}_{i}.pt", map_location=device))
-        m.eval()
-        models.append(m)
+    # Scaler
+    scaler = joblib.load(MODEL_DIR / f"{upper}_scaler.pkl")
 
-    logger.info(f"Loaded {len(models)}-model ensemble for {symbol}")
-    return models, scaler, device, info
+    # CatBoost
+    from catboost import CatBoostClassifier
+    cat_model = CatBoostClassifier()
+    cat_model.load_model(str(MODEL_DIR / f"{upper}_catboost.cbm"))
+
+    # CNN
+    cnn_info = joblib.load(MODEL_DIR / f"{upper}_cnn_info.pkl")
+    cnn_model = CNNClassifier(
+        input_size  = cnn_info["input_size"],
+        num_filters = cnn_info["num_filters"],
+        kernel_size = cnn_info["kernel_size"],
+        num_layers  = cnn_info["num_layers"],
+        num_classes = 3,
+        dropout     = 0.0,  # inference — no dropout
+    ).to(device)
+    cnn_model.load_state_dict(torch.load(MODEL_DIR / f"{upper}_cnn.pt", map_location=device))
+    cnn_model.eval()
+
+    # LSTM
+    lstm_info = joblib.load(MODEL_DIR / f"{upper}_lstm_info.pkl")
+    lstm_model = LSTMClassifier(
+        input_size  = lstm_info["input_size"],
+        hidden_size = lstm_info["hidden_size"],
+        num_layers  = lstm_info["num_layers"],
+        num_classes = 3,
+        dropout     = 0.0,
+    ).to(device)
+    lstm_model.load_state_dict(torch.load(MODEL_DIR / f"{upper}_lstm.pt", map_location=device))
+    lstm_model.eval()
+
+    # Ensemble weights (DE-optimised)
+    weights_path = MODEL_DIR / f"{upper}_ensemble_weights.pkl"
+    weights = joblib.load(weights_path) if weights_path.exists() else [1/3, 1/3, 1/3]
+
+    logger.info(f"Loaded CatBoost+CNN+LSTM ensemble for {symbol}")
+    return cat_model, cnn_model, lstm_model, scaler, device, weights
 
 
-def get_signal(models: list, scaler, device, info, df: pd.DataFrame) -> dict:
-    """Run ensemble inference — average probabilities across all N models."""
-    feat_df = build_features(df, timeframe=TIMEFRAME)
+def _predict_proba_batched(model, X: np.ndarray, seq_len: int,
+                            model_type: str, device) -> np.ndarray:
+    """
+    Batched sliding-window inference for CNN or LSTM.
+    Returns (n_samples, 3) probability array with leading padding rows.
+    """
+    X = np.ascontiguousarray(X, dtype=np.float32)
+    n, n_feat = X.shape
+    n_windows = n - seq_len + 1
+    if n_windows <= 0:
+        return np.full((n, 3), [0.0, 1.0, 0.0], dtype=np.float32)
 
-    saved_cols = info.get("feature_cols") or get_feature_columns(feat_df)
-    for col in saved_cols:
-        if col not in feat_df.columns:
-            feat_df[col] = 0.0
+    windows = np.lib.stride_tricks.as_strided(
+        X,
+        shape=(n_windows, seq_len, n_feat),
+        strides=(X.strides[0], X.strides[0], X.strides[1]),
+    )
 
-    X = scaler.transform(feat_df[saved_cols].values.astype(np.float32))
+    batch_size = 256
+    all_probs  = []
+    with torch.no_grad():
+        for start in range(0, n_windows, batch_size):
+            batch_np = np.array(windows[start:start + batch_size])
+            if model_type == "cnn":
+                batch_np = batch_np.transpose(0, 2, 1)  # (B, features, seq_len)
+            batch = torch.from_numpy(batch_np).to(device)
+            probs = torch.softmax(model(batch), dim=1).cpu().numpy()
+            all_probs.append(probs)
+
+    pad = np.full((seq_len - 1, 3), [0.0, 1.0, 0.0], dtype=np.float32)
+    return np.vstack([pad, np.vstack(all_probs)])
+
+
+def get_signal(cat_model, cnn_model, lstm_model, scaler, device, weights,
+               df: pd.DataFrame) -> dict:
+    """
+    Run CatBoost+CNN+LSTM ensemble inference on the latest bar.
+    Uses batched stride-tricks inference — no sample-by-sample loop.
+    """
+    feat_df    = build_features(df, timeframe=TIMEFRAME)
+    feat_cols  = get_feature_columns(feat_df)
+    X          = scaler.transform(feat_df[feat_cols].values.astype(np.float32))
 
     if len(X) < SEQ_LEN:
         return {"signal": "HOLD", "confidence": 0.0, "up_prob": 0.0, "down_prob": 0.0}
 
-    # Score recent bars across all models to find percentile threshold
-    n = min(len(X), 300)
-    all_best = []
-    for i in range(SEQ_LEN, n + 1):
-        seq = torch.FloatTensor(X[i-SEQ_LEN:i]).unsqueeze(0).to(device)
-        bar_probs = []
-        with torch.no_grad():
-            for model in models:
-                p = torch.softmax(model(seq), dim=1).cpu().numpy()[0]
-                bar_probs.append(p)
-        avg_p = np.mean(bar_probs, axis=0)
-        all_best.append(max(avg_p[0], avg_p[2]))
+    # CatBoost: flat features, no sequence
+    cat_proba = cat_model.predict_proba(X)   # (n, 3)
 
-    candidates = [p for p in all_best if p > 0.34]
-    threshold  = max(float(np.percentile(candidates, (1 - TOP_PCT) * 100)), 0.34) \
-                 if len(candidates) >= 5 else 0.40
+    # CNN + LSTM: batched sliding-window over the whole array
+    cnn_proba  = _predict_proba_batched(cnn_model,  X, SEQ_LEN, "cnn",  device)
+    lstm_proba = _predict_proba_batched(lstm_model, X, SEQ_LEN, "lstm", device)
 
-    # Latest bar — average ensemble probabilities
-    seq = torch.FloatTensor(X[-SEQ_LEN:]).unsqueeze(0).to(device)
-    bar_probs = []
-    with torch.no_grad():
-        for model in models:
-            p = torch.softmax(model(seq), dim=1).cpu().numpy()[0]
-            bar_probs.append(p)
-    probs = np.mean(bar_probs, axis=0)
+    # Align lengths (padding rows at start of seq models)
+    n = min(len(cat_proba), len(cnn_proba), len(lstm_proba))
+    blended = (weights[0] * cat_proba[-n:]
+             + weights[1] * cnn_proba[-n:]
+             + weights[2] * lstm_proba[-n:])
 
-    down_p, up_p = float(probs[0]), float(probs[2])
+    # Use last N bars to compute percentile signal threshold
+    recent    = min(n, 300)
+    up_probs  = blended[-recent:, 2]
+    dn_probs  = blended[-recent:, 0]
+    best_prob = np.maximum(up_probs, dn_probs)
+    candidates = best_prob[best_prob > 0.34]
+    threshold  = (max(float(np.percentile(candidates, (1 - TOP_PCT) * 100)), 0.34)
+                  if len(candidates) >= 5 else 0.40)
 
-    if up_p >= threshold:     signal = "BUY"
+    # Signal from the very last bar
+    up_p  = float(blended[-1, 2])
+    down_p = float(blended[-1, 0])
+
+    if   up_p   >= threshold: signal = "BUY"
     elif down_p >= threshold: signal = "SELL"
-    else:                     signal = "HOLD"
+    else:                      signal = "HOLD"
 
     logger.info(f"Signal: {signal} | up={up_p:.3f} down={down_p:.3f} "
-                f"threshold={threshold:.3f} ensemble={len(models)} models")
+                f"threshold={threshold:.3f}")
     return {"signal": signal, "confidence": max(up_p, down_p),
             "up_prob": up_p, "down_prob": down_p}
 
@@ -211,9 +293,9 @@ def log_trade(row: dict):
 # ── Core ──────────────────────────────────────────────────────────────────────
 
 def run_symbol(symbol: str) -> dict | None:
-    df                          = fetch_candles(symbol)
-    models, scaler, device, info = load_ensemble(symbol)
-    sig                         = get_signal(models, scaler, device, info, df)
+    df                                              = fetch_candles(symbol)
+    cat_model, cnn_model, lstm_model, scaler, device, weights = load_ensemble(symbol)
+    sig = get_signal(cat_model, cnn_model, lstm_model, scaler, device, weights, df)
     state          = load_state(symbol)
     current_price  = float(df["close"].iloc[-1])
     now            = datetime.now(timezone.utc).isoformat()
