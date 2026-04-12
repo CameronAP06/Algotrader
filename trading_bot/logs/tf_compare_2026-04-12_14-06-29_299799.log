@@ -1,0 +1,39 @@
+2026-04-12 14:06:30.092 | INFO     | kraken_history:get_history_dir:593 - Found Kraken OHLC data at: data/OHLC_Kraken (12027 CSV files)
+2026-04-12 14:06:30.092 | INFO     | kraken_history:fetch_ohlcv_full:349 - Loading BTC/USD 4h from data/OHLC_Kraken\XBTUSD_240.csv...
+2026-04-12 14:06:30.107 | INFO     | kraken_history:fetch_ohlcv_full:351 -   Loaded 4383 bars (2024-01-01 → 2025-12-31)
+2026-04-12 14:06:30.108 | INFO     | kraken_history:fetch_ohlcv_full:360 -   History cap 1095d: 4383 → 4383 bars (from 2024-01-01)
+2026-04-12 14:06:30.108 | INFO     | kraken_history:_topup_from_api:230 -   Topping up BTC/USD 4h from 2025-12-31 via API...
+2026-04-12 14:06:36.153 | INFO     | kraken_history:_topup_from_api:253 -   Top-up: 610 new bars
+2026-04-12 14:06:36.168 | SUCCESS  | kraken_history:fetch_ohlcv_full:389 - BTC/USD 4h: 4993 bars total (2024-01-01 → 2026-04-12)
+2026-04-12 14:06:36.193 | INFO     | data.feature_engineer:build_features:606 - Building features for BTC/USD (4993 rows)
+2026-04-12 14:06:36.294 | INFO     | data.feature_engineer:build_features:637 - Dropped 200 NaN/inf rows → 4793 usable rows
+2026-04-12 14:06:36.295 | INFO     | data.feature_engineer:build_features:640 - Label distribution: DOWN=331 NEUTRAL=4046 UP=416
+2026-04-12 14:06:36.295 | INFO     | data.feature_engineer:build_features:647 - Regime: ranging=1988 trending_up=1254 trending_down=1551
+2026-04-12 14:06:36.825 | INFO     | data.feature_engineer:save_features:661 - Saved features -> data\features\BTC_USD_4h_features.csv
+2026-04-12 14:06:36.850 | INFO     | models.lstm_ensemble:<module>:49 - Ensemble using cuda | AMP=enabled
+2026-04-12 14:06:36.851 | INFO     | models.lstm_ensemble:train_ensemble:428 - 
+Training 9-model ensemble for BTC/USD_4h on cuda
+2026-04-12 14:06:36.851 | INFO     | models.lstm_ensemble:train_ensemble:429 -   Train: 2850 | Val: 647 | Features: 122
+2026-04-12 14:06:38.730 | INFO     | models.lstm_ensemble:_train_one:329 -   [1/9] Class weights: DOWN=1.66 NEUTRAL=0.25 UP=1.18 (from counts: [222, 2317, 311])
+2026-04-12 14:06:38.730 | INFO     | models.lstm_ensemble:_train_one:342 -   [1/9] Training seed=42 — 2790 samples
+2026-04-12 14:06:39.409 | ERROR    | __mp_main__:run_symbol:591 - BTC/USD 4h failed: expected scalar type Half but found Float
+2026-04-12 14:06:39.467 | INFO     | kraken_history:get_history_dir:593 - Found Kraken OHLC data at: data/OHLC_Kraken (12027 CSV files)
+2026-04-12 14:06:39.467 | INFO     | kraken_history:fetch_ohlcv_full:349 - Loading ETH/USD 4h from data/OHLC_Kraken\ETHUSD_240.csv...
+2026-04-12 14:06:39.477 | INFO     | kraken_history:fetch_ohlcv_full:351 -   Loaded 4383 bars (2024-01-01 → 2025-12-31)
+2026-04-12 14:06:39.478 | INFO     | kraken_history:fetch_ohlcv_full:360 -   History cap 1095d: 4383 → 4383 bars (from 2024-01-01)
+2026-04-12 14:06:39.478 | INFO     | kraken_history:_topup_from_api:230 -   Topping up ETH/USD 4h from 2025-12-31 via API...
+2026-04-12 14:06:45.532 | INFO     | kraken_history:_topup_from_api:253 -   Top-up: 610 new bars
+2026-04-12 14:06:45.547 | SUCCESS  | kraken_history:fetch_ohlcv_full:389 - ETH/USD 4h: 4993 bars total (2024-01-01 → 2026-04-12)
+2026-04-12 14:06:45.613 | INFO     | kraken_history:get_history_dir:593 - Found Kraken OHLC data at: data/OHLC_Kraken (12027 CSV files)
+2026-04-12 14:06:45.632 | INFO     | kraken_history:fetch_ohlcv_full:334 - Loaded BTC/USD 4h from cache (4993 rows)
+2026-04-12 14:06:45.632 | INFO     | data.feature_engineer:build_features:606 - Building features for ETH/USD (4993 rows)
+2026-04-12 14:06:45.738 | INFO     | data.feature_engineer:build_features:637 - Dropped 200 NaN/inf rows → 4793 usable rows
+2026-04-12 14:06:45.739 | INFO     | data.feature_engineer:build_features:640 - Label distribution: DOWN=635 NEUTRAL=3508 UP=650
+2026-04-12 14:06:45.739 | INFO     | data.feature_engineer:build_features:647 - Regime: ranging=1829 trending_up=1190 trending_down=1774
+2026-04-12 14:06:46.277 | INFO     | data.feature_engineer:save_features:661 - Saved features -> data\features\ETH_USD_4h_features.csv
+2026-04-12 14:06:46.287 | INFO     | models.lstm_ensemble:train_ensemble:428 - 
+Training 9-model ensemble for ETH/USD_4h on cuda
+2026-04-12 14:06:46.288 | INFO     | models.lstm_ensemble:train_ensemble:429 -   Train: 2850 | Val: 647 | Features: 122
+2026-04-12 14:06:46.297 | INFO     | models.lstm_ensemble:_train_one:329 -   [1/9] Class weights: DOWN=1.42 NEUTRAL=0.25 UP=1.34 (from counts: [358, 2114, 378])
+2026-04-12 14:06:46.297 | INFO     | models.lstm_ensemble:_train_one:342 -   [1/9] Training seed=42 — 2790 samples
+2026-04-12 14:06:46.856 | ERROR    | __mp_main__:run_symbol:591 - ETH/USD 4h failed: expected scalar type Half but found Float
