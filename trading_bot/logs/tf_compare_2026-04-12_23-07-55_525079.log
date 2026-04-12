@@ -1,0 +1,3 @@
+2026-04-12 23:07:55.525 | INFO     | __main__:main:850 - Using explicit symbol list: 2 symbols
+2026-04-12 23:07:55.528 | INFO     | __main__:main:950 - Running 2 combos with 1 parallel worker(s) across 1 GPU(s)
+2026-04-12 23:21:49.216 | INFO     | __main__:main:986 - [1/2] INJ/USD 4h done
