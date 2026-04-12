@@ -1,0 +1,11 @@
+2026-04-12 17:52:38.654 | INFO     | __main__:main:843 - Using explicit symbol list: 5 symbols
+2026-04-12 17:52:38.661 | INFO     | __main__:main:943 - Running 5 combos with 1 parallel worker(s) across 1 GPU(s)
+2026-04-12 18:05:22.346 | INFO     | __main__:main:979 - [1/5] BTC/USD 4h done
+2026-04-12 18:17:43.468 | INFO     | __main__:main:979 - [2/5] ETH/USD 4h done
+2026-04-12 18:30:48.680 | INFO     | __main__:main:979 - [3/5] INJ/USD 4h done
+2026-04-12 18:43:34.168 | INFO     | __main__:main:979 - [4/5] LINK/USD 4h done
+2026-04-12 18:56:23.943 | INFO     | __main__:main:979 - [5/5] SOL/USD 4h done
+2026-04-12 18:56:24.694 | INFO     | src.notifier:send:15 - [Telegram disabled] ✅ <b>Scan Complete</b> (1.1h)
+Combos: 5 | Failed: 0 | Skipped: 0
+<b>Strong: 0</b> | Good: 0
+Output: expanded_scan_20260412_175238.csv
