@@ -65,14 +65,22 @@ XGB_PARAMS = {
 }
 
 LSTM_PARAMS = {
-    "sequence_length": 60, "hidden_size": 128,
-    "num_layers": 2, "dropout": 0.2,
-    "epochs": 100, "batch_size": 64,
-    "learning_rate": 0.001,
-    "patience": 30,   # was 25 — must be >= T_0*(1+T_mult)=30 so early stopping
-                      # never fires before the first full cosine LR restart cycle
-                      # completes (cycle 1=10 epochs, cycle 2=20 epochs → total 30).
-                      # Stopping mid-cycle risks getting trapped in a local optimum.
+    "sequence_length": 60,
+    "hidden_size":     256,   # was 128 — wider bottleneck for 122 input features
+    "num_layers":      2,
+    "dropout":         0.3,   # slightly higher to compensate for larger capacity
+    "epochs":          120,   # extra headroom since no LR restarts destabilise early
+    "batch_size":      64,
+    "learning_rate":   0.002, # was 0.001 — higher peak LR with single cosine decay
+    "patience":        25,    # was 30 — no restart cycle to wait for, can stop earlier
+    "training_stride": 15,    # sliding-window step during training (seq_len//4).
+                              # stride=1 → 98% overlap between adjacent sequences (redundant).
+                              # stride=15 → sequences drawn from diverse time periods,
+                              # presented in random order each epoch via DataLoader shuffle.
+                              # Val/test always use stride=1 (dense coverage for evaluation).
+    "noise_sigma":     0.02,  # Gaussian noise σ added to inputs during training only.
+                              # Forces the model to learn robust patterns rather than
+                              # memorising specific feature values. Off during inference.
 }
 
 ENSEMBLE_WEIGHTS = {"catboost": 0.40, "cnn": 0.35, "lstm": 0.25}
@@ -142,10 +150,9 @@ USE_TREND_FILTER      = False   # SMA alignment — disabled: hurts at longer TF
 USE_VOLATILITY_FILTER = True    # Skip very low ATR bars (bottom VOLATILITY_FILTER_PCT)
 USE_VOLUME_FILTER     = True    # Require minimum volume (VOLUME_FILTER_PCT × avg)
 USE_FUNDING_FILTER    = False   # Funding rate extremes (Kraken perp only)
-USE_REGIME_FILTER     = False   # Disables ADX Filter 5 only.
-                                 # Choppiness (Filter 6) and Market Efficiency Ratio
-                                 # (Filter 7) are unconditional and remain active.
-                                 # Edge scanner validated signals without ADX gating.
+USE_REGIME_FILTER     = False   # ADX momentum gate (Filter 5) — disabled: Kelly already penalises low-ADX bars
+USE_CHOPPINESS_FILTER = False   # Choppiness Index gate (Filter 6) — killed 293 signals (53% of all kills); disabled
+USE_EFFICIENCY_FILTER = False   # Market Efficiency Ratio gate (Filter 7) — redundant with choppiness; disabled
 
 # Volatility filter: skip bars in bottom X% of ATR distribution
 # Was 0.20 (bottom 20%) — lowered to bottom 10%

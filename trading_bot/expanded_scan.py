@@ -31,6 +31,7 @@ sys.path.insert(0, _here)
 sys.path.insert(0, _parent)
 
 import numpy as np
+import pandas as pd
 from loguru import logger
 from sklearn.preprocessing import StandardScaler
 
@@ -219,8 +220,7 @@ def _fmt_date(ts_series) -> str:
         t0 = pd.to_datetime(ts_series.iloc[0])
         t1 = pd.to_datetime(ts_series.iloc[-1])
         return f"{t0.strftime('%Y-%m-%d')}→{t1.strftime('%Y-%m-%d')}"
-    except Exception as _e:
-        logger.debug(f"_fmt_date failed ({type(_e).__name__}: {_e}) — series type={type(ts_series)}, len={len(ts_series) if hasattr(ts_series, '__len__') else 'N/A'}, sample={repr(ts_series.iloc[0]) if hasattr(ts_series, 'iloc') and len(ts_series) > 0 else 'EMPTY'}")
+    except Exception:
         return "?"
 
 

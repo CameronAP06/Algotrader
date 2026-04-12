@@ -55,7 +55,7 @@ CACHE_DIR = Path(MODEL_DIR) / "fold_cache"   # cached trained models keyed by da
 
 # Architecture version tag — bump this to invalidate all cached models when
 # the architecture changes (e.g. after adding attention or changing focal gamma)
-_ARCH_TAG = b"arch_v3_attention_focal_gamma1"
+_ARCH_TAG = b"arch_v4_multihead_hidden256_stride15"
 
 
 # ── Architecture ──────────────────────────────────────────────────────────────
@@ -73,24 +73,38 @@ class MIOpenSafeLayerNorm(nn.Module):
         return self.weight * (x - mean) / torch.sqrt(var + self.eps) + self.bias
 
 
-class SelfAttention(nn.Module):
+class MultiHeadTemporalAttention(nn.Module):
     """
-    Single-head additive self-attention over the LSTM output sequence.
+    Multi-head self-attention over the LSTM output sequence.
 
-    Instead of only using the final hidden state, this learns a weighted
-    average over all seq_len hidden states — letting the model focus on
-    whichever bars are most predictive rather than trusting the last one alone.
+    Replaces single-head additive attention with 4 independent attention heads.
+    Each head learns to focus on a different aspect of the sequence — e.g. one
+    head might weight recent momentum bars, another might attend to volume spikes,
+    another to mean-reversion setups.  The heads operate in parallel and their
+    outputs are concatenated then projected back to hidden_size.
 
-    Complexity: O(seq_len * hidden_size) — negligible vs LSTM.
+    Uses PyTorch's built-in nn.MultiheadAttention with batch_first=True.
+    hidden_size must be divisible by num_heads (256 / 4 = 64 ✓).
     """
-    def __init__(self, hidden_size: int):
+    def __init__(self, hidden_size: int, num_heads: int = 4, dropout: float = 0.1):
         super().__init__()
-        self.score = nn.Linear(hidden_size, 1, bias=False)
+        assert hidden_size % num_heads == 0, \
+            f"hidden_size ({hidden_size}) must be divisible by num_heads ({num_heads})"
+        self.attn = nn.MultiheadAttention(
+            embed_dim   = hidden_size,
+            num_heads   = num_heads,
+            dropout     = dropout,
+            batch_first = True,
+        )
+        self.norm = nn.LayerNorm(hidden_size)
 
     def forward(self, lstm_out: torch.Tensor) -> torch.Tensor:
-        # lstm_out: (batch, seq_len, hidden_size)
-        weights = torch.softmax(self.score(lstm_out), dim=1)   # (batch, seq_len, 1)
-        return (lstm_out * weights).sum(dim=1)                  # (batch, hidden_size)
+        # Self-attention: query = key = value = lstm_out
+        # attn_out: (batch, seq_len, hidden_size)
+        attn_out, _ = self.attn(lstm_out, lstm_out, lstm_out)
+        # Residual + norm, then take the final timestep as context vector
+        out = self.norm(lstm_out + attn_out)
+        return out[:, -1, :]   # (batch, hidden_size) — last attended position
 
 
 class FocalLoss(nn.Module):
@@ -144,32 +158,50 @@ class LSTMClassifier(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, num_classes, dropout):
         super().__init__()
         # Inter-layer LSTM dropout is safe on CUDA but broken on DirectML
-        # (MIOpen gfx1100 kernel crashes). Conditionally enable per device.
         inter_dropout = dropout if (USE_AMP and num_layers > 1) else 0.0
         self.lstm      = nn.LSTM(input_size, hidden_size, num_layers,
                                  batch_first=True, dropout=inter_dropout)
-        self.attention = SelfAttention(hidden_size)
+        self.attention = MultiHeadTemporalAttention(hidden_size, num_heads=4,
+                                                    dropout=0.1)
         self.norm      = MIOpenSafeLayerNorm(hidden_size)
         self.dropout   = nn.Dropout(dropout)
         self.fc        = nn.Linear(hidden_size, num_classes)
 
     def forward(self, x):
         out, _ = self.lstm(x)                        # (batch, seq_len, hidden)
-        ctx    = self.attention(out)                  # (batch, hidden) — attention-weighted
+        ctx    = self.attention(out)                  # (batch, hidden) — multi-head attended
         return self.fc(self.dropout(self.norm(ctx)))
 
 
 class SequenceDataset(Dataset):
-    def __init__(self, X, y, seq_len):
+    """
+    Sliding-window sequence dataset with configurable stride.
+
+    stride=1  (default for val/test): maximum coverage, every bar is a sequence start.
+    stride>1  (training): sparser starts drawn from diverse time periods.
+              With shuffle=True in DataLoader, each epoch sees the same set of
+              starting positions in a different random order — this is the
+              "randomly arranged segments" approach.
+
+    Example with seq_len=60, stride=15, 2850 training bars:
+      - 186 unique non-overlapping-ish starting positions
+      - Adjacent sequences share 45/60 bars (75% overlap) vs 59/60 (98%) at stride=1
+      - Each epoch: all 186 segments, random order → genuinely diverse batches
+    """
+    def __init__(self, X, y, seq_len, stride: int = 1):
         self.X       = torch.FloatTensor(X)
         self.y       = torch.LongTensor(y)
         self.seq_len = seq_len
+        n            = len(X)
+        # Build the list of valid start indices for this stride
+        self.starts  = list(range(0, max(0, n - seq_len), stride))
 
     def __len__(self):
-        return max(0, len(self.X) - self.seq_len)
+        return len(self.starts)
 
     def __getitem__(self, idx):
-        return self.X[idx:idx+self.seq_len], self.y[idx+self.seq_len]
+        s = self.starts[idx]
+        return self.X[s:s+self.seq_len], self.y[s+self.seq_len]
 
 
 # ── Model cache ───────────────────────────────────────────────────────────────
@@ -312,16 +344,23 @@ def _train_one(X_train, y_train, X_val, y_val,
     torch.manual_seed(seed)
     np.random.seed(seed)
 
-    train_ds = SequenceDataset(X_train, y_train, seq_len)
-    val_ds   = SequenceDataset(X_val,   y_val,   seq_len)
-    train_dl = DataLoader(train_ds, batch_size=p["batch_size"], shuffle=True)
+    stride   = p.get("training_stride", 1)
+    train_ds = SequenceDataset(X_train, y_train, seq_len, stride=stride)
+    val_ds   = SequenceDataset(X_val,   y_val,   seq_len, stride=1)
+    train_dl = DataLoader(train_ds, batch_size=p["batch_size"], shuffle=True,
+                          drop_last=len(train_ds) >= p["batch_size"])
     val_dl   = DataLoader(val_ds,   batch_size=p["batch_size"])
+
+    noise_sigma = p.get("noise_sigma", 0.0)
 
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=p["learning_rate"], weight_decay=1e-4
     )
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
-        optimizer, T_0=10, T_mult=2, eta_min=1e-6
+    # Single cosine decay — no warm restarts.  Restarts reset LR to max mid-training
+    # which was observed to destabilise models that had already found good minima
+    # (val_loss best at epoch 1 then diverged after restart at epoch 10).
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        optimizer, T_max=p["epochs"], eta_min=1e-6
     )
 
     # Inverse-frequency class weights — handles label imbalance
@@ -345,12 +384,22 @@ def _train_one(X_train, y_train, X_val, y_val,
     best_state       = None
 
     logger.info(f"  [{model_idx+1}/{N_MODELS}] Training seed={seed} — "
-                f"{len(train_ds)} samples")
+                f"{len(train_ds)} segments (stride={stride}, noise_σ={noise_sigma})")
 
     for epoch in range(p["epochs"]):
         model.train()
         for X_b, y_b in train_dl:
             X_b, y_b = X_b.to(DEVICE), y_b.to(DEVICE)
+
+            # Input noise augmentation: add small Gaussian noise to features.
+            # σ is in standardised-feature units (features are ~N(0,1) after scaling).
+            # Noise breaks the 75-98% sequence overlap, forcing the model to learn
+            # robust patterns rather than memorising specific feature values.
+            # Disabled during val/inference (model.training gate not needed — this
+            # block only runs inside the training loop).
+            if noise_sigma > 0:
+                X_b = X_b + torch.randn_like(X_b) * noise_sigma
+
             optimizer.zero_grad(set_to_none=True)
 
             if USE_AMP:
