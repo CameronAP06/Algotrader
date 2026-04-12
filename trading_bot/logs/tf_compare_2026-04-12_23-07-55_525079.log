@@ -1,3 +1,8 @@
 2026-04-12 23:07:55.525 | INFO     | __main__:main:850 - Using explicit symbol list: 2 symbols
 2026-04-12 23:07:55.528 | INFO     | __main__:main:950 - Running 2 combos with 1 parallel worker(s) across 1 GPU(s)
 2026-04-12 23:21:49.216 | INFO     | __main__:main:986 - [1/2] INJ/USD 4h done
+2026-04-12 23:35:31.387 | INFO     | __main__:main:986 - [2/2] SOL/USD 4h done
+2026-04-12 23:35:32.138 | INFO     | src.notifier:send:15 - [Telegram disabled] ✅ <b>Scan Complete</b> (0.5h)
+Combos: 2 | Failed: 0 | Skipped: 0
+<b>Strong: 0</b> | Good: 0
+Output: expanded_scan_20260412_230755.csv
