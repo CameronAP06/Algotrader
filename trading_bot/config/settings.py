@@ -120,9 +120,9 @@ ATR_TP_MULT     = 3.0   # TP   = 3.0 × ATR from entry  (2:1 reward:risk maintai
 KELLY_MAX_PCT    = 0.25   # was 0.40 hardcoded in engine.py
 
 # Kelly ADX regime threshold — halve position size in choppy markets (ADX below this)
-# Aligned to REGIME_ADX_THRESHOLD (18) so the regime label and Kelly penalty
+# Aligned to REGIME_ADX_THRESHOLD (14) so the regime label and Kelly penalty
 # use the same boundary. engine.py imports KELLY_REGIME_ADX from here.
-KELLY_REGIME_ADX = 18.0   # was 20.0 hardcoded in engine.py
+KELLY_REGIME_ADX = 14.0   # was 18.0; lowered to pass more signals in crypto consolidation
 
 # Max bars to hold a position before forcing close (prevents dead-capital lockup)
 # Set per timeframe: at 4h that's 5 days; at 1h that's ~2 days
@@ -156,10 +156,10 @@ VOLATILITY_FILTER_PCT = 0.10
 VOLUME_FILTER_PCT     = 0.40
 
 # Regime filter: ADX must exceed this threshold to trade
-# Was 25 — lowered to 18 (crypto spends ~60% of time below ADX 25)
+# Was 25 → 18 → 14 (crypto spends ~60% of time below ADX 25; consolidation phases are tradeable)
 # Longer timeframes get further automatic relaxation via TF_RELAX in filters.py
 REGIME_WINDOW        = 50
-REGIME_ADX_THRESHOLD = 18
+REGIME_ADX_THRESHOLD = 14
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 DATA_DIR    = "data/raw"

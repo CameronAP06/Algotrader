@@ -193,7 +193,7 @@ HISTORY_DAYS = {
 
 TRAIN_RATIO  = 0.60
 VAL_RATIO    = 0.20
-TOP_PCT      = 0.15
+TOP_PCT      = 0.20
 N_MODELS     = 9
 MIN_TRADES   = 5          # global fallback — MIN_TRADES_TF takes precedence
 N_WF_FOLDS   = 6         # was 3; 6 folds = more rigorous out-of-sample validation
@@ -238,7 +238,7 @@ def run_fold(symbol, timeframe, X_scaled, y, feat_df, train_idx, val_idx, test_i
     strongly disagree (per-class std > DISAGREE_THRESHOLD) is forced to HOLD.
     High disagreement = genuinely ambiguous bar = not worth trading.
     """
-    DISAGREE_THRESHOLD = 0.12  # max per-class std before suppressing signal
+    DISAGREE_THRESHOLD = 0.15  # max per-class std before suppressing signal
 
     from config.settings import LSTM_PARAMS
     from models.lstm_ensemble import train_ensemble, predict_proba_ensemble

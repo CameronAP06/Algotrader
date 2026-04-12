@@ -55,7 +55,7 @@ CACHE_DIR = Path(MODEL_DIR) / "fold_cache"   # cached trained models keyed by da
 
 # Architecture version tag — bump this to invalidate all cached models when
 # the architecture changes (e.g. after adding attention or changing focal gamma)
-_ARCH_TAG = b"arch_v2_attention_focal_gamma2"
+_ARCH_TAG = b"arch_v3_attention_focal_gamma1"
 
 
 # ── Architecture ──────────────────────────────────────────────────────────────
@@ -335,7 +335,7 @@ def _train_one(X_train, y_train, X_val, y_val,
                 f"DOWN={inv_freq[0]:.2f} NEUTRAL={inv_freq[1]:.2f} UP={inv_freq[2]:.2f} "
                 f"(from counts: {counts.astype(int).tolist()})")
 
-    criterion = FocalLoss(weight=class_weights, gamma=2.0)
+    criterion = FocalLoss(weight=class_weights, gamma=1.0)
 
     # AMP scaler — only active on CUDA
     amp_scaler = torch.cuda.amp.GradScaler() if USE_AMP else None
@@ -451,7 +451,7 @@ def train_ensemble(X_train: np.ndarray, y_train: np.ndarray,
         val_counts = np.bincount(y_val, minlength=3).astype(float)
         val_counts = np.maximum(val_counts, 1.0)
         val_inv    = np.clip(1.0 / val_counts / (1.0 / val_counts).mean(), 0.25, 4.0)
-        crit = FocalLoss(weight=torch.FloatTensor(val_inv).to(DEVICE), gamma=2.0)
+        crit = FocalLoss(weight=torch.FloatTensor(val_inv).to(DEVICE), gamma=1.0)
         vl = 0.0
         with torch.no_grad():
             for X_b, y_b in val_dl:
