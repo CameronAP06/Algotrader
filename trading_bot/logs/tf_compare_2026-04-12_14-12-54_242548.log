@@ -1,0 +1,8 @@
+2026-04-12 14:12:54.247 | INFO     | __main__:main:840 - Using explicit symbol list: 2 symbols
+2026-04-12 14:12:54.248 | INFO     | __main__:main:940 - Running 2 combos with 1 parallel worker(s) across 1 GPU(s)
+2026-04-12 14:25:59.227 | INFO     | __main__:main:976 - [1/2] BTC/USD 4h done
+2026-04-12 14:38:22.308 | INFO     | __main__:main:976 - [2/2] ETH/USD 4h done
+2026-04-12 14:38:23.072 | INFO     | src.notifier:send:15 - [Telegram disabled] ✅ <b>Scan Complete</b> (0.4h)
+Combos: 2 | Failed: 0 | Skipped: 0
+<b>Strong: 0</b> | Good: 0
+Output: expanded_scan_20260412_141254.csv
