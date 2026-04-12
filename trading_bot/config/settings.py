@@ -81,6 +81,11 @@ LSTM_PARAMS = {
                               # stride=4 → ~697 segments, 11 batches/epoch, model can
                               # train meaningfully for 60-80 epochs before early stop.
     "noise_sigma":     0.02,  # Gaussian noise added during training only — robust features
+    "lr_t_max":        60,    # CosineAnnealingLR T_max — LR reaches eta_min at this epoch.
+                              # Set to ~60 so LR decays meaningfully within the real training
+                              # window (models early-stop at epoch 30-80 due to balanced_acc
+                              # plateau). T_max=200 was effectively no scheduler — LR only
+                              # dropped from 0.001 to 0.00087 by epoch 53 (early stop point).
 }
 
 ENSEMBLE_WEIGHTS = {"catboost": 0.40, "cnn": 0.35, "lstm": 0.25}
@@ -122,22 +127,31 @@ USE_ATR_STOPS   = True
 ATR_STOP_MULT   = 1.5   # stop = 1.5 × ATR from entry  (wider stop = fewer noise-outs)
 ATR_TP_MULT     = 3.0   # TP   = 3.0 × ATR from entry  (2:1 reward:risk maintained)
 
-# Kelly position sizing caps — imported by engine.py
-# KELLY_MAX_PCT: hard cap on fraction Kelly can allocate per trade (Kelly ON path)
-# Aligned to MAX_POSITION_PCT so both sizing modes cap at the same level.
-KELLY_MAX_PCT    = 0.25   # was 0.40 hardcoded in engine.py
+# Kelly position sizing — all parameters in one place
+KELLY_FRACTION   = 0.25   # fractional Kelly safety margin (full Kelly is dangerously volatile)
+KELLY_MIN_PCT    = 0.05   # never risk less than 5% per trade (avoids dust trades)
+KELLY_MAX_PCT    = 0.25   # hard cap per trade (was 0.40 hardcoded in engine.py)
+KELLY_REGIME_ADX = 14.0   # halve Kelly fraction when ADX < this (choppy market penalty)
+                           # was 18.0; aligned to REGIME_ADX_THRESHOLD so both use same boundary
 
-# Kelly ADX regime threshold — halve position size in choppy markets (ADX below this)
-# Aligned to REGIME_ADX_THRESHOLD (14) so the regime label and Kelly penalty
-# use the same boundary. engine.py imports KELLY_REGIME_ADX from here.
-KELLY_REGIME_ADX = 14.0   # was 18.0; lowered to pass more signals in crypto consolidation
+# Kelly initial priors — used before enough trades to estimate win rate empirically.
+# Applied until _recalc_kelly has seen >= 5 completed trades.
+KELLY_INITIAL_WIN_RATE = 0.45  # conservative prior; empirical wr typically 42-52%
+KELLY_INITIAL_PAYOFF   = 1.8   # conservative prior for payoff ratio (avg_win / avg_loss)
+
+# Kelly confidence tiering — scale allocation by model signal certainty.
+# Low  (< TIER_LOW): 50% of Kelly — near-threshold signal, stay small
+# Mid  (< TIER_MID): 75% of Kelly — moderate confidence
+# High (≥ TIER_MID): full Kelly — strong signal
+KELLY_CONF_TIER_LOW = 0.40
+KELLY_CONF_TIER_MID = 0.50
 
 # Max bars to hold a position before forcing close (prevents dead-capital lockup)
 # Set per timeframe: at 4h that's 5 days; at 1h that's ~2 days
 MAX_HOLD_BARS    = 30     # bars; override per TF in engine if needed
 
 # Amihud illiquidity filter threshold percentile (top X% most illiquid bars suppressed)
-AMIHUD_FILTER_PCT = 0.80  # block signals in the top 20% most illiquid bars
+AMIHUD_FILTER_PCT = 0.85  # block top 15% most illiquid bars (was 0.80 / top 20% — too aggressive)
 
 # ── Signal Filters ────────────────────────────────────────────────────────────
 # Each filter can be independently toggled.
@@ -153,20 +167,26 @@ USE_FUNDING_FILTER    = False   # Funding rate extremes (Kraken perp only)
 USE_REGIME_FILTER     = False   # ADX momentum gate (Filter 5) — disabled: Kelly already penalises low-ADX bars
 USE_CHOPPINESS_FILTER = False   # Choppiness Index gate (Filter 6) — killed 293 signals (53% of all kills); disabled
 USE_EFFICIENCY_FILTER = False   # Market Efficiency Ratio gate (Filter 7) — redundant with choppiness; disabled
+USE_AMIHUD_FILTER     = True    # Amihud illiquidity gate (Filter 8) — blocks top 20% most illiquid bars
 
 # Volatility filter: skip bars in bottom X% of ATR distribution
 # Was 0.20 (bottom 20%) — lowered to bottom 10%
 VOLATILITY_FILTER_PCT = 0.10
 
 # Volume filter: require vol >= X% of 14-bar average
-# Was 0.80 (80%) — lowered to 40%
-VOLUME_FILTER_PCT     = 0.40
+# Was 0.80 (80%) → 0.40 → 0.30 — 0.40 was still cutting too many valid bars at 4h+
+VOLUME_FILTER_PCT     = 0.30
 
 # Regime filter: ADX must exceed this threshold to trade
 # Was 25 → 18 → 14 (crypto spends ~60% of time below ADX 25; consolidation phases are tradeable)
 # Longer timeframes get further automatic relaxation via TF_RELAX in filters.py
 REGIME_WINDOW        = 50
 REGIME_ADX_THRESHOLD = 14
+
+# Ensemble disagreement filter — suppress signals where the 9 models strongly disagree.
+# Max per-class std across all 9 models. High std = genuine ambiguity = not worth trading.
+# 0.15 means: if any class has std > 0.15 across the ensemble, force HOLD.
+ENSEMBLE_DISAGREE_THRESHOLD = 0.15
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 DATA_DIR    = "data/raw"

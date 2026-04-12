@@ -55,7 +55,7 @@ CACHE_DIR = Path(MODEL_DIR) / "fold_cache"   # cached trained models keyed by da
 
 # Architecture version tag — bump this to invalidate all cached models when
 # the architecture changes (e.g. after adding attention or changing focal gamma)
-_ARCH_TAG = b"arch_v5_multihead_hidden192_stride4"
+_ARCH_TAG = b"arch_v6_balanced_sampler_balanced_es"
 
 
 # ── Architecture ──────────────────────────────────────────────────────────────
@@ -347,7 +347,27 @@ def _train_one(X_train, y_train, X_val, y_val,
     stride   = p.get("training_stride", 1)
     train_ds = SequenceDataset(X_train, y_train, seq_len, stride=stride)
     val_ds   = SequenceDataset(X_val,   y_val,   seq_len, stride=1)
-    train_dl = DataLoader(train_ds, batch_size=p["batch_size"], shuffle=True,
+
+    # WeightedRandomSampler: each sequence is sampled with probability proportional
+    # to the inverse frequency of its label.  With 87% NEUTRAL labels, random
+    # sampling gives each batch ~8/64 minority samples — insufficient for the model
+    # to learn UP/DOWN patterns.  The sampler forces ~equal class representation per
+    # batch (UP : NEUTRAL : DOWN ≈ 1:1:1), so minority gradients are never drowned out.
+    # replacement=True is required — minority classes don't have enough samples to
+    # fill a batch without repetition.
+    seq_labels = np.array([train_ds.y[s + train_ds.seq_len].item()
+                           for s in train_ds.starts])
+    label_counts = np.bincount(seq_labels, minlength=3).astype(float)
+    label_counts  = np.maximum(label_counts, 1.0)
+    class_sample_w = 1.0 / label_counts
+    sample_weights = torch.DoubleTensor([class_sample_w[l] for l in seq_labels])
+    sampler = torch.utils.data.WeightedRandomSampler(
+        weights=sample_weights, num_samples=len(train_ds), replacement=True
+    )
+    logger.info(f"  [{model_idx+1}/{N_MODELS}] Sampler label counts: "
+                f"DOWN={int(label_counts[0])} NEUTRAL={int(label_counts[1])} "
+                f"UP={int(label_counts[2])} → balanced batches")
+    train_dl = DataLoader(train_ds, batch_size=p["batch_size"], sampler=sampler,
                           drop_last=len(train_ds) >= p["batch_size"])
     val_dl   = DataLoader(val_ds,   batch_size=p["batch_size"])
 
@@ -357,31 +377,37 @@ def _train_one(X_train, y_train, X_val, y_val,
         model.parameters(), lr=p["learning_rate"], weight_decay=1e-4
     )
     # Single cosine decay — no warm restarts.  Restarts reset LR to max mid-training
-    # which was observed to destabilise models that had already found good minima
-    # (val_loss best at epoch 1 then diverged after restart at epoch 10).
+    # which was observed to destabilise models that had already found good minima.
+    # T_max = lr_t_max (default 60): LR reaches eta_min at epoch 60, then stays flat.
+    # This ensures meaningful LR decay within the real training window (early stop
+    # fires at epoch 30-80).  T_max=epochs (200) was effectively no scheduler —
+    # LR only dropped from 0.001 to 0.00087 by epoch 53 (observed early stop point).
+    lr_t_max  = p.get("lr_t_max", 60)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-        optimizer, T_max=p["epochs"], eta_min=1e-6
+        optimizer, T_max=lr_t_max, eta_min=1e-6
     )
 
-    # Inverse-frequency class weights — handles label imbalance
-    counts    = np.bincount(y_train, minlength=3).astype(float)
-    counts    = np.maximum(counts, 1.0)
-    inv_freq  = 1.0 / counts
-    inv_freq /= inv_freq.mean()
-    inv_freq  = np.clip(inv_freq, 0.25, 4.0)
+    # Class weights: uniform (1.0) now that WeightedRandomSampler provides balanced batches.
+    # Previously used inverse-frequency weights to compensate for 87% NEUTRAL imbalance,
+    # but the sampler already draws equal UP/DOWN/NEUTRAL per batch.  Stacking both
+    # means UP/DOWN get ~3x more gradient AND appear equally often — extreme overcorrection
+    # that causes the model to predict UP/DOWN on everything.
+    # FocalLoss with γ=1 still downweights easy (high-confidence) examples;
+    # the sampler handles class balance; uniform weights let both work without fighting.
+    inv_freq      = np.ones(3, dtype=np.float32)
     class_weights = torch.FloatTensor(inv_freq).to(DEVICE)
-    logger.info(f"  [{model_idx+1}/{N_MODELS}] Class weights: "
-                f"DOWN={inv_freq[0]:.2f} NEUTRAL={inv_freq[1]:.2f} UP={inv_freq[2]:.2f} "
-                f"(from counts: {counts.astype(int).tolist()})")
+    counts        = np.bincount(y_train, minlength=3).astype(int)
+    logger.info(f"  [{model_idx+1}/{N_MODELS}] Class weights: uniform (sampler balances batches) "
+                f"| raw counts: DOWN={counts[0]} NEUTRAL={counts[1]} UP={counts[2]}")
 
     criterion = FocalLoss(weight=class_weights, gamma=1.0)
 
     # AMP scaler — only active on CUDA
     amp_scaler = torch.cuda.amp.GradScaler() if USE_AMP else None
 
-    best_val_loss    = float("inf")
-    patience_counter = 0
-    best_state       = None
+    best_balanced_acc = 0.0
+    patience_counter  = 0
+    best_state        = None
 
     logger.info(f"  [{model_idx+1}/{N_MODELS}] Training seed={seed} — "
                 f"{len(train_ds)} segments (stride={stride}, noise_σ={noise_sigma})")
@@ -417,40 +443,59 @@ def _train_one(X_train, y_train, X_val, y_val,
                 optimizer.step()
 
         model.eval()
-        val_loss, correct, total = 0, 0, 0
+        val_loss   = 0.0
+        all_preds  = []
+        all_labels = []
         with torch.no_grad():
             for X_b, y_b in val_dl:
                 X_b, y_b = X_b.to(DEVICE), y_b.to(DEVICE)
                 with (torch.cuda.amp.autocast() if USE_AMP else _null_ctx()):
                     logits = model(X_b)
-                val_loss += criterion(logits, y_b).item()
-                correct  += (logits.argmax(1) == y_b).sum().item()
-                total    += len(y_b)
+                val_loss  += criterion(logits, y_b).item()
+                all_preds.extend(logits.argmax(1).cpu().numpy())
+                all_labels.extend(y_b.cpu().numpy())
 
         val_loss /= max(len(val_dl), 1)
-        val_acc   = correct / max(total, 1)
         scheduler.step()
 
-        logger.info(f"    Epoch {epoch:3d} | val_loss={val_loss:.4f} | "
-                    f"val_acc={val_acc:.4f} | lr={optimizer.param_groups[0]['lr']:.6f}")
+        # Balanced accuracy = mean per-class recall.
+        # Tracks UP/DOWN detection directly — val_acc of 89%+ signals NEUTRAL
+        # collapse (model learns to always predict majority class).
+        # Early stopping on balanced_acc keeps the state with best minority
+        # class performance rather than the state that best predicts NEUTRAL.
+        preds_arr  = np.array(all_preds)
+        labels_arr = np.array(all_labels)
+        per_class_recall = []
+        for c in range(3):
+            mask = labels_arr == c
+            if mask.sum() > 0:
+                per_class_recall.append((preds_arr[mask] == c).mean())
+        balanced_acc = float(np.mean(per_class_recall)) if per_class_recall else 0.0
+        val_acc      = (preds_arr == labels_arr).mean()
 
-        if val_loss < best_val_loss:
-            best_val_loss    = val_loss
-            best_state       = {k: v.cpu().clone() for k, v in model.state_dict().items()}
-            patience_counter = 0
+        logger.info(f"    Epoch {epoch:3d} | val_loss={val_loss:.4f} | "
+                    f"val_acc={val_acc:.4f} | bal_acc={balanced_acc:.4f} | "
+                    f"lr={optimizer.param_groups[0]['lr']:.6f}")
+
+        if balanced_acc > best_balanced_acc:
+            best_balanced_acc = balanced_acc
+            best_state        = {k: v.cpu().clone() for k, v in model.state_dict().items()}
+            patience_counter  = 0
         else:
             patience_counter += 1
             if patience_counter >= p["patience"]:
-                logger.info(f"    Early stop at epoch {epoch}")
+                logger.info(f"    Early stop at epoch {epoch} "
+                            f"(best bal_acc={best_balanced_acc:.4f})")
                 break
 
     if best_state is None:
         logger.warning(f"  [{model_idx+1}/{N_MODELS}] best_state is None "
-                       f"(no epoch completed) — using final model weights as fallback")
+                       f"(no epoch completed, balanced_acc never improved) "
+                       f"— using final model weights as fallback")
         best_state = {k: v.cpu().clone() for k, v in model.state_dict().items()}
 
     model.load_state_dict(best_state)
-    logger.info(f"  [{model_idx+1}/{N_MODELS}] Best val_loss: {best_val_loss:.4f}")
+    logger.info(f"  [{model_idx+1}/{N_MODELS}] Best balanced_acc: {best_balanced_acc:.4f}")
     _save_cache(model, key)
 
     # Temperature calibration — always fitted on current val set regardless of cache

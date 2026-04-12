@@ -28,7 +28,7 @@ from config.settings import (
     USE_VOLATILITY_FILTER, VOLATILITY_FILTER_PCT,
     USE_TREND_FILTER,      USE_FUNDING_FILTER,
     USE_CHOPPINESS_FILTER, USE_EFFICIENCY_FILTER,
-    AMIHUD_FILTER_PCT,
+    USE_AMIHUD_FILTER,     AMIHUD_FILTER_PCT,
 )
 
 # Longer timeframes get looser thresholds — fewer bars, coarser signal
@@ -55,7 +55,10 @@ def apply_filters(df: pd.DataFrame, signals: dict,
     relax = TF_RELAX.get(timeframe, 1.0)
 
     close_col = df_aligned["close"]
-    sma_col   = df_aligned["sma_20"] if "sma_20" in df_aligned.columns else close_col
+    # FEATURE_WINDOW_SIZES=[7,14,21,50,200] generates sma_21, not sma_20
+    sma_col   = (df_aligned["sma_21"] if "sma_21" in df_aligned.columns
+                 else df_aligned["sma_20"] if "sma_20" in df_aligned.columns
+                 else close_col)
 
     atr_col       = df_aligned.get("atr_14", pd.Series(np.ones(n)))
     atr_pct       = max(VOLATILITY_FILTER_PCT * relax, 0.05)
@@ -145,7 +148,7 @@ def apply_filters(df: pd.DataFrame, signals: dict,
                 signal_arr[i] = "HOLD"; filtered_count["efficiency"] += 1; continue
 
         # Filter 8: Amihud illiquidity — skip very thin/illiquid bars
-        if amihud_series.iloc[i] > amihud_threshold:
+        if USE_AMIHUD_FILTER and amihud_series.iloc[i] > amihud_threshold:
             signal_arr[i] = "HOLD"; filtered_count["amihud"] += 1; continue
 
     total_filtered   = sum(filtered_count.values())

@@ -24,18 +24,14 @@ from config.settings import (
     STOP_LOSS_PCT, TAKE_PROFIT_PCT, MAX_POSITION_PCT,
     MAX_DAILY_DRAWDOWN,
     RESULTS_DIR,
-    ATR_STOP_MULT, ATR_TP_MULT,       # ATR stop/TP multipliers — editable in settings
-    KELLY_MAX_PCT, KELLY_REGIME_ADX,   # Kelly caps — editable in settings
-    MAX_HOLD_BARS,                     # max bars before forced close
+    ATR_STOP_MULT, ATR_TP_MULT,
+    KELLY_FRACTION, KELLY_MIN_PCT, KELLY_MAX_PCT, KELLY_REGIME_ADX,
+    KELLY_INITIAL_WIN_RATE, KELLY_INITIAL_PAYOFF,
+    KELLY_CONF_TIER_LOW, KELLY_CONF_TIER_MID,
+    MAX_HOLD_BARS,
 )
 
-# ── Kelly constants ────────────────────────────────────────────────────────────
-KELLY_FRACTION   = 0.25    # quarter-Kelly — standard safety margin
-KELLY_MIN_PCT    = 0.05    # never risk less than 5% (avoids dust trades)
-# KELLY_MAX_PCT and KELLY_REGIME_ADX imported from settings above
-
-# ATR-based stop/TP multipliers — imported from settings above
-ATR_WINDOW    = 14
+ATR_WINDOW = 14
 
 
 class BacktestEngine:
@@ -73,21 +69,24 @@ class BacktestEngine:
 
     def _kelly_fraction(self, confidence: float, win_rate_est: float,
                         payoff_ratio: float, adx: float = 100.0) -> float:
-        p = float(np.clip(confidence, 0.34, 0.95))
+        # Kelly formula: f* = (p*b - q) / b
+        # p = historical win rate (NOT model confidence — confidence is for tiering only)
+        # win_rate_est is updated from real trade outcomes via _recalc_kelly;
+        # starts at KELLY_INITIAL_WIN_RATE until 5 trades have completed.
+        p = float(np.clip(win_rate_est, 0.25, 0.80))
         b = max(payoff_ratio, 0.5)
         q = 1.0 - p
         kelly = (p * b - q) / b
         if adx < KELLY_REGIME_ADX:
             kelly *= 0.5   # halve in choppy markets
         kelly *= KELLY_FRACTION
-        # Confidence tiering — scale allocation by signal certainty
-        #   Low  (< 0.40): 50% of Kelly — near-random, stay small
-        #   Mid  (< 0.50): 75% of Kelly — moderate edge
-        #   High (≥ 0.50): full Kelly
-        if confidence < 0.40:
-            kelly *= 0.50
-        elif confidence < 0.50:
-            kelly *= 0.75
+        # Confidence tiering — scale allocation by model signal certainty.
+        # Uses current-bar confidence (model probability), not historical win rate.
+        if confidence < KELLY_CONF_TIER_LOW:
+            kelly *= 0.50   # near-threshold signal — stay small
+        elif confidence < KELLY_CONF_TIER_MID:
+            kelly *= 0.75   # moderate confidence
+        # else: full Kelly (high confidence)
         return float(np.clip(kelly, KELLY_MIN_PCT, KELLY_MAX_PCT))
 
     def _precompute_atr(self, highs, lows, closes) -> np.ndarray:
@@ -204,8 +203,8 @@ class BacktestEngine:
         lows       = df["low"].values[-n:]
         adx_arr    = df["adx"].values[-n:] if "adx" in df.columns else np.full(n, 100.0)
 
-        win_rate_est = 0.50
-        payoff_ratio = 2.0
+        win_rate_est = KELLY_INITIAL_WIN_RATE
+        payoff_ratio = KELLY_INITIAL_PAYOFF
         wins, losses = [], []
 
         # Precompute ATR for entire series — O(n) instead of O(n²)
@@ -443,11 +442,8 @@ def _recalc_kelly(wins: list, losses: list):
 def kelly_position_size(win_rate: float, payoff_ratio: float,
                         capital: float,
                         fraction: float = KELLY_FRACTION) -> float:
-    """
-    Standalone Kelly position size calculator.
-    Returns the dollar amount to allocate to the next trade.
-    """
-    b      = max(payoff_ratio, 0.01)
+    """Standalone Kelly position size calculator. Returns dollar amount to allocate."""
+    b       = max(payoff_ratio, 0.01)
     kelly_f = max(0.0, (win_rate * b - (1 - win_rate)) / b) * fraction
     kelly_f = float(np.clip(kelly_f, KELLY_MIN_PCT, KELLY_MAX_PCT))
     return capital * kelly_f

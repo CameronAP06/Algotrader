@@ -235,23 +235,30 @@ def run_fold(symbol, timeframe, X_scaled, y, feat_df, train_idx, val_idx, test_i
     set.  Purging removes these contaminated samples.
 
     Disagreement filter: after ensemble inference, any bar where the 9 models
-    strongly disagree (per-class std > DISAGREE_THRESHOLD) is forced to HOLD.
-    High disagreement = genuinely ambiguous bar = not worth trading.
+    strongly disagree (per-class std > ENSEMBLE_DISAGREE_THRESHOLD) is forced
+    to HOLD.  High disagreement = genuinely ambiguous bar = not worth trading.
     """
-    DISAGREE_THRESHOLD = 0.15  # max per-class std before suppressing signal
-
-    from config.settings import LSTM_PARAMS
+    from config.settings import LSTM_PARAMS, ENSEMBLE_DISAGREE_THRESHOLD
     from models.lstm_ensemble import train_ensemble, predict_proba_ensemble
 
     t_start, t_end = train_idx
-    # Purge: trim label-leaking tail from training window
+    # Purge train tail: labels at the last `horizon` training bars use prices that
+    # fall in the val window — strip them so training never sees future val prices.
     t_end_purged = max(t_start + LSTM_PARAMS["sequence_length"] * 3,
                        t_end - purge_bars)
 
+    # Purge val tail: same contamination exists at the val/test boundary.
+    # The last `horizon` val labels use prices in the test window, so early
+    # stopping sees a tiny amount of test-window information.  Trimming the
+    # contaminated tail removes this bias.  Keep at least seq_len * 2 val bars.
+    v_start, v_end = val_idx
+    v_end_purged   = max(v_start + LSTM_PARAMS["sequence_length"] * 2,
+                         v_end - purge_bars)
+
     X_train = X_scaled[t_start:t_end_purged]
     y_train = y[t_start:t_end_purged]
-    X_val   = X_scaled[val_idx[0]:val_idx[1]]
-    y_val   = y[val_idx[0]:val_idx[1]]
+    X_val   = X_scaled[v_start:v_end_purged]
+    y_val   = y[v_start:v_end_purged]
     X_test  = X_scaled[test_idx[0]:test_idx[1]]
     feat_test = feat_df.iloc[test_idx[0]:test_idx[1]].reset_index(drop=True)
 
@@ -287,12 +294,12 @@ def run_fold(symbol, timeframe, X_scaled, y, feat_df, train_idx, val_idx, test_i
         max_std = proba_std.max(axis=1)
         suppressed = 0
         for i in range(len(sig_arr)):
-            if sig_arr[i] != "HOLD" and max_std[i] > DISAGREE_THRESHOLD:
+            if sig_arr[i] != "HOLD" and max_std[i] > ENSEMBLE_DISAGREE_THRESHOLD:
                 sig_arr[i] = "HOLD"
                 suppressed += 1
         if suppressed:
             logger.info(f"  Disagreement filter: suppressed {suppressed} signals "
-                        f"(std > {DISAGREE_THRESHOLD})")
+                        f"(std > {ENSEMBLE_DISAGREE_THRESHOLD})")
         signals["signal"] = sig_arr
     filtered = apply_filters(feat_test, signals, timeframe=timeframe)
     m        = BacktestEngine().run(feat_test, filtered, symbol=symbol, timeframe=timeframe)
