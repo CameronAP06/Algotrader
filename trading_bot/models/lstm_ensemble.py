@@ -36,7 +36,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from pathlib import Path
 from loguru import logger
-from config.settings import LSTM_PARAMS, MODEL_DIR
+from config.settings import LSTM_PARAMS, MODEL_DIR, ENSEMBLE_MAX_TEMPERATURE
 
 try:
     import torch_directml
@@ -55,7 +55,7 @@ CACHE_DIR = Path(MODEL_DIR) / "fold_cache"   # cached trained models keyed by da
 
 # Architecture version tag — bump this to invalidate all cached models when
 # the architecture changes (e.g. after adding attention or changing focal gamma)
-_ARCH_TAG = b"arch_v6_balanced_sampler_balanced_es"
+_ARCH_TAG = b"arch_v7_reduce_lr_on_plateau"
 
 
 # ── Architecture ──────────────────────────────────────────────────────────────
@@ -376,15 +376,17 @@ def _train_one(X_train, y_train, X_val, y_val,
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=p["learning_rate"], weight_decay=1e-4
     )
-    # Single cosine decay — no warm restarts.  Restarts reset LR to max mid-training
-    # which was observed to destabilise models that had already found good minima.
-    # T_max = lr_t_max (default 60): LR reaches eta_min at epoch 60, then stays flat.
-    # This ensures meaningful LR decay within the real training window (early stop
-    # fires at epoch 30-80).  T_max=epochs (200) was effectively no scheduler —
-    # LR only dropped from 0.001 to 0.00087 by epoch 53 (observed early stop point).
-    lr_t_max  = p.get("lr_t_max", 60)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-        optimizer, T_max=lr_t_max, eta_min=1e-6
+    # ReduceLROnPlateau: halve LR each time balanced_acc fails to improve for
+    # lr_plateau_patience epochs.  Unlike CosineAnnealingLR (which cycles LR back
+    # up after T_max epochs), this scheduler ONLY ever decreases LR — no accidental
+    # destabilisation after epoch 60 as seen with the cosine schedule.
+    # Decay path: 0.001 → 0.0005 → 0.00025 → 0.000125 → ... → 1e-6 floor.
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer,
+        mode     = "max",    # maximise balanced_acc
+        factor   = p.get("lr_plateau_factor",  0.5),
+        patience = p.get("lr_plateau_patience", 10),
+        min_lr   = 1e-6,
     )
 
     # Class weights: uniform (1.0) now that WeightedRandomSampler provides balanced batches.
@@ -456,7 +458,6 @@ def _train_one(X_train, y_train, X_val, y_val,
                 all_labels.extend(y_b.cpu().numpy())
 
         val_loss /= max(len(val_dl), 1)
-        scheduler.step()
 
         # Balanced accuracy = mean per-class recall.
         # Tracks UP/DOWN detection directly — val_acc of 89%+ signals NEUTRAL
@@ -473,6 +474,7 @@ def _train_one(X_train, y_train, X_val, y_val,
         balanced_acc = float(np.mean(per_class_recall)) if per_class_recall else 0.0
         val_acc      = (preds_arr == labels_arr).mean()
 
+        scheduler.step(balanced_acc)   # ReduceLROnPlateau: reduce LR if no improvement
         logger.info(f"    Epoch {epoch:3d} | val_loss={val_loss:.4f} | "
                     f"val_acc={val_acc:.4f} | bal_acc={balanced_acc:.4f} | "
                     f"lr={optimizer.param_groups[0]['lr']:.6f}")
@@ -601,8 +603,21 @@ def predict_proba_ensemble(models: list, X: np.ndarray,
         strides=(X.strides[0], X.strides[0], X.strides[1]),
     )
 
-    all_probas = []
+    all_probas  = []
+    skipped     = 0
     for model in models:
+        T = getattr(model, "temperature", 1.0)
+        if T > ENSEMBLE_MAX_TEMPERATURE:
+            # Model is overconfident beyond recoverable calibration — temperature
+            # scaling spreads it to near-uniform [0.33, 0.33, 0.33].  Including it
+            # suppresses confident predictions from other models and massively inflates
+            # per-class std, causing the disagreement filter to kill most signals.
+            logger.warning(
+                f"  Skipping ensemble model (T={T:.2f} > {ENSEMBLE_MAX_TEMPERATURE}) "
+                f"— contributes noise, not signal"
+            )
+            skipped += 1
+            continue
         model.eval()
         model_probs = []
         with torch.no_grad():
@@ -610,12 +625,20 @@ def predict_proba_ensemble(models: list, X: np.ndarray,
                 batch = torch.from_numpy(
                     np.array(windows[start:start + batch_size])
                 ).to(DEVICE)
-                T = getattr(model, "temperature", 1.0)
                 p = torch.softmax(model(batch) / T, dim=1).cpu().numpy()
                 model_probs.append(p)
         all_probas.append(np.vstack([pad, np.vstack(model_probs)]))
 
-    all_probas = np.stack(all_probas, axis=0)  # (n_models, n_bars, 3)
+    if not all_probas:
+        logger.error("All ensemble models exceeded ENSEMBLE_MAX_TEMPERATURE — returning neutral")
+        neutral = np.tile([0.0, 1.0, 0.0], (n, 1)).astype(np.float32)
+        return (neutral, np.zeros_like(neutral)) if return_std else neutral
+
+    if skipped:
+        logger.info(f"  Ensemble: {len(all_probas)}/{len(models)} models used "
+                    f"({skipped} excluded for T>{ENSEMBLE_MAX_TEMPERATURE})")
+
+    all_probas = np.stack(all_probas, axis=0)  # (n_active_models, n_bars, 3)
     mean_proba = all_probas.mean(axis=0)
 
     if return_std:

@@ -80,12 +80,12 @@ LSTM_PARAMS = {
     "training_stride": 4,     # was 15 → 187 segments (too few, caused 4-epoch overfit)
                               # stride=4 → ~697 segments, 11 batches/epoch, model can
                               # train meaningfully for 60-80 epochs before early stop.
-    "noise_sigma":     0.02,  # Gaussian noise added during training only — robust features
-    "lr_t_max":        60,    # CosineAnnealingLR T_max — LR reaches eta_min at this epoch.
-                              # Set to ~60 so LR decays meaningfully within the real training
-                              # window (models early-stop at epoch 30-80 due to balanced_acc
-                              # plateau). T_max=200 was effectively no scheduler — LR only
-                              # dropped from 0.001 to 0.00087 by epoch 53 (early stop point).
+    "noise_sigma":          0.02,  # Gaussian noise added during training only
+    "lr_plateau_patience":  10,    # ReduceLROnPlateau: epochs without balanced_acc improvement
+                                   # before halving LR. Triggers at 10 / 20 / 30... epochs,
+                                   # always decreasing — never cycles back up like CosineAnnealingLR
+                                   # (which was rising after epoch 60 and corrupting late training).
+    "lr_plateau_factor":    0.5,   # LR multiplier on each plateau: 0.001→0.0005→0.00025→...
 }
 
 ENSEMBLE_WEIGHTS = {"catboost": 0.40, "cnn": 0.35, "lstm": 0.25}
@@ -187,6 +187,13 @@ REGIME_ADX_THRESHOLD = 14
 # Max per-class std across all 9 models. High std = genuine ambiguity = not worth trading.
 # 0.15 means: if any class has std > 0.15 across the ensemble, force HOLD.
 ENSEMBLE_DISAGREE_THRESHOLD = 0.15
+
+# Ensemble temperature gate — exclude models whose temperature calibration exceeded this
+# value from the ensemble average.  A T=10 model outputs near-uniform [0.33,0.33,0.33]
+# probabilities that suppress confident predictions from other models AND inflate per-class
+# std, causing the disagreement filter to kill most signals (e.g. fold 1 BTC: 13/14 killed).
+# Models exceeding this threshold are logged and skipped during inference.
+ENSEMBLE_MAX_TEMPERATURE = 5.0
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 DATA_DIR    = "data/raw"
