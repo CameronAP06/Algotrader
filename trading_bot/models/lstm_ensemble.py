@@ -55,7 +55,7 @@ CACHE_DIR = Path(MODEL_DIR) / "fold_cache"   # cached trained models keyed by da
 
 # Architecture version tag — bump this to invalidate all cached models when
 # the architecture changes (e.g. after adding attention or changing focal gamma)
-_ARCH_TAG = b"arch_v4_multihead_hidden256_stride15"
+_ARCH_TAG = b"arch_v5_multihead_hidden192_stride4"
 
 
 # ── Architecture ──────────────────────────────────────────────────────────────

@@ -66,21 +66,21 @@ XGB_PARAMS = {
 
 LSTM_PARAMS = {
     "sequence_length": 60,
-    "hidden_size":     256,   # was 128 — wider bottleneck for 122 input features
+    "hidden_size":     192,   # was 128 → 256 → 192: larger than original but not
+                              # so large it overfits on ~700 training segments
     "num_layers":      2,
-    "dropout":         0.3,   # slightly higher to compensate for larger capacity
-    "epochs":          120,   # extra headroom since no LR restarts destabilise early
+    "dropout":         0.35,
+    "epochs":          200,   # high ceiling — early stopping controls actual runtime
     "batch_size":      64,
-    "learning_rate":   0.002, # was 0.001 — higher peak LR with single cosine decay
-    "patience":        25,    # was 30 — no restart cycle to wait for, can stop earlier
-    "training_stride": 15,    # sliding-window step during training (seq_len//4).
-                              # stride=1 → 98% overlap between adjacent sequences (redundant).
-                              # stride=15 → sequences drawn from diverse time periods,
-                              # presented in random order each epoch via DataLoader shuffle.
-                              # Val/test always use stride=1 (dense coverage for evaluation).
-    "noise_sigma":     0.02,  # Gaussian noise σ added to inputs during training only.
-                              # Forces the model to learn robust patterns rather than
-                              # memorising specific feature values. Off during inference.
+    "learning_rate":   0.001, # was 0.002 — 0.002 overshoot the minimum in 4-6 epochs
+                              # with only 3 batches/epoch (stride=15 problem)
+    "patience":        50,    # was 25 → model peaked at epoch 4-6, patience=25 forced
+                              # stop at epoch ~29. Now allows model 50 epochs to find
+                              # a better basin after each improvement stalls.
+    "training_stride": 4,     # was 15 → 187 segments (too few, caused 4-epoch overfit)
+                              # stride=4 → ~697 segments, 11 batches/epoch, model can
+                              # train meaningfully for 60-80 epochs before early stop.
+    "noise_sigma":     0.02,  # Gaussian noise added during training only — robust features
 }
 
 ENSEMBLE_WEIGHTS = {"catboost": 0.40, "cnn": 0.35, "lstm": 0.25}

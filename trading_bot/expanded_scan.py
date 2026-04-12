@@ -194,7 +194,7 @@ HISTORY_DAYS = {
 
 TRAIN_RATIO  = 0.60
 VAL_RATIO    = 0.20
-TOP_PCT      = 0.20
+TOP_PCT      = 0.30
 N_MODELS     = 9
 MIN_TRADES   = 5          # global fallback — MIN_TRADES_TF takes precedence
 N_WF_FOLDS   = 6         # was 3; 6 folds = more rigorous out-of-sample validation

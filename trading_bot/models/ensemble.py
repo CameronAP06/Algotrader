@@ -151,7 +151,7 @@ def _grid_search_weights(p1, p2, p3, y_true):
 
 
 def compute_signal_threshold(proba: np.ndarray, top_pct: float = 0.15,
-                             floor: float = 0.34) -> float:
+                             floor: float = 0.33) -> float:
     """
     Compute the percentile-based signal threshold from a probability array.
 
