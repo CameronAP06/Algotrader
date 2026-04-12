@@ -117,6 +117,11 @@ class FocalLoss(nn.Module):
         self.num_classes = num_classes
 
     def forward(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+        # Cast weight to match logits dtype (fp16 under AMP, fp32 otherwise).
+        # self.weight is always stored as fp32; under autocast logits are fp16,
+        # so mixing them raises "expected scalar type Half but found Float".
+        w = self.weight.to(logits.dtype) if self.weight is not None else None
+
         # Build soft targets: confidence on true class, uniform smoothing elsewhere
         confidence = 1.0 - self.smoothing
         smooth_val = self.smoothing / (self.num_classes - 1)
@@ -127,11 +132,11 @@ class FocalLoss(nn.Module):
         ce = -(soft * log_probs).sum(dim=1)          # soft cross-entropy per sample
 
         # Apply class weights on the true class only
-        if self.weight is not None:
-            ce = ce * self.weight[targets]
+        if w is not None:
+            ce = ce * w[targets]
 
         pt = torch.exp(-F.cross_entropy(logits, targets,
-                                        weight=self.weight, reduction="none").detach())
+                                        weight=w, reduction="none").detach())
         return ((1 - pt) ** self.gamma * ce).mean()
 
 
