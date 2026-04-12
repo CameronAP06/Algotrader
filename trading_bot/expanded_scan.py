@@ -219,7 +219,8 @@ def _fmt_date(ts_series) -> str:
         t0 = pd.to_datetime(ts_series.iloc[0])
         t1 = pd.to_datetime(ts_series.iloc[-1])
         return f"{t0.strftime('%Y-%m-%d')}→{t1.strftime('%Y-%m-%d')}"
-    except Exception:
+    except Exception as _e:
+        logger.debug(f"_fmt_date failed ({type(_e).__name__}: {_e}) — series type={type(ts_series)}, len={len(ts_series) if hasattr(ts_series, '__len__') else 'N/A'}, sample={repr(ts_series.iloc[0]) if hasattr(ts_series, 'iloc') and len(ts_series) > 0 else 'EMPTY'}")
         return "?"
 
 
