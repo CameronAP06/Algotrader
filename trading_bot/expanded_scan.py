@@ -216,7 +216,9 @@ def asset_class(symbol: str) -> str:
 def _fmt_date(ts_series) -> str:
     """Format first/last timestamp of a series for logging."""
     try:
-        return f"{ts_series.iloc[0].strftime('%Y-%m-%d')}→{ts_series.iloc[-1].strftime('%Y-%m-%d')}"
+        t0 = pd.to_datetime(ts_series.iloc[0])
+        t1 = pd.to_datetime(ts_series.iloc[-1])
+        return f"{t0.strftime('%Y-%m-%d')}→{t1.strftime('%Y-%m-%d')}"
     except Exception:
         return "?"
 
@@ -235,7 +237,7 @@ def run_fold(symbol, timeframe, X_scaled, y, feat_df, train_idx, val_idx, test_i
     strongly disagree (per-class std > DISAGREE_THRESHOLD) is forced to HOLD.
     High disagreement = genuinely ambiguous bar = not worth trading.
     """
-    DISAGREE_THRESHOLD = 0.07  # max per-class std before suppressing signal
+    DISAGREE_THRESHOLD = 0.12  # max per-class std before suppressing signal
 
     from config.settings import LSTM_PARAMS
     from models.lstm_ensemble import train_ensemble, predict_proba_ensemble

@@ -261,8 +261,8 @@ def _fit_temperature(model: LSTMClassifier,
         return float(F.cross_entropy(scaled, labels).item())
 
     try:
-        result = minimize_scalar(nll, bounds=(0.5, 5.0), method="bounded")
-        T = float(np.clip(result.x, 0.5, 5.0))
+        result = minimize_scalar(nll, bounds=(0.5, 10.0), method="bounded")
+        T = float(np.clip(result.x, 0.5, 10.0))
     except Exception:
         T = 1.0
 
@@ -406,8 +406,8 @@ def _train_one(X_train, y_train, X_val, y_val,
 
     # Temperature calibration — always fitted on current val set regardless of cache
     T = _fit_temperature(model, X_val, y_val, seq_len)
-    logger.info(f"  [{model_idx+1}/{N_MODELS}] Temperature T={T:.3f} "
-                f"({'over-confident → spreading' if T > 1.0 else 'well-calibrated'})")
+    cal_label = "well-calibrated" if T <= 1.0 else f"over-confident → spreading (T={T:.2f})"
+    logger.info(f"  [{model_idx+1}/{N_MODELS}] Temperature T={T:.3f} ({cal_label})")
     return model
 
 
