@@ -1,0 +1,370 @@
+2026-04-12 14:58:01.760 | INFO     | kraken_history:get_history_dir:593 - Found Kraken OHLC data at: data/OHLC_Kraken (12027 CSV files)
+2026-04-12 14:58:01.789 | INFO     | kraken_history:fetch_ohlcv_full:334 - Loaded BTC/USD 4h from cache (4993 rows)
+2026-04-12 14:58:01.878 | INFO     | data.feature_engineer:build_features:601 - Loaded features from cache (4793 rows): data\features\BTC_USD_4h_features.csv
+2026-04-12 14:58:01.907 | INFO     | models.lstm_ensemble:<module>:49 - Ensemble using cuda | AMP=enabled
+2026-04-12 14:58:01.908 | INFO     | models.lstm_ensemble:train_ensemble:433 - 
+Training 9-model ensemble for BTC/USD_4h on cuda
+2026-04-12 14:58:01.908 | INFO     | models.lstm_ensemble:train_ensemble:434 -   Train: 2850 | Val: 647 | Features: 122
+2026-04-12 14:58:02.036 | INFO     | models.lstm_ensemble:_train_one:304 -   [1/9] Cache HIT seed=42 (key=fb397252…) — skipping training
+2026-04-12 14:58:02.186 | INFO     | models.lstm_ensemble:_train_one:308 -   [1/9] Temperature T=10.000
+2026-04-12 14:58:02.278 | INFO     | models.lstm_ensemble:_train_one:304 -   [2/9] Cache HIT seed=179 (key=cd771e9a…) — skipping training
+2026-04-12 14:58:02.333 | INFO     | models.lstm_ensemble:_train_one:308 -   [2/9] Temperature T=10.000
+2026-04-12 14:58:02.397 | INFO     | models.lstm_ensemble:_train_one:304 -   [3/9] Cache HIT seed=316 (key=851ab813…) — skipping training
+2026-04-12 14:58:02.432 | INFO     | models.lstm_ensemble:_train_one:308 -   [3/9] Temperature T=10.000
+2026-04-12 14:58:02.491 | INFO     | models.lstm_ensemble:_train_one:304 -   [4/9] Cache HIT seed=453 (key=deefb256…) — skipping training
+2026-04-12 14:58:02.528 | INFO     | models.lstm_ensemble:_train_one:308 -   [4/9] Temperature T=10.000
+2026-04-12 14:58:02.579 | INFO     | models.lstm_ensemble:_train_one:304 -   [5/9] Cache HIT seed=590 (key=68d3b052…) — skipping training
+2026-04-12 14:58:02.611 | INFO     | models.lstm_ensemble:_train_one:308 -   [5/9] Temperature T=10.000
+2026-04-12 14:58:02.655 | INFO     | models.lstm_ensemble:_train_one:304 -   [6/9] Cache HIT seed=727 (key=f7f4018a…) — skipping training
+2026-04-12 14:58:02.688 | INFO     | models.lstm_ensemble:_train_one:308 -   [6/9] Temperature T=10.000
+2026-04-12 14:58:02.737 | INFO     | models.lstm_ensemble:_train_one:304 -   [7/9] Cache HIT seed=864 (key=54249030…) — skipping training
+2026-04-12 14:58:02.768 | INFO     | models.lstm_ensemble:_train_one:308 -   [7/9] Temperature T=10.000
+2026-04-12 14:58:02.817 | INFO     | models.lstm_ensemble:_train_one:304 -   [8/9] Cache HIT seed=1001 (key=59a40059…) — skipping training
+2026-04-12 14:58:02.844 | INFO     | models.lstm_ensemble:_train_one:308 -   [8/9] Temperature T=10.000
+2026-04-12 14:58:02.894 | INFO     | models.lstm_ensemble:_train_one:304 -   [9/9] Cache HIT seed=1138 (key=9d829ceb…) — skipping training
+2026-04-12 14:58:02.930 | INFO     | models.lstm_ensemble:_train_one:308 -   [9/9] Temperature T=10.000
+2026-04-12 14:58:02.968 | INFO     | models.lstm_ensemble:train_ensemble:462 - 
+Ensemble training complete for BTC/USD_4h:
+2026-04-12 14:58:02.968 | INFO     | models.lstm_ensemble:train_ensemble:463 -   Val losses: ['0.0639', '0.0632', '0.0716', '0.0852', '0.0792', '0.0696', '0.0673', '0.0670', '0.0700']
+2026-04-12 14:58:02.968 | INFO     | models.lstm_ensemble:train_ensemble:464 -   Mean: 0.0708 | Std: 0.0068
+2026-04-12 14:58:03.260 | INFO     | __mp_main__:run_fold:278 -   Val-calibrated threshold: 0.3486
+2026-04-12 14:58:03.261 | INFO     | models.ensemble:generate_signals:215 - Signal distribution (threshold=0.3486153781414032): BUY=16 (7.4%)  SELL=0 (0.0%)  HOLD=199 (92.6%)
+2026-04-12 14:58:03.264 | INFO     | backtest.filters:apply_filters:147 - Filters [4h] 5/16 removed (69% survive) — trend=0 vol=0 volume=1 funding=0 regime=0 amihud=4
+2026-04-12 14:58:03.265 | INFO     | backtest.engine:_compute_metrics:403 - BTC/USD | Ann=-0.89% Sh=-1.71 So=-0.72 Cal=-4.55 DD=-0.20%(9b) WR=0.00% PF=0.00 RF=0.45 Trades=1(L1/S0) TrendWR=0.00%(1) RangeWR=0.00%(0) Exits={'END_OF_PERIOD': 1}
+2026-04-12 14:58:03.266 | INFO     | __mp_main__:run_symbol:437 -   Fold 1/6 [?]: net=-0.1% ann=-0.9% WR=0.0% Sh=-1.71 trades=1
+2026-04-12 14:58:03.271 | INFO     | models.lstm_ensemble:train_ensemble:433 - 
+Training 9-model ensemble for BTC/USD_4h on cuda
+2026-04-12 14:58:03.272 | INFO     | models.lstm_ensemble:train_ensemble:434 -   Train: 3065 | Val: 647 | Features: 122
+2026-04-12 14:58:03.279 | INFO     | models.lstm_ensemble:_train_one:304 -   [1/9] Cache HIT seed=42 (key=9c86d52a…) — skipping training
+2026-04-12 14:58:03.306 | INFO     | models.lstm_ensemble:_train_one:308 -   [1/9] Temperature T=0.694
+2026-04-12 14:58:03.346 | INFO     | models.lstm_ensemble:_train_one:304 -   [2/9] Cache HIT seed=179 (key=4b5106f9…) — skipping training
+2026-04-12 14:58:03.378 | INFO     | models.lstm_ensemble:_train_one:308 -   [2/9] Temperature T=0.500
+2026-04-12 14:58:03.423 | INFO     | models.lstm_ensemble:_train_one:304 -   [3/9] Cache HIT seed=316 (key=4f2c6e44…) — skipping training
+2026-04-12 14:58:03.449 | INFO     | models.lstm_ensemble:_train_one:308 -   [3/9] Temperature T=9.999
+2026-04-12 14:58:03.496 | INFO     | models.lstm_ensemble:_train_one:304 -   [4/9] Cache HIT seed=453 (key=b4ed79b8…) — skipping training
+2026-04-12 14:58:03.528 | INFO     | models.lstm_ensemble:_train_one:308 -   [4/9] Temperature T=10.000
+2026-04-12 14:58:03.563 | INFO     | models.lstm_ensemble:_train_one:304 -   [5/9] Cache HIT seed=590 (key=726e4ef4…) — skipping training
+2026-04-12 14:58:03.597 | INFO     | models.lstm_ensemble:_train_one:308 -   [5/9] Temperature T=10.000
+2026-04-12 14:58:03.639 | INFO     | models.lstm_ensemble:_train_one:304 -   [6/9] Cache HIT seed=727 (key=b150d894…) — skipping training
+2026-04-12 14:58:03.663 | INFO     | models.lstm_ensemble:_train_one:308 -   [6/9] Temperature T=10.000
+2026-04-12 14:58:03.716 | INFO     | models.lstm_ensemble:_train_one:304 -   [7/9] Cache HIT seed=864 (key=cc57b2fb…) — skipping training
+2026-04-12 14:58:03.745 | INFO     | models.lstm_ensemble:_train_one:308 -   [7/9] Temperature T=0.860
+2026-04-12 14:58:03.787 | INFO     | models.lstm_ensemble:_train_one:304 -   [8/9] Cache HIT seed=1001 (key=70e2dcdf…) — skipping training
+2026-04-12 14:58:03.819 | INFO     | models.lstm_ensemble:_train_one:308 -   [8/9] Temperature T=10.000
+2026-04-12 14:58:03.864 | INFO     | models.lstm_ensemble:_train_one:304 -   [9/9] Cache HIT seed=1138 (key=291a6322…) — skipping training
+2026-04-12 14:58:03.896 | INFO     | models.lstm_ensemble:_train_one:308 -   [9/9] Temperature T=9.995
+2026-04-12 14:58:03.932 | INFO     | models.lstm_ensemble:train_ensemble:462 - 
+Ensemble training complete for BTC/USD_4h:
+2026-04-12 14:58:03.932 | INFO     | models.lstm_ensemble:train_ensemble:463 -   Val losses: ['0.0853', '0.0820', '0.0824', '0.0801', '0.0831', '0.0789', '0.0798', '0.0861', '0.0832']
+2026-04-12 14:58:03.935 | INFO     | models.lstm_ensemble:train_ensemble:464 -   Mean: 0.0823 | Std: 0.0023
+2026-04-12 14:58:04.204 | INFO     | __mp_main__:run_fold:278 -   Val-calibrated threshold: 0.3997
+2026-04-12 14:58:04.204 | INFO     | models.ensemble:generate_signals:215 - Signal distribution (threshold=0.39969301223754883): BUY=13 (6.0%)  SELL=13 (6.0%)  HOLD=189 (87.9%)
+2026-04-12 14:58:04.204 | INFO     | backtest.filters:apply_filters:147 - Filters [4h] 11/26 removed (58% survive) — trend=0 vol=2 volume=3 funding=0 regime=4 amihud=2
+2026-04-12 14:58:04.215 | INFO     | backtest.engine:_compute_metrics:403 - BTC/USD | Ann=3.65% Sh=4.72 So=3.61 Cal=41.14 DD=-0.09%(53b) WR=100.00% PF=36274995252.57 RF=3.97 Trades=2(L1/S1) TrendWR=100.00%(1) RangeWR=100.00%(1) Exits={'TAKE_PROFIT': 2}
+2026-04-12 14:58:04.215 | INFO     | __mp_main__:run_symbol:437 -   Fold 2/6 [?]: net=+0.4% ann=+3.7% WR=100.0% Sh=4.72 trades=2
+2026-04-12 14:58:04.224 | INFO     | models.lstm_ensemble:train_ensemble:433 - 
+Training 9-model ensemble for BTC/USD_4h on cuda
+2026-04-12 14:58:04.224 | INFO     | models.lstm_ensemble:train_ensemble:434 -   Train: 3280 | Val: 647 | Features: 122
+2026-04-12 14:58:04.232 | INFO     | models.lstm_ensemble:_train_one:304 -   [1/9] Cache HIT seed=42 (key=2a40559d…) — skipping training
+2026-04-12 14:58:04.262 | INFO     | models.lstm_ensemble:_train_one:308 -   [1/9] Temperature T=10.000
+2026-04-12 14:58:04.298 | INFO     | models.lstm_ensemble:_train_one:304 -   [2/9] Cache HIT seed=179 (key=56716b77…) — skipping training
+2026-04-12 14:58:04.332 | INFO     | models.lstm_ensemble:_train_one:308 -   [2/9] Temperature T=0.540
+2026-04-12 14:58:04.373 | INFO     | models.lstm_ensemble:_train_one:304 -   [3/9] Cache HIT seed=316 (key=e41678dd…) — skipping training
+2026-04-12 14:58:04.506 | INFO     | models.lstm_ensemble:_train_one:308 -   [3/9] Temperature T=10.000
+2026-04-12 14:58:04.546 | INFO     | models.lstm_ensemble:_train_one:304 -   [4/9] Cache HIT seed=453 (key=5577ab75…) — skipping training
+2026-04-12 14:58:04.571 | INFO     | models.lstm_ensemble:_train_one:308 -   [4/9] Temperature T=9.999
+2026-04-12 14:58:04.613 | INFO     | models.lstm_ensemble:_train_one:304 -   [5/9] Cache HIT seed=590 (key=3883bb98…) — skipping training
+2026-04-12 14:58:04.647 | INFO     | models.lstm_ensemble:_train_one:308 -   [5/9] Temperature T=10.000
+2026-04-12 14:58:04.681 | INFO     | models.lstm_ensemble:_train_one:304 -   [6/9] Cache HIT seed=727 (key=fa614378…) — skipping training
+2026-04-12 14:58:04.714 | INFO     | models.lstm_ensemble:_train_one:308 -   [6/9] Temperature T=0.852
+2026-04-12 14:58:04.758 | INFO     | models.lstm_ensemble:_train_one:304 -   [7/9] Cache HIT seed=864 (key=87b594bf…) — skipping training
+2026-04-12 14:58:04.789 | INFO     | models.lstm_ensemble:_train_one:308 -   [7/9] Temperature T=1.110
+2026-04-12 14:58:04.831 | INFO     | models.lstm_ensemble:_train_one:304 -   [8/9] Cache HIT seed=1001 (key=177bf5b6…) — skipping training
+2026-04-12 14:58:04.861 | INFO     | models.lstm_ensemble:_train_one:308 -   [8/9] Temperature T=10.000
+2026-04-12 14:58:04.906 | INFO     | models.lstm_ensemble:_train_one:304 -   [9/9] Cache HIT seed=1138 (key=cbdeae91…) — skipping training
+2026-04-12 14:58:04.938 | INFO     | models.lstm_ensemble:_train_one:308 -   [9/9] Temperature T=0.843
+2026-04-12 14:58:04.971 | INFO     | models.lstm_ensemble:train_ensemble:462 - 
+Ensemble training complete for BTC/USD_4h:
+2026-04-12 14:58:04.971 | INFO     | models.lstm_ensemble:train_ensemble:463 -   Val losses: ['0.0983', '0.1032', '0.1178', '0.1015', '0.1009', '0.1053', '0.1117', '0.1572', '0.1010']
+2026-04-12 14:58:04.971 | INFO     | models.lstm_ensemble:train_ensemble:464 -   Mean: 0.1108 | Std: 0.0174
+2026-04-12 14:58:05.244 | INFO     | __mp_main__:run_fold:278 -   Val-calibrated threshold: 0.3878
+2026-04-12 14:58:05.245 | INFO     | models.ensemble:generate_signals:215 - Signal distribution (threshold=0.38780784606933594): BUY=3 (1.4%)  SELL=125 (58.1%)  HOLD=87 (40.5%)
+2026-04-12 14:58:05.245 | INFO     | __mp_main__:run_fold:293 -   Disagreement filter: suppressed 43 signals (std > 0.12)
+2026-04-12 14:58:05.250 | INFO     | backtest.filters:apply_filters:147 - Filters [4h] 71/85 removed (16% survive) — trend=0 vol=7 volume=13 funding=0 regime=48 amihud=3
+2026-04-12 14:58:05.253 | INFO     | backtest.engine:_compute_metrics:403 - BTC/USD | Ann=1.73% Sh=1.34 So=1.25 Cal=5.01 DD=-0.35%(44b) WR=40.00% PF=1.67 RF=0.49 Trades=5(L1/S4) TrendWR=0.00%(0) RangeWR=40.00%(5) Exits={'STOP_LOSS': 2, 'TAKE_PROFIT': 2, 'END_OF_PERIOD': 1}
+2026-04-12 14:58:05.253 | INFO     | __mp_main__:run_symbol:437 -   Fold 3/6 [?]: net=+0.2% ann=+1.7% WR=40.0% Sh=1.34 trades=5
+2026-04-12 14:58:05.256 | INFO     | models.lstm_ensemble:train_ensemble:433 - 
+Training 9-model ensemble for BTC/USD_4h on cuda
+2026-04-12 14:58:05.256 | INFO     | models.lstm_ensemble:train_ensemble:434 -   Train: 3495 | Val: 647 | Features: 122
+2026-04-12 14:58:05.266 | INFO     | models.lstm_ensemble:_train_one:304 -   [1/9] Cache HIT seed=42 (key=0f691983…) — skipping training
+2026-04-12 14:58:05.296 | INFO     | models.lstm_ensemble:_train_one:308 -   [1/9] Temperature T=10.000
+2026-04-12 14:58:05.338 | INFO     | models.lstm_ensemble:_train_one:304 -   [2/9] Cache HIT seed=179 (key=99f6dc3d…) — skipping training
+2026-04-12 14:58:05.371 | INFO     | models.lstm_ensemble:_train_one:308 -   [2/9] Temperature T=10.000
+2026-04-12 14:58:05.411 | INFO     | models.lstm_ensemble:_train_one:304 -   [3/9] Cache HIT seed=316 (key=b9b1e644…) — skipping training
+2026-04-12 14:58:05.437 | INFO     | models.lstm_ensemble:_train_one:308 -   [3/9] Temperature T=10.000
+2026-04-12 14:58:05.483 | INFO     | models.lstm_ensemble:_train_one:304 -   [4/9] Cache HIT seed=453 (key=6bd8e020…) — skipping training
+2026-04-12 14:58:05.511 | INFO     | models.lstm_ensemble:_train_one:308 -   [4/9] Temperature T=10.000
+2026-04-12 14:58:05.556 | INFO     | models.lstm_ensemble:_train_one:304 -   [5/9] Cache HIT seed=590 (key=b6a65d3f…) — skipping training
+2026-04-12 14:58:05.588 | INFO     | models.lstm_ensemble:_train_one:308 -   [5/9] Temperature T=10.000
+2026-04-12 14:58:05.627 | INFO     | models.lstm_ensemble:_train_one:304 -   [6/9] Cache HIT seed=727 (key=b2c38f58…) — skipping training
+2026-04-12 14:58:05.654 | INFO     | models.lstm_ensemble:_train_one:308 -   [6/9] Temperature T=10.000
+2026-04-12 14:58:05.697 | INFO     | models.lstm_ensemble:_train_one:304 -   [7/9] Cache HIT seed=864 (key=a06f2a1f…) — skipping training
+2026-04-12 14:58:05.722 | INFO     | models.lstm_ensemble:_train_one:308 -   [7/9] Temperature T=10.000
+2026-04-12 14:58:05.768 | INFO     | models.lstm_ensemble:_train_one:304 -   [8/9] Cache HIT seed=1001 (key=8c27b263…) — skipping training
+2026-04-12 14:58:05.796 | INFO     | models.lstm_ensemble:_train_one:308 -   [8/9] Temperature T=10.000
+2026-04-12 14:58:05.837 | INFO     | models.lstm_ensemble:_train_one:304 -   [9/9] Cache HIT seed=1138 (key=7115968e…) — skipping training
+2026-04-12 14:58:05.871 | INFO     | models.lstm_ensemble:_train_one:308 -   [9/9] Temperature T=10.000
+2026-04-12 14:58:05.906 | INFO     | models.lstm_ensemble:train_ensemble:462 - 
+Ensemble training complete for BTC/USD_4h:
+2026-04-12 14:58:05.906 | INFO     | models.lstm_ensemble:train_ensemble:463 -   Val losses: ['0.1273', '0.1292', '0.1487', '0.1286', '0.1347', '0.1407', '0.1414', '0.1350', '0.1288']
+2026-04-12 14:58:05.907 | INFO     | models.lstm_ensemble:train_ensemble:464 -   Mean: 0.1349 | Std: 0.0069
+2026-04-12 14:58:06.174 | INFO     | __mp_main__:run_fold:278 -   Val-calibrated threshold: 0.3528
+2026-04-12 14:58:06.174 | INFO     | models.ensemble:generate_signals:215 - Signal distribution (threshold=0.35280680656433105): BUY=0 (0.0%)  SELL=18 (8.4%)  HOLD=197 (91.6%)
+2026-04-12 14:58:06.174 | INFO     | backtest.filters:apply_filters:147 - Filters [4h] 7/18 removed (61% survive) — trend=0 vol=0 volume=1 funding=0 regime=0 amihud=6
+2026-04-12 14:58:06.185 | INFO     | backtest.engine:_compute_metrics:403 - BTC/USD | Ann=0.06% Sh=0.11 So=0.07 Cal=0.62 DD=-0.09%(135b) WR=33.33% PF=1.21 RF=0.06 Trades=3(L0/S3) TrendWR=0.00%(1) RangeWR=50.00%(2) Exits={'STOP_LOSS': 1, 'TAKE_PROFIT': 1, 'MAX_HOLD': 1}
+2026-04-12 14:58:06.185 | INFO     | __mp_main__:run_symbol:437 -   Fold 4/6 [?]: net=+0.0% ann=+0.1% WR=33.3% Sh=0.11 trades=3
+2026-04-12 14:58:06.191 | INFO     | models.lstm_ensemble:train_ensemble:433 - 
+Training 9-model ensemble for BTC/USD_4h on cuda
+2026-04-12 14:58:06.191 | INFO     | models.lstm_ensemble:train_ensemble:434 -   Train: 3710 | Val: 647 | Features: 122
+2026-04-12 14:58:06.199 | INFO     | models.lstm_ensemble:_train_one:304 -   [1/9] Cache HIT seed=42 (key=9982ddb7…) — skipping training
+2026-04-12 14:58:06.228 | INFO     | models.lstm_ensemble:_train_one:308 -   [1/9] Temperature T=10.000
+2026-04-12 14:58:06.262 | INFO     | models.lstm_ensemble:_train_one:304 -   [2/9] Cache HIT seed=179 (key=fdf4535b…) — skipping training
+2026-04-12 14:58:06.297 | INFO     | models.lstm_ensemble:_train_one:308 -   [2/9] Temperature T=10.000
+2026-04-12 14:58:06.338 | INFO     | models.lstm_ensemble:_train_one:304 -   [3/9] Cache HIT seed=316 (key=e8488da6…) — skipping training
+2026-04-12 14:58:06.372 | INFO     | models.lstm_ensemble:_train_one:308 -   [3/9] Temperature T=10.000
+2026-04-12 14:58:06.412 | INFO     | models.lstm_ensemble:_train_one:304 -   [4/9] Cache HIT seed=453 (key=f27771e0…) — skipping training
+2026-04-12 14:58:06.445 | INFO     | models.lstm_ensemble:_train_one:308 -   [4/9] Temperature T=10.000
+2026-04-12 14:58:06.478 | INFO     | models.lstm_ensemble:_train_one:304 -   [5/9] Cache HIT seed=590 (key=28dd3f33…) — skipping training
+2026-04-12 14:58:06.511 | INFO     | models.lstm_ensemble:_train_one:308 -   [5/9] Temperature T=10.000
+2026-04-12 14:58:06.554 | INFO     | models.lstm_ensemble:_train_one:304 -   [6/9] Cache HIT seed=727 (key=3f36ee2d…) — skipping training
+2026-04-12 14:58:06.589 | INFO     | models.lstm_ensemble:_train_one:308 -   [6/9] Temperature T=10.000
+2026-04-12 14:58:06.628 | INFO     | models.lstm_ensemble:_train_one:304 -   [7/9] Cache HIT seed=864 (key=e2be05a4…) — skipping training
+2026-04-12 14:58:06.661 | INFO     | models.lstm_ensemble:_train_one:308 -   [7/9] Temperature T=10.000
+2026-04-12 14:58:06.695 | INFO     | models.lstm_ensemble:_train_one:304 -   [8/9] Cache HIT seed=1001 (key=d9f52479…) — skipping training
+2026-04-12 14:58:06.733 | INFO     | models.lstm_ensemble:_train_one:308 -   [8/9] Temperature T=10.000
+2026-04-12 14:58:06.772 | INFO     | models.lstm_ensemble:_train_one:304 -   [9/9] Cache HIT seed=1138 (key=0af0dd71…) — skipping training
+2026-04-12 14:58:06.795 | INFO     | models.lstm_ensemble:_train_one:308 -   [9/9] Temperature T=10.000
+2026-04-12 14:58:06.833 | INFO     | models.lstm_ensemble:train_ensemble:462 - 
+Ensemble training complete for BTC/USD_4h:
+2026-04-12 14:58:06.838 | INFO     | models.lstm_ensemble:train_ensemble:463 -   Val losses: ['0.1237', '0.1284', '0.1281', '0.1324', '0.1395', '0.1230', '0.1331', '0.1287', '0.1217']
+2026-04-12 14:58:06.838 | INFO     | models.lstm_ensemble:train_ensemble:464 -   Mean: 0.1287 | Std: 0.0053
+2026-04-12 14:58:07.111 | INFO     | __mp_main__:run_fold:278 -   Val-calibrated threshold: 0.3517
+2026-04-12 14:58:07.111 | INFO     | models.ensemble:generate_signals:215 - Signal distribution (threshold=0.35167983174324036): BUY=0 (0.0%)  SELL=0 (0.0%)  HOLD=215 (100.0%)
+2026-04-12 14:58:07.114 | INFO     | backtest.filters:apply_filters:147 - Filters [4h] 0/0 removed (0% survive) — trend=0 vol=0 volume=0 funding=0 regime=0 amihud=0
+2026-04-12 14:58:07.116 | INFO     | backtest.engine:_compute_metrics:403 - BTC/USD | Ann=0.00% Sh=0.00 So=0.00 Cal=0.00 DD=0.00%(0b) WR=0.00% PF=0.00 RF=inf Trades=0(L0/S0) TrendWR=0.00%(0) RangeWR=0.00%(0) Exits={}
+2026-04-12 14:58:07.116 | INFO     | __mp_main__:run_symbol:437 -   Fold 5/6 [?]: net=+0.0% ann=+0.0% WR=0.0% Sh=0.00 trades=0
+2026-04-12 14:58:07.120 | INFO     | models.lstm_ensemble:train_ensemble:433 - 
+Training 9-model ensemble for BTC/USD_4h on cuda
+2026-04-12 14:58:07.120 | INFO     | models.lstm_ensemble:train_ensemble:434 -   Train: 3925 | Val: 647 | Features: 122
+2026-04-12 14:58:07.128 | INFO     | models.lstm_ensemble:_train_one:304 -   [1/9] Cache HIT seed=42 (key=d645623c…) — skipping training
+2026-04-12 14:58:07.156 | INFO     | models.lstm_ensemble:_train_one:308 -   [1/9] Temperature T=10.000
+2026-04-12 14:58:07.196 | INFO     | models.lstm_ensemble:_train_one:304 -   [2/9] Cache HIT seed=179 (key=58a0d282…) — skipping training
+2026-04-12 14:58:07.228 | INFO     | models.lstm_ensemble:_train_one:308 -   [2/9] Temperature T=10.000
+2026-04-12 14:58:07.271 | INFO     | models.lstm_ensemble:_train_one:304 -   [3/9] Cache HIT seed=316 (key=c552baf3…) — skipping training
+2026-04-12 14:58:07.306 | INFO     | models.lstm_ensemble:_train_one:308 -   [3/9] Temperature T=10.000
+2026-04-12 14:58:07.348 | INFO     | models.lstm_ensemble:_train_one:304 -   [4/9] Cache HIT seed=453 (key=b8f13017…) — skipping training
+2026-04-12 14:58:07.376 | INFO     | models.lstm_ensemble:_train_one:308 -   [4/9] Temperature T=10.000
+2026-04-12 14:58:07.413 | INFO     | models.lstm_ensemble:_train_one:304 -   [5/9] Cache HIT seed=590 (key=3d75c494…) — skipping training
+2026-04-12 14:58:07.445 | INFO     | models.lstm_ensemble:_train_one:308 -   [5/9] Temperature T=10.000
+2026-04-12 14:58:07.487 | INFO     | models.lstm_ensemble:_train_one:304 -   [6/9] Cache HIT seed=727 (key=bfc95c75…) — skipping training
+2026-04-12 14:58:07.522 | INFO     | models.lstm_ensemble:_train_one:308 -   [6/9] Temperature T=10.000
+2026-04-12 14:58:07.574 | INFO     | models.lstm_ensemble:_train_one:304 -   [7/9] Cache HIT seed=864 (key=96af3439…) — skipping training
+2026-04-12 14:58:07.599 | INFO     | models.lstm_ensemble:_train_one:308 -   [7/9] Temperature T=10.000
+2026-04-12 14:58:07.645 | INFO     | models.lstm_ensemble:_train_one:304 -   [8/9] Cache HIT seed=1001 (key=5316756b…) — skipping training
+2026-04-12 14:58:07.672 | INFO     | models.lstm_ensemble:_train_one:308 -   [8/9] Temperature T=10.000
+2026-04-12 14:58:07.719 | INFO     | models.lstm_ensemble:_train_one:304 -   [9/9] Cache HIT seed=1138 (key=2897b98d…) — skipping training
+2026-04-12 14:58:07.746 | INFO     | models.lstm_ensemble:_train_one:308 -   [9/9] Temperature T=10.000
+2026-04-12 14:58:07.779 | INFO     | models.lstm_ensemble:train_ensemble:462 - 
+Ensemble training complete for BTC/USD_4h:
+2026-04-12 14:58:07.779 | INFO     | models.lstm_ensemble:train_ensemble:463 -   Val losses: ['0.1641', '0.1580', '0.1494', '0.1522', '0.1533', '0.1520', '0.1522', '0.1505', '0.1600']
+2026-04-12 14:58:07.779 | INFO     | models.lstm_ensemble:train_ensemble:464 -   Mean: 0.1546 | Std: 0.0046
+2026-04-12 14:58:08.051 | INFO     | __mp_main__:run_fold:278 -   Val-calibrated threshold: 0.3482
+2026-04-12 14:58:08.051 | INFO     | models.ensemble:generate_signals:215 - Signal distribution (threshold=0.3481738567352295): BUY=0 (0.0%)  SELL=0 (0.0%)  HOLD=215 (100.0%)
+2026-04-12 14:58:08.057 | INFO     | backtest.filters:apply_filters:147 - Filters [4h] 0/0 removed (0% survive) — trend=0 vol=0 volume=0 funding=0 regime=0 amihud=0
+2026-04-12 14:58:08.059 | INFO     | backtest.engine:_compute_metrics:403 - BTC/USD | Ann=0.00% Sh=0.00 So=0.00 Cal=0.00 DD=0.00%(0b) WR=0.00% PF=0.00 RF=inf Trades=0(L0/S0) TrendWR=0.00%(0) RangeWR=0.00%(0) Exits={}
+2026-04-12 14:58:08.059 | INFO     | __mp_main__:run_symbol:437 -   Fold 6/6 [?]: net=+0.0% ann=+0.0% WR=0.0% Sh=0.00 trades=0
+2026-04-12 14:58:08.127 | INFO     | kraken_history:get_history_dir:593 - Found Kraken OHLC data at: data/OHLC_Kraken (12027 CSV files)
+2026-04-12 14:58:08.136 | INFO     | kraken_history:fetch_ohlcv_full:334 - Loaded ETH/USD 4h from cache (4993 rows)
+2026-04-12 14:58:08.188 | INFO     | kraken_history:get_history_dir:593 - Found Kraken OHLC data at: data/OHLC_Kraken (12027 CSV files)
+2026-04-12 14:58:08.201 | INFO     | kraken_history:fetch_ohlcv_full:334 - Loaded BTC/USD 4h from cache (4993 rows)
+2026-04-12 14:58:08.294 | INFO     | data.feature_engineer:build_features:601 - Loaded features from cache (4793 rows): data\features\ETH_USD_4h_features.csv
+2026-04-12 14:58:08.307 | INFO     | models.lstm_ensemble:train_ensemble:433 - 
+Training 9-model ensemble for ETH/USD_4h on cuda
+2026-04-12 14:58:08.307 | INFO     | models.lstm_ensemble:train_ensemble:434 -   Train: 2850 | Val: 647 | Features: 122
+2026-04-12 14:58:08.314 | INFO     | models.lstm_ensemble:_train_one:304 -   [1/9] Cache HIT seed=42 (key=eb36609b…) — skipping training
+2026-04-12 14:58:08.345 | INFO     | models.lstm_ensemble:_train_one:308 -   [1/9] Temperature T=10.000
+2026-04-12 14:58:08.378 | INFO     | models.lstm_ensemble:_train_one:304 -   [2/9] Cache HIT seed=179 (key=1392c5e9…) — skipping training
+2026-04-12 14:58:08.413 | INFO     | models.lstm_ensemble:_train_one:308 -   [2/9] Temperature T=10.000
+2026-04-12 14:58:08.454 | INFO     | models.lstm_ensemble:_train_one:304 -   [3/9] Cache HIT seed=316 (key=7d190c5d…) — skipping training
+2026-04-12 14:58:08.487 | INFO     | models.lstm_ensemble:_train_one:308 -   [3/9] Temperature T=10.000
+2026-04-12 14:58:08.530 | INFO     | models.lstm_ensemble:_train_one:304 -   [4/9] Cache HIT seed=453 (key=66d41fac…) — skipping training
+2026-04-12 14:58:08.562 | INFO     | models.lstm_ensemble:_train_one:308 -   [4/9] Temperature T=10.000
+2026-04-12 14:58:08.601 | INFO     | models.lstm_ensemble:_train_one:304 -   [5/9] Cache HIT seed=590 (key=ec6f210f…) — skipping training
+2026-04-12 14:58:08.629 | INFO     | models.lstm_ensemble:_train_one:308 -   [5/9] Temperature T=10.000
+2026-04-12 14:58:08.672 | INFO     | models.lstm_ensemble:_train_one:304 -   [6/9] Cache HIT seed=727 (key=213bf75e…) — skipping training
+2026-04-12 14:58:08.698 | INFO     | models.lstm_ensemble:_train_one:308 -   [6/9] Temperature T=10.000
+2026-04-12 14:58:08.745 | INFO     | models.lstm_ensemble:_train_one:304 -   [7/9] Cache HIT seed=864 (key=c36eef39…) — skipping training
+2026-04-12 14:58:08.778 | INFO     | models.lstm_ensemble:_train_one:308 -   [7/9] Temperature T=10.000
+2026-04-12 14:58:08.821 | INFO     | models.lstm_ensemble:_train_one:304 -   [8/9] Cache HIT seed=1001 (key=24fbefed…) — skipping training
+2026-04-12 14:58:08.847 | INFO     | models.lstm_ensemble:_train_one:308 -   [8/9] Temperature T=10.000
+2026-04-12 14:58:08.891 | INFO     | models.lstm_ensemble:_train_one:304 -   [9/9] Cache HIT seed=1138 (key=d529d130…) — skipping training
+2026-04-12 14:58:08.922 | INFO     | models.lstm_ensemble:_train_one:308 -   [9/9] Temperature T=10.000
+2026-04-12 14:58:08.956 | INFO     | models.lstm_ensemble:train_ensemble:462 - 
+Ensemble training complete for ETH/USD_4h:
+2026-04-12 14:58:08.956 | INFO     | models.lstm_ensemble:train_ensemble:463 -   Val losses: ['0.2089', '0.2148', '0.2615', '0.2256', '0.2029', '0.2292', '0.2051', '0.2109', '0.2267']
+2026-04-12 14:58:08.961 | INFO     | models.lstm_ensemble:train_ensemble:464 -   Mean: 0.2206 | Std: 0.0171
+2026-04-12 14:58:09.253 | INFO     | __mp_main__:run_fold:278 -   Val-calibrated threshold: 0.3517
+2026-04-12 14:58:09.253 | INFO     | models.ensemble:generate_signals:215 - Signal distribution (threshold=0.3516768515110016): BUY=0 (0.0%)  SELL=24 (11.2%)  HOLD=191 (88.8%)
+2026-04-12 14:58:09.257 | INFO     | backtest.filters:apply_filters:147 - Filters [4h] 13/24 removed (46% survive) — trend=0 vol=4 volume=4 funding=0 regime=4 amihud=1
+2026-04-12 14:58:09.257 | INFO     | backtest.engine:_compute_metrics:403 - ETH/USD | Ann=3.74% Sh=2.65 So=1.81 Cal=22.54 DD=-0.17%(28b) WR=66.67% PF=4.71 RF=2.18 Trades=3(L0/S3) TrendWR=66.67%(3) RangeWR=0.00%(0) Exits={'STOP_LOSS': 1, 'TAKE_PROFIT': 2}
+2026-04-12 14:58:09.257 | INFO     | __mp_main__:run_symbol:437 -   Fold 1/6 [?]: net=+0.4% ann=+3.7% WR=66.7% Sh=2.65 trades=3
+2026-04-12 14:58:09.267 | INFO     | models.lstm_ensemble:train_ensemble:433 - 
+Training 9-model ensemble for ETH/USD_4h on cuda
+2026-04-12 14:58:09.267 | INFO     | models.lstm_ensemble:train_ensemble:434 -   Train: 3065 | Val: 647 | Features: 122
+2026-04-12 14:58:09.276 | INFO     | models.lstm_ensemble:_train_one:304 -   [1/9] Cache HIT seed=42 (key=a1e36da5…) — skipping training
+2026-04-12 14:58:09.305 | INFO     | models.lstm_ensemble:_train_one:308 -   [1/9] Temperature T=10.000
+2026-04-12 14:58:09.354 | INFO     | models.lstm_ensemble:_train_one:304 -   [2/9] Cache HIT seed=179 (key=5c525613…) — skipping training
+2026-04-12 14:58:09.378 | INFO     | models.lstm_ensemble:_train_one:308 -   [2/9] Temperature T=10.000
+2026-04-12 14:58:09.433 | INFO     | models.lstm_ensemble:_train_one:304 -   [3/9] Cache HIT seed=316 (key=0c17a015…) — skipping training
+2026-04-12 14:58:09.469 | INFO     | models.lstm_ensemble:_train_one:308 -   [3/9] Temperature T=10.000
+2026-04-12 14:58:09.512 | INFO     | models.lstm_ensemble:_train_one:304 -   [4/9] Cache HIT seed=453 (key=77111e5c…) — skipping training
+2026-04-12 14:58:09.545 | INFO     | models.lstm_ensemble:_train_one:308 -   [4/9] Temperature T=10.000
+2026-04-12 14:58:09.589 | INFO     | models.lstm_ensemble:_train_one:304 -   [5/9] Cache HIT seed=590 (key=ac301fc0…) — skipping training
+2026-04-12 14:58:09.621 | INFO     | models.lstm_ensemble:_train_one:308 -   [5/9] Temperature T=10.000
+2026-04-12 14:58:09.663 | INFO     | models.lstm_ensemble:_train_one:304 -   [6/9] Cache HIT seed=727 (key=22116d9d…) — skipping training
+2026-04-12 14:58:09.694 | INFO     | models.lstm_ensemble:_train_one:308 -   [6/9] Temperature T=10.000
+2026-04-12 14:58:09.738 | INFO     | models.lstm_ensemble:_train_one:304 -   [7/9] Cache HIT seed=864 (key=22513772…) — skipping training
+2026-04-12 14:58:09.762 | INFO     | models.lstm_ensemble:_train_one:308 -   [7/9] Temperature T=10.000
+2026-04-12 14:58:09.809 | INFO     | models.lstm_ensemble:_train_one:304 -   [8/9] Cache HIT seed=1001 (key=c2633784…) — skipping training
+2026-04-12 14:58:09.836 | INFO     | models.lstm_ensemble:_train_one:308 -   [8/9] Temperature T=10.000
+2026-04-12 14:58:09.878 | INFO     | models.lstm_ensemble:_train_one:304 -   [9/9] Cache HIT seed=1138 (key=986ae790…) — skipping training
+2026-04-12 14:58:09.905 | INFO     | models.lstm_ensemble:_train_one:308 -   [9/9] Temperature T=10.000
+2026-04-12 14:58:09.939 | INFO     | models.lstm_ensemble:train_ensemble:462 - 
+Ensemble training complete for ETH/USD_4h:
+2026-04-12 14:58:09.939 | INFO     | models.lstm_ensemble:train_ensemble:463 -   Val losses: ['0.1908', '0.1989', '0.1975', '0.2144', '0.2030', '0.2113', '0.2057', '0.1997', '0.2158']
+2026-04-12 14:58:09.939 | INFO     | models.lstm_ensemble:train_ensemble:464 -   Mean: 0.2041 | Std: 0.0079
+2026-04-12 14:58:10.209 | INFO     | __mp_main__:run_fold:278 -   Val-calibrated threshold: 0.3543
+2026-04-12 14:58:10.209 | INFO     | models.ensemble:generate_signals:215 - Signal distribution (threshold=0.35433799028396606): BUY=0 (0.0%)  SELL=49 (22.8%)  HOLD=166 (77.2%)
+2026-04-12 14:58:10.219 | INFO     | backtest.filters:apply_filters:147 - Filters [4h] 41/49 removed (16% survive) — trend=0 vol=11 volume=7 funding=0 regime=23 amihud=0
+2026-04-12 14:58:10.222 | INFO     | backtest.engine:_compute_metrics:403 - ETH/USD | Ann=7.83% Sh=3.54 So=2.67 Cal=28.20 DD=-0.28%(93b) WR=100.00% PF=75804022584.49 RF=2.68 Trades=3(L0/S3) TrendWR=0.00%(0) RangeWR=100.00%(3) Exits={'TAKE_PROFIT': 3}
+2026-04-12 14:58:10.223 | INFO     | __mp_main__:run_symbol:437 -   Fold 2/6 [?]: net=+0.7% ann=+7.8% WR=100.0% Sh=3.54 trades=3
+2026-04-12 14:58:10.228 | INFO     | models.lstm_ensemble:train_ensemble:433 - 
+Training 9-model ensemble for ETH/USD_4h on cuda
+2026-04-12 14:58:10.228 | INFO     | models.lstm_ensemble:train_ensemble:434 -   Train: 3280 | Val: 647 | Features: 122
+2026-04-12 14:58:10.236 | INFO     | models.lstm_ensemble:_train_one:304 -   [1/9] Cache HIT seed=42 (key=d130f2cb…) — skipping training
+2026-04-12 14:58:10.261 | INFO     | models.lstm_ensemble:_train_one:308 -   [1/9] Temperature T=10.000
+2026-04-12 14:58:10.304 | INFO     | models.lstm_ensemble:_train_one:304 -   [2/9] Cache HIT seed=179 (key=ae0d1ad6…) — skipping training
+2026-04-12 14:58:10.336 | INFO     | models.lstm_ensemble:_train_one:308 -   [2/9] Temperature T=10.000
+2026-04-12 14:58:10.378 | INFO     | models.lstm_ensemble:_train_one:304 -   [3/9] Cache HIT seed=316 (key=1761e994…) — skipping training
+2026-04-12 14:58:10.404 | INFO     | models.lstm_ensemble:_train_one:308 -   [3/9] Temperature T=10.000
+2026-04-12 14:58:10.451 | INFO     | models.lstm_ensemble:_train_one:304 -   [4/9] Cache HIT seed=453 (key=462a8a1e…) — skipping training
+2026-04-12 14:58:10.478 | INFO     | models.lstm_ensemble:_train_one:308 -   [4/9] Temperature T=10.000
+2026-04-12 14:58:10.521 | INFO     | models.lstm_ensemble:_train_one:304 -   [5/9] Cache HIT seed=590 (key=28ad73f0…) — skipping training
+2026-04-12 14:58:10.545 | INFO     | models.lstm_ensemble:_train_one:308 -   [5/9] Temperature T=10.000
+2026-04-12 14:58:10.588 | INFO     | models.lstm_ensemble:_train_one:304 -   [6/9] Cache HIT seed=727 (key=75de5c18…) — skipping training
+2026-04-12 14:58:10.623 | INFO     | models.lstm_ensemble:_train_one:308 -   [6/9] Temperature T=10.000
+2026-04-12 14:58:10.665 | INFO     | models.lstm_ensemble:_train_one:304 -   [7/9] Cache HIT seed=864 (key=2dc731fd…) — skipping training
+2026-04-12 14:58:10.693 | INFO     | models.lstm_ensemble:_train_one:308 -   [7/9] Temperature T=10.000
+2026-04-12 14:58:10.729 | INFO     | models.lstm_ensemble:_train_one:304 -   [8/9] Cache HIT seed=1001 (key=7aa71a1c…) — skipping training
+2026-04-12 14:58:10.761 | INFO     | models.lstm_ensemble:_train_one:308 -   [8/9] Temperature T=10.000
+2026-04-12 14:58:10.795 | INFO     | models.lstm_ensemble:_train_one:304 -   [9/9] Cache HIT seed=1138 (key=41722dfa…) — skipping training
+2026-04-12 14:58:10.832 | INFO     | models.lstm_ensemble:_train_one:308 -   [9/9] Temperature T=10.000
+2026-04-12 14:58:10.871 | INFO     | models.lstm_ensemble:train_ensemble:462 - 
+Ensemble training complete for ETH/USD_4h:
+2026-04-12 14:58:10.871 | INFO     | models.lstm_ensemble:train_ensemble:463 -   Val losses: ['0.2110', '0.2022', '0.2096', '0.2157', '0.2032', '0.2177', '0.2216', '0.2149', '0.2248']
+2026-04-12 14:58:10.871 | INFO     | models.lstm_ensemble:train_ensemble:464 -   Mean: 0.2134 | Std: 0.0072
+2026-04-12 14:58:11.136 | INFO     | __mp_main__:run_fold:278 -   Val-calibrated threshold: 0.3622
+2026-04-12 14:58:11.136 | INFO     | models.ensemble:generate_signals:215 - Signal distribution (threshold=0.3622451722621918): BUY=0 (0.0%)  SELL=0 (0.0%)  HOLD=215 (100.0%)
+2026-04-12 14:58:11.136 | INFO     | backtest.filters:apply_filters:147 - Filters [4h] 0/0 removed (0% survive) — trend=0 vol=0 volume=0 funding=0 regime=0 amihud=0
+2026-04-12 14:58:11.136 | INFO     | backtest.engine:_compute_metrics:403 - ETH/USD | Ann=0.00% Sh=0.00 So=0.00 Cal=0.00 DD=0.00%(0b) WR=0.00% PF=0.00 RF=inf Trades=0(L0/S0) TrendWR=0.00%(0) RangeWR=0.00%(0) Exits={}
+2026-04-12 14:58:11.147 | INFO     | __mp_main__:run_symbol:437 -   Fold 3/6 [?]: net=+0.0% ann=+0.0% WR=0.0% Sh=0.00 trades=0
+2026-04-12 14:58:11.152 | INFO     | models.lstm_ensemble:train_ensemble:433 - 
+Training 9-model ensemble for ETH/USD_4h on cuda
+2026-04-12 14:58:11.152 | INFO     | models.lstm_ensemble:train_ensemble:434 -   Train: 3495 | Val: 647 | Features: 122
+2026-04-12 14:58:11.161 | INFO     | models.lstm_ensemble:_train_one:304 -   [1/9] Cache HIT seed=42 (key=32133043…) — skipping training
+2026-04-12 14:58:11.189 | INFO     | models.lstm_ensemble:_train_one:308 -   [1/9] Temperature T=10.000
+2026-04-12 14:58:11.236 | INFO     | models.lstm_ensemble:_train_one:304 -   [2/9] Cache HIT seed=179 (key=99c251ff…) — skipping training
+2026-04-12 14:58:11.263 | INFO     | models.lstm_ensemble:_train_one:308 -   [2/9] Temperature T=10.000
+2026-04-12 14:58:11.304 | INFO     | models.lstm_ensemble:_train_one:304 -   [3/9] Cache HIT seed=316 (key=ca63a7a2…) — skipping training
+2026-04-12 14:58:11.329 | INFO     | models.lstm_ensemble:_train_one:308 -   [3/9] Temperature T=10.000
+2026-04-12 14:58:11.377 | INFO     | models.lstm_ensemble:_train_one:304 -   [4/9] Cache HIT seed=453 (key=afba8e03…) — skipping training
+2026-04-12 14:58:11.407 | INFO     | models.lstm_ensemble:_train_one:308 -   [4/9] Temperature T=10.000
+2026-04-12 14:58:11.446 | INFO     | models.lstm_ensemble:_train_one:304 -   [5/9] Cache HIT seed=590 (key=b980dd8a…) — skipping training
+2026-04-12 14:58:11.478 | INFO     | models.lstm_ensemble:_train_one:308 -   [5/9] Temperature T=10.000
+2026-04-12 14:58:11.522 | INFO     | models.lstm_ensemble:_train_one:304 -   [6/9] Cache HIT seed=727 (key=c335189a…) — skipping training
+2026-04-12 14:58:11.555 | INFO     | models.lstm_ensemble:_train_one:308 -   [6/9] Temperature T=10.000
+2026-04-12 14:58:11.600 | INFO     | models.lstm_ensemble:_train_one:304 -   [7/9] Cache HIT seed=864 (key=0155e121…) — skipping training
+2026-04-12 14:58:11.629 | INFO     | models.lstm_ensemble:_train_one:308 -   [7/9] Temperature T=10.000
+2026-04-12 14:58:11.661 | INFO     | models.lstm_ensemble:_train_one:304 -   [8/9] Cache HIT seed=1001 (key=40802ccd…) — skipping training
+2026-04-12 14:58:11.695 | INFO     | models.lstm_ensemble:_train_one:308 -   [8/9] Temperature T=10.000
+2026-04-12 14:58:11.737 | INFO     | models.lstm_ensemble:_train_one:304 -   [9/9] Cache HIT seed=1138 (key=576fdcc4…) — skipping training
+2026-04-12 14:58:11.771 | INFO     | models.lstm_ensemble:_train_one:308 -   [9/9] Temperature T=10.000
+2026-04-12 14:58:11.805 | INFO     | models.lstm_ensemble:train_ensemble:462 - 
+Ensemble training complete for ETH/USD_4h:
+2026-04-12 14:58:11.805 | INFO     | models.lstm_ensemble:train_ensemble:463 -   Val losses: ['0.2027', '0.2029', '0.2079', '0.1983', '0.1997', '0.2066', '0.2006', '0.1957', '0.1943']
+2026-04-12 14:58:11.805 | INFO     | models.lstm_ensemble:train_ensemble:464 -   Mean: 0.2010 | Std: 0.0043
+2026-04-12 14:58:12.074 | INFO     | __mp_main__:run_fold:278 -   Val-calibrated threshold: 0.3575
+2026-04-12 14:58:12.074 | INFO     | models.ensemble:generate_signals:215 - Signal distribution (threshold=0.35752829909324646): BUY=32 (14.9%)  SELL=0 (0.0%)  HOLD=183 (85.1%)
+2026-04-12 14:58:12.074 | INFO     | backtest.filters:apply_filters:147 - Filters [4h] 4/32 removed (88% survive) — trend=0 vol=0 volume=1 funding=0 regime=0 amihud=3
+2026-04-12 14:58:12.085 | INFO     | backtest.engine:_compute_metrics:403 - ETH/USD | Ann=0.41% Sh=0.44 So=0.20 Cal=1.62 DD=-0.25%(17b) WR=50.00% PF=1.20 RF=0.16 Trades=4(L4/S0) TrendWR=50.00%(4) RangeWR=0.00%(0) Exits={'STOP_LOSS': 2, 'TAKE_PROFIT': 2}
+2026-04-12 14:58:12.086 | INFO     | __mp_main__:run_symbol:437 -   Fold 4/6 [?]: net=+0.0% ann=+0.4% WR=50.0% Sh=0.44 trades=4
+2026-04-12 14:58:12.091 | INFO     | models.lstm_ensemble:train_ensemble:433 - 
+Training 9-model ensemble for ETH/USD_4h on cuda
+2026-04-12 14:58:12.091 | INFO     | models.lstm_ensemble:train_ensemble:434 -   Train: 3710 | Val: 647 | Features: 122
+2026-04-12 14:58:12.100 | INFO     | models.lstm_ensemble:_train_one:304 -   [1/9] Cache HIT seed=42 (key=1c350bba…) — skipping training
+2026-04-12 14:58:12.128 | INFO     | models.lstm_ensemble:_train_one:308 -   [1/9] Temperature T=10.000
+2026-04-12 14:58:12.163 | INFO     | models.lstm_ensemble:_train_one:304 -   [2/9] Cache HIT seed=179 (key=18f1a56c…) — skipping training
+2026-04-12 14:58:12.195 | INFO     | models.lstm_ensemble:_train_one:308 -   [2/9] Temperature T=10.000
+2026-04-12 14:58:12.239 | INFO     | models.lstm_ensemble:_train_one:304 -   [3/9] Cache HIT seed=316 (key=8b27dac4…) — skipping training
+2026-04-12 14:58:12.271 | INFO     | models.lstm_ensemble:_train_one:308 -   [3/9] Temperature T=10.000
+2026-04-12 14:58:12.316 | INFO     | models.lstm_ensemble:_train_one:304 -   [4/9] Cache HIT seed=453 (key=0718a24a…) — skipping training
+2026-04-12 14:58:12.344 | INFO     | models.lstm_ensemble:_train_one:308 -   [4/9] Temperature T=10.000
+2026-04-12 14:58:12.379 | INFO     | models.lstm_ensemble:_train_one:304 -   [5/9] Cache HIT seed=590 (key=1687932b…) — skipping training
+2026-04-12 14:58:12.412 | INFO     | models.lstm_ensemble:_train_one:308 -   [5/9] Temperature T=10.000
+2026-04-12 14:58:12.445 | INFO     | models.lstm_ensemble:_train_one:304 -   [6/9] Cache HIT seed=727 (key=da95ec9d…) — skipping training
+2026-04-12 14:58:12.478 | INFO     | models.lstm_ensemble:_train_one:308 -   [6/9] Temperature T=10.000
+2026-04-12 14:58:12.522 | INFO     | models.lstm_ensemble:_train_one:304 -   [7/9] Cache HIT seed=864 (key=127d5bcb…) — skipping training
+2026-04-12 14:58:12.554 | INFO     | models.lstm_ensemble:_train_one:308 -   [7/9] Temperature T=10.000
+2026-04-12 14:58:12.599 | INFO     | models.lstm_ensemble:_train_one:304 -   [8/9] Cache HIT seed=1001 (key=8785eac8…) — skipping training
+2026-04-12 14:58:12.626 | INFO     | models.lstm_ensemble:_train_one:308 -   [8/9] Temperature T=10.000
+2026-04-12 14:58:12.663 | INFO     | models.lstm_ensemble:_train_one:304 -   [9/9] Cache HIT seed=1138 (key=99afbbc6…) — skipping training
+2026-04-12 14:58:12.695 | INFO     | models.lstm_ensemble:_train_one:308 -   [9/9] Temperature T=10.000
+2026-04-12 14:58:12.728 | INFO     | models.lstm_ensemble:train_ensemble:462 - 
+Ensemble training complete for ETH/USD_4h:
+2026-04-12 14:58:12.728 | INFO     | models.lstm_ensemble:train_ensemble:463 -   Val losses: ['0.2241', '0.2296', '0.2283', '0.2141', '0.2211', '0.2323', '0.2106', '0.2308', '0.2150']
+2026-04-12 14:58:12.728 | INFO     | models.lstm_ensemble:train_ensemble:464 -   Mean: 0.2229 | Std: 0.0076
+2026-04-12 14:58:13.005 | INFO     | __mp_main__:run_fold:278 -   Val-calibrated threshold: 0.3547
+2026-04-12 14:58:13.005 | INFO     | models.ensemble:generate_signals:215 - Signal distribution (threshold=0.3547384440898895): BUY=11 (5.1%)  SELL=0 (0.0%)  HOLD=204 (94.9%)
+2026-04-12 14:58:13.007 | INFO     | backtest.filters:apply_filters:147 - Filters [4h] 2/11 removed (82% survive) — trend=0 vol=0 volume=0 funding=0 regime=2 amihud=0
+2026-04-12 14:58:13.010 | INFO     | backtest.engine:_compute_metrics:403 - ETH/USD | Ann=1.77% Sh=1.60 So=0.86 Cal=10.80 DD=-0.16%(61b) WR=50.00% PF=2.24 RF=1.05 Trades=2(L2/S0) TrendWR=0.00%(0) RangeWR=50.00%(2) Exits={'STOP_LOSS': 1, 'TAKE_PROFIT': 1}
+2026-04-12 14:58:13.010 | INFO     | __mp_main__:run_symbol:437 -   Fold 5/6 [?]: net=+0.2% ann=+1.8% WR=50.0% Sh=1.60 trades=2
+2026-04-12 14:58:13.017 | INFO     | models.lstm_ensemble:train_ensemble:433 - 
+Training 9-model ensemble for ETH/USD_4h on cuda
+2026-04-12 14:58:13.017 | INFO     | models.lstm_ensemble:train_ensemble:434 -   Train: 3925 | Val: 647 | Features: 122
+2026-04-12 14:58:13.024 | INFO     | models.lstm_ensemble:_train_one:304 -   [1/9] Cache HIT seed=42 (key=032e11e1…) — skipping training
+2026-04-12 14:58:13.056 | INFO     | models.lstm_ensemble:_train_one:308 -   [1/9] Temperature T=10.000
+2026-04-12 14:58:13.096 | INFO     | models.lstm_ensemble:_train_one:304 -   [2/9] Cache HIT seed=179 (key=71b1c4dd…) — skipping training
+2026-04-12 14:58:13.121 | INFO     | models.lstm_ensemble:_train_one:308 -   [2/9] Temperature T=10.000
+2026-04-12 14:58:13.161 | INFO     | models.lstm_ensemble:_train_one:304 -   [3/9] Cache HIT seed=316 (key=95b2add6…) — skipping training
+2026-04-12 14:58:13.195 | INFO     | models.lstm_ensemble:_train_one:308 -   [3/9] Temperature T=10.000
+2026-04-12 14:58:13.238 | INFO     | models.lstm_ensemble:_train_one:304 -   [4/9] Cache HIT seed=453 (key=247f6415…) — skipping training
+2026-04-12 14:58:13.262 | INFO     | models.lstm_ensemble:_train_one:308 -   [4/9] Temperature T=10.000
+2026-04-12 14:58:13.314 | INFO     | models.lstm_ensemble:_train_one:304 -   [5/9] Cache HIT seed=590 (key=0a34335b…) — skipping training
+2026-04-12 14:58:13.344 | INFO     | models.lstm_ensemble:_train_one:308 -   [5/9] Temperature T=10.000
+2026-04-12 14:58:13.378 | INFO     | models.lstm_ensemble:_train_one:304 -   [6/9] Cache HIT seed=727 (key=36c5840d…) — skipping training
+2026-04-12 14:58:13.413 | INFO     | models.lstm_ensemble:_train_one:308 -   [6/9] Temperature T=10.000
+2026-04-12 14:58:13.455 | INFO     | models.lstm_ensemble:_train_one:304 -   [7/9] Cache HIT seed=864 (key=8082c07f…) — skipping training
+2026-04-12 14:58:13.488 | INFO     | models.lstm_ensemble:_train_one:308 -   [7/9] Temperature T=10.000
+2026-04-12 14:58:13.529 | INFO     | models.lstm_ensemble:_train_one:304 -   [8/9] Cache HIT seed=1001 (key=8e2506a9…) — skipping training
+2026-04-12 14:58:13.562 | INFO     | models.lstm_ensemble:_train_one:308 -   [8/9] Temperature T=10.000
+2026-04-12 14:58:13.608 | INFO     | models.lstm_ensemble:_train_one:304 -   [9/9] Cache HIT seed=1138 (key=150f370b…) — skipping training
+2026-04-12 14:58:13.639 | INFO     | models.lstm_ensemble:_train_one:308 -   [9/9] Temperature T=10.000
+2026-04-12 14:58:13.672 | INFO     | models.lstm_ensemble:train_ensemble:462 - 
+Ensemble training complete for ETH/USD_4h:
+2026-04-12 14:58:13.672 | INFO     | models.lstm_ensemble:train_ensemble:463 -   Val losses: ['0.2452', '0.2351', '0.2411', '0.2325', '0.2333', '0.2561', '0.2326', '0.2580', '0.2352']
+2026-04-12 14:58:13.677 | INFO     | models.lstm_ensemble:train_ensemble:464 -   Mean: 0.2410 | Std: 0.0094
+2026-04-12 14:58:13.944 | INFO     | __mp_main__:run_fold:278 -   Val-calibrated threshold: 0.3542
+2026-04-12 14:58:13.944 | INFO     | models.ensemble:generate_signals:215 - Signal distribution (threshold=0.3542492687702179): BUY=47 (21.9%)  SELL=0 (0.0%)  HOLD=168 (78.1%)
+2026-04-12 14:58:13.944 | INFO     | backtest.filters:apply_filters:147 - Filters [4h] 34/47 removed (28% survive) — trend=0 vol=11 volume=3 funding=0 regime=17 amihud=3
+2026-04-12 14:58:13.955 | INFO     | backtest.engine:_compute_metrics:403 - ETH/USD | Ann=-2.54% Sh=-2.47 So=-1.65 Cal=-5.25 DD=-0.48%(109b) WR=25.00% PF=0.46 RF=0.52 Trades=4(L4/S0) TrendWR=33.33%(3) RangeWR=0.00%(1) Exits={'STOP_LOSS': 3, 'TAKE_PROFIT': 1}
+2026-04-12 14:58:13.955 | INFO     | __mp_main__:run_symbol:437 -   Fold 6/6 [?]: net=-0.3% ann=-2.5% WR=25.0% Sh=-2.47 trades=4
