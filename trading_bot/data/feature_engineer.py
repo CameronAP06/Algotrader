@@ -463,16 +463,108 @@ def add_raw_ohlcv_sequences(df: pd.DataFrame, windows: list = None) -> pd.DataFr
 
     return df
 
+# ─── Return Distribution Features ───────────────────────────────────────────
+
+def add_return_distribution_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Higher-moment return distribution features — skewness and kurtosis over
+    rolling windows, plus up-bar percentage.
+
+    Why these help:
+    - Up-bar percentage captures directional bias better than a simple SMA
+      because it's normalised to [0,1] and not distorted by outlier bars.
+    - Rolling skewness: +ve skew means recent gains are concentrated in
+      a few large bars (trend); −ve skew suggests crash-like behaviour.
+    - Rolling kurtosis: high kurtosis (fat tails) signals potential vol
+      expansion — the model can learn to be more cautious in these regimes.
+    """
+    ret = df["close"].pct_change()
+
+    for w in (7, 14, 28):
+        up_bars = (ret > 0).rolling(w, min_periods=max(1, w // 2)).mean()
+        df[f"up_bar_pct_{w}"] = up_bars.fillna(0.5)
+
+    for w in (20, 50):
+        df[f"return_skew_{w}"] = (
+            ret.rolling(w, min_periods=max(5, w // 4))
+               .skew()
+               .fillna(0.0)
+        )
+        df[f"return_kurt_{w}"] = (
+            ret.rolling(w, min_periods=max(5, w // 4))
+               .kurt()
+               .fillna(0.0)
+        )
+
+    return df
+
+
 # ─── Main Pipeline ───────────────────────────────────────────────────────────
 
-def _cache_path(symbol: str, timeframe: str) -> Path:
+# ─── BTC/ETH Cross-Symbol Features ─────────────────────────────────────────
+
+def add_btc_features(df: pd.DataFrame, btc_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Inject BTC price-action features into an altcoin feature matrix.
+
+    BTC leads altcoins by 15-60 minutes — its recent return and volatility
+    are among the highest-signal free features for altcoin prediction.
+
+    Features added:
+      btc_ret_{1,4,24}h   — BTC log-return over N bars
+      btc_vol_24h          — BTC 24-bar rolling volatility (std of 1-bar returns)
+      btc_vs_alt_24h       — BTC 24h return minus this symbol's 24h return
+                             (positive = BTC outperforming → altcoin likely to follow)
+
+    Skipped silently if btc_df is None or timestamps don't align.
+    """
+    if btc_df is None or btc_df.empty:
+        return df
+
+    try:
+        btc = btc_df.copy()
+        if "timestamp" in btc.columns:
+            btc = btc.set_index("timestamp")["close"]
+        else:
+            btc = btc["close"]
+
+        # Align BTC timestamps to this symbol's timestamps
+        target_ts = (pd.to_datetime(df["timestamp"])
+                     if "timestamp" in df.columns else df.index)
+        btc_aligned = btc.reindex(target_ts, method="nearest", tolerance="2h")
+
+        # BTC returns at multiple horizons
+        for h in [1, 4, 24]:
+            df[f"btc_ret_{h}h"] = np.log1p(btc_aligned.pct_change(h).values)
+
+        # BTC rolling volatility (std of 1-bar log-returns over 24 bars)
+        btc_r1 = np.log1p(btc_aligned.pct_change(1))
+        df["btc_vol_24h"] = btc_r1.rolling(24).std().values
+
+        # BTC vs this symbol momentum divergence
+        if "close" in df.columns:
+            own_ret_24 = np.log1p(df["close"].pct_change(24))
+            df["btc_vs_alt_24h"] = df["btc_ret_24h"] - own_ret_24
+
+        n_valid = btc_aligned.notna().sum()
+        logger.debug(f"  BTC features added ({n_valid}/{len(df)} aligned bars)")
+
+    except Exception as e:
+        logger.warning(f"  BTC feature injection failed: {e} — skipping")
+
+    return df
+
+
+def _cache_path(symbol: str, timeframe: str, has_btc: bool = False) -> Path:
     safe_name = symbol.replace("/", "_")
-    return Path(FEATURE_DIR) / f"{safe_name}_{timeframe}_features.csv"
+    suffix    = "_btc" if has_btc else ""
+    return Path(FEATURE_DIR) / f"{safe_name}_{timeframe}{suffix}_features.csv"
 
 
-def _cache_is_valid(symbol: str, timeframe: str, raw_df_len: int) -> bool:
+def _cache_is_valid(symbol: str, timeframe: str, raw_df_len: int,
+                    has_btc: bool = False) -> bool:
     """Return True if a fresh feature cache exists and is newer than the raw data file."""
-    cache = _cache_path(symbol, timeframe)
+    cache = _cache_path(symbol, timeframe, has_btc=has_btc)
     if not cache.exists():
         return False
     try:
@@ -480,7 +572,6 @@ def _cache_is_valid(symbol: str, timeframe: str, raw_df_len: int) -> bool:
         raw_path  = Path(DATA_DIR) / f"{safe_name}_{timeframe}.csv"
         if raw_path.exists() and cache.stat().st_mtime < raw_path.stat().st_mtime:
             return False   # raw data is newer → cache is stale
-        # Quick sanity check: cached rows should be at least half of raw rows
         cached = pd.read_csv(cache, nrows=5)
         if cached.empty:
             return False
@@ -490,14 +581,21 @@ def _cache_is_valid(symbol: str, timeframe: str, raw_df_len: int) -> bool:
 
 
 def build_features(df: pd.DataFrame, symbol: str = "", timeframe: str = "1h",
-                   use_cache: bool = True) -> pd.DataFrame:
+                   use_cache: bool = True,
+                   btc_df: pd.DataFrame = None) -> pd.DataFrame:
     """
     Build feature matrix from raw OHLCV data.
-    Loads from cache when available and up-to-date — avoids recomputing on
-    every run, which saves ~10 s per symbol.
+
+    btc_df: optional BTC/USD OHLCV DataFrame — when provided and symbol is not
+    BTC/ETH, injects BTC cross-symbol features (return, volatility, divergence).
+    A separate cache file is used when BTC features are present so that the
+    two variants don't clobber each other.
     """
-    if use_cache and symbol and _cache_is_valid(symbol, timeframe, len(df)):
-        cache = _cache_path(symbol, timeframe)
+    is_btc = symbol in ("BTC/USD", "BTC/USDT", "ETH/USD", "ETH/USDT")
+    has_btc = (btc_df is not None and not btc_df.empty and not is_btc)
+
+    if use_cache and symbol and _cache_is_valid(symbol, timeframe, len(df), has_btc=has_btc):
+        cache = _cache_path(symbol, timeframe, has_btc=has_btc)
         try:
             feat_df = pd.read_csv(cache)
             logger.info(f"Loaded features from cache ({len(feat_df)} rows): {cache}")
@@ -524,6 +622,11 @@ def build_features(df: pd.DataFrame, symbol: str = "", timeframe: str = "1h",
     df = add_sentiment_features(df)   # Fear/greed proxy, vol sentiment, divergences
     df = add_funding_features(df)
     df = add_alt_data_features(df, timeframe=timeframe)
+    df = add_return_distribution_features(df)             # skew, kurtosis, up-bar pct
+
+    # BTC cross-symbol features (skip for BTC/ETH themselves)
+    if has_btc:
+        df = add_btc_features(df, btc_df)
 
     # Lever 1 + 2: timeframe-aware, volatility-adjusted labels
     df["label"] = create_labels(df, timeframe=timeframe)
@@ -545,15 +648,15 @@ def build_features(df: pd.DataFrame, symbol: str = "", timeframe: str = "1h",
 
     # Persist to cache so subsequent runs skip the rebuild
     if use_cache and symbol:
-        save_features(df, symbol, timeframe=timeframe)
+        save_features(df, symbol, timeframe=timeframe, has_btc=has_btc)
 
     return df
 
 
-def save_features(df: pd.DataFrame, symbol: str, timeframe: str = TIMEFRAME) -> Path:
+def save_features(df: pd.DataFrame, symbol: str, timeframe: str = TIMEFRAME,
+                  has_btc: bool = False) -> Path:
     os.makedirs(FEATURE_DIR, exist_ok=True)
-    safe_name = symbol.replace("/", "_")
-    path = Path(FEATURE_DIR) / f"{safe_name}_{timeframe}_features.csv"
+    path = _cache_path(symbol, timeframe, has_btc=has_btc)
     df.to_csv(path, index=False)
     logger.info(f"Saved features -> {path}")
     return path

@@ -19,7 +19,7 @@ Usage:
     python expanded_scan.py --resume                 # skip already-completed rows
 """
 
-import os, sys, argparse, csv, time, threading
+import os, sys, argparse, csv, time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import set_start_method
 from datetime import datetime
@@ -221,14 +221,32 @@ def _fmt_date(ts_series) -> str:
         return "?"
 
 
-def run_fold(symbol, timeframe, X_scaled, y, feat_df, train_idx, val_idx, test_idx):
-    """Train on one fold and return backtest metrics for the test window."""
+def run_fold(symbol, timeframe, X_scaled, y, feat_df, train_idx, val_idx, test_idx,
+             purge_bars: int = 0):
+    """
+    Train on one fold and return backtest metrics for the test window.
+
+    purge_bars: strip this many bars from the END of the training set before
+    training.  Prevents label leakage: labels at bar i use future prices up to
+    bar i+horizon, so the last `horizon` training labels overlap with the val
+    set.  Purging removes these contaminated samples.
+
+    Disagreement filter: after ensemble inference, any bar where the 9 models
+    strongly disagree (per-class std > DISAGREE_THRESHOLD) is forced to HOLD.
+    High disagreement = genuinely ambiguous bar = not worth trading.
+    """
+    DISAGREE_THRESHOLD = 0.07  # max per-class std before suppressing signal
+
     from config.settings import LSTM_PARAMS
-    # Local import — CUDA_VISIBLE_DEVICES must already be set (by _run_on_gpu)
-    # before this import so lstm_ensemble resolves DEVICE to the correct GPU.
     from models.lstm_ensemble import train_ensemble, predict_proba_ensemble
-    X_train = X_scaled[train_idx[0]:train_idx[1]]
-    y_train = y[train_idx[0]:train_idx[1]]
+
+    t_start, t_end = train_idx
+    # Purge: trim label-leaking tail from training window
+    t_end_purged = max(t_start + LSTM_PARAMS["sequence_length"] * 3,
+                       t_end - purge_bars)
+
+    X_train = X_scaled[t_start:t_end_purged]
+    y_train = y[t_start:t_end_purged]
     X_val   = X_scaled[val_idx[0]:val_idx[1]]
     y_val   = y[val_idx[0]:val_idx[1]]
     X_test  = X_scaled[test_idx[0]:test_idx[1]]
@@ -237,17 +255,42 @@ def run_fold(symbol, timeframe, X_scaled, y, feat_df, train_idx, val_idx, test_i
     if len(X_train) < LSTM_PARAMS["sequence_length"] * 3:
         return None
 
-    models   = train_ensemble(X_train, y_train, X_val, y_val,
-                               symbol=f"{symbol}_{timeframe}", n_models=N_MODELS)
-    proba    = predict_proba_ensemble(models, X_test)
+    from models.ensemble import compute_signal_threshold
 
-    # Guard: if proba is empty or too short to produce signals, skip fold
+    models         = train_ensemble(X_train, y_train, X_val, y_val,
+                                    symbol=f"{symbol}_{timeframe}", n_models=N_MODELS)
+    proba, proba_std = predict_proba_ensemble(models, X_test, return_std=True)
+
     if proba is None or len(proba) == 0 or proba.shape[1] != 3:
         logger.warning(f"  Fold skipped — predict_proba_ensemble returned empty array "
                        f"(X_test={len(X_test)} rows)")
         return None
 
-    signals  = generate_signals(proba, use_percentile=True, top_pct=TOP_PCT)
+    # Fix hindsight bias: compute threshold on val set, apply frozen to test set.
+    # Old approach computed the 85th-percentile threshold from the test bars
+    # themselves — the backtest knew which bars would be "most confident" in
+    # advance.  Now we use the val set to calibrate the threshold, then apply
+    # it blindly to the test set, matching what live deployment actually does.
+    val_proba = predict_proba_ensemble(models, X_val)
+    val_threshold = compute_signal_threshold(val_proba, top_pct=TOP_PCT)
+    logger.info(f"  Val-calibrated threshold: {val_threshold:.4f}")
+
+    signals = generate_signals(proba, use_percentile=False, threshold=val_threshold)
+
+    # Ensemble disagreement filter — suppress signals where models disagree
+    sig_arr = signals["signal"].copy()
+    if proba_std is not None and len(proba_std) == len(sig_arr):
+        # Max std across all three classes for each bar
+        max_std = proba_std.max(axis=1)
+        suppressed = 0
+        for i in range(len(sig_arr)):
+            if sig_arr[i] != "HOLD" and max_std[i] > DISAGREE_THRESHOLD:
+                sig_arr[i] = "HOLD"
+                suppressed += 1
+        if suppressed:
+            logger.info(f"  Disagreement filter: suppressed {suppressed} signals "
+                        f"(std > {DISAGREE_THRESHOLD})")
+        signals["signal"] = sig_arr
     filtered = apply_filters(feat_test, signals, timeframe=timeframe)
     m        = BacktestEngine().run(feat_test, filtered, symbol=symbol, timeframe=timeframe)
 
@@ -286,7 +329,17 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
             logger.warning(f"{symbol} {timeframe}: {len(raw) if raw is not None else 0} bars — skipping")
             return None
 
-        feat_df   = build_features(raw, symbol=symbol, timeframe=timeframe)
+        # Fetch BTC data for cross-symbol features (skip for BTC itself)
+        btc_raw = None
+        if symbol not in ("BTC/USD", "BTC/USDT"):
+            try:
+                btc_raw = fetch_ohlcv_timeframe("BTC/USD", timeframe,
+                                                 history_days=days)
+            except Exception as _btc_err:
+                logger.debug(f"BTC fetch skipped for {symbol}: {_btc_err}")
+
+        feat_df   = build_features(raw, symbol=symbol, timeframe=timeframe,
+                                   btc_df=btc_raw)
         feat_cols = get_feature_columns(feat_df)
 
         from config.settings import LSTM_PARAMS
@@ -344,6 +397,12 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
         else:
             effective_folds = N_WF_FOLDS
 
+        # Purge gap = label horizon for this timeframe.
+        # Strips the contaminated tail from training so labels near the
+        # train/val boundary don't leak future-price information into training.
+        from data.feature_engineer import get_label_params as _glp
+        _horizon, _ = _glp(timeframe)
+
         fold_results = []
         for fold in range(effective_folds):
             train_end = train_end0 + fold * fold_size
@@ -352,17 +411,26 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
             if test_end > n:
                 break
 
-            # Fit scaler on this fold's train only
+            # Fit scaler on the most recent ~1 year of training data only.
+            # Fitting on all history (e.g. 2020–2024) bakes in old volatility
+            # regimes — the scaler's mean/std are dominated by conditions that
+            # no longer hold.  Using only recent data means the normalisation
+            # reflects the current distributional environment.
+            _scaler_window = {"1h": 8760, "4h": 2190, "8h": 1095,
+                              "12h": 730, "1d": 365}.get(timeframe, 8760)
+            _scaler_start  = max(0, train_end - _scaler_window)
             scaler   = StandardScaler()
+            scaler.fit(X[_scaler_start:train_end])   # fit on recent year only
             X_scaled = X.copy()
-            X_scaled[:train_end]        = scaler.fit_transform(X[:train_end])
+            X_scaled[:train_end]        = scaler.transform(X[:train_end])
             X_scaled[train_end:val_end] = scaler.transform(X[train_end:val_end])
             X_scaled[val_end:test_end]  = scaler.transform(X[val_end:test_end])
 
             fr = run_fold(symbol, timeframe, X_scaled, y, feat_df,
                           train_idx=(0, train_end),
                           val_idx  =(train_end, val_end),
-                          test_idx =(val_end, test_end))
+                          test_idx =(val_end, test_end),
+                          purge_bars=_horizon)
             if fr:
                 logger.info(f"  Fold {fold+1}/{effective_folds} [{fr['date_range']}]: "
                             f"net={fr['net']:+.1%} ann={fr['ann']:+.1%} "
@@ -401,6 +469,21 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
         n_range  = _imean("n_range_trades")
         n_trades = _imean("n_trades")
         n_folds_pos = sum(1 for x in nets if x > 0)
+
+        # ── Wilcoxon signed-rank test for fold-return significance ────────────
+        # Tests whether the distribution of fold returns is significantly > 0.
+        # With only 6 folds, t-test assumptions don't hold (non-normal, small n).
+        # Wilcoxon is non-parametric and valid here.  p < 0.10 = 90% confidence
+        # the median fold return is genuinely positive.
+        try:
+            from scipy.stats import wilcoxon as _wilcoxon
+            if len(nets) >= 4 and any(x != nets[0] for x in nets):  # need variance
+                _, _p_val = _wilcoxon(nets, alternative="greater", zero_method="wilcox")
+            else:
+                _p_val = 1.0   # too few folds or all identical (degenerate)
+        except Exception:
+            _p_val = 1.0
+        p_significant = _p_val < 0.10
 
         # ── Quality score (composite, 0-100) ──────────────────────────────────
         consistency  = n_folds_pos / max(len(fold_results), 1)
@@ -444,8 +527,10 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
         min_trades = MIN_TRADES_TF.get(timeframe, MIN_TRADES)
         if n_trades < min_trades:
             status = "TOO_FEW_TRADES"
+        elif quality >= 65 and n_folds_pos == len(fold_results) and p_significant:
+            status = "** STRONG"   # great metrics AND statistically significant
         elif quality >= 65 and n_folds_pos == len(fold_results):
-            status = "** STRONG"
+            status = "* GOOD"      # great metrics but p >= 0.10 (not enough folds)
         elif quality >= 52 and n_folds_pos >= len(fold_results) - 1:
             status = "* GOOD"
         elif ann > 0.0 and wr >= 0.35:
@@ -496,6 +581,7 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
             "n_range_trades":   n_range,
             "regime_edge":      regime_edge,
             "quality_score":    quality,
+            "wilcox_p":         round(_p_val, 4),
             "kelly_pct":        kelly_pct,
             "status":           status,
             "elapsed_s":        round(elapsed, 1),
@@ -522,11 +608,42 @@ def print_row(r: dict):
     )
 
 
+# Canonical column order — must match result dict keys from run_symbol().
+# Defined here so the CSV header is stable whether we write one row or many.
+_FIELDNAMES = [
+    "symbol", "timeframe", "asset_class", "n_models", "n_bars",
+    "n_folds", "folds_positive", "fold_dates",
+    "label_down", "label_neutral", "label_up",
+    "n_trades", "win_rate", "net_return", "ann_return", "ann_std",
+    "sharpe", "sortino", "calmar", "max_drawdown",
+    "profit_factor", "recovery_factor", "payoff_ratio",
+    "avg_win", "avg_loss", "max_consec_losses",
+    "trend_wr", "range_wr", "n_trend_trades", "n_range_trades",
+    "regime_edge", "quality_score", "wilcox_p",
+    "kelly_pct", "status", "elapsed_s",
+]
+
+
+def append_result_row(path: Path, row: dict) -> None:
+    """
+    Append one result row to the CSV immediately after it completes.
+    Writes the header iff the file is new or empty — safe to call row-by-row.
+    All writes happen in the main process so no cross-process lock is needed.
+    """
+    write_header = not path.exists() or path.stat().st_size == 0
+    with open(path, "a", newline="", encoding="utf-8-sig") as f:
+        w = csv.DictWriter(f, fieldnames=_FIELDNAMES, extrasaction="ignore")
+        if write_header:
+            w.writeheader()
+        w.writerow(row)
+
+
 def save_csv(results, path):
+    """Rewrite the full CSV — used at the end for a clean sorted snapshot."""
     if not results:
         return
     with open(path, "w", newline="", encoding="utf-8-sig") as f:
-        w = csv.DictWriter(f, fieldnames=results[0].keys())
+        w = csv.DictWriter(f, fieldnames=_FIELDNAMES, extrasaction="ignore")
         w.writeheader()
         w.writerows(results)
 
@@ -650,22 +767,22 @@ def print_summary(results: list):
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
-def _run_gpu_partition(gpu_id: int, items: list) -> list:
+def _run_single(gpu_id: int, symbol: str, timeframe: str) -> dict | None:
     """
-    One process per GPU. Sets CUDA_VISIBLE_DEVICES as the very first thing —
-    before any torch import — then runs all assigned (symbol, timeframe) pairs
-    serially. Returns list of result dicts.
+    One (symbol, timeframe) combo per future. Sets CUDA_VISIBLE_DEVICES before
+    any torch import so each task lands on the right GPU.
+
+    Submitting one future per combo (instead of one per worker partition) means
+    as_completed() fires after every result — the main process can write to CSV
+    and update the dashboard immediately, giving live progress throughout the run.
     """
     import os
     os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
-    results = []
-    for sym, tf in items:
-        try:
-            results.append(run_symbol(sym, tf))
-        except Exception as e:
-            logger.error(f"GPU {gpu_id} | {sym} {tf} crashed: {e}")
-            results.append(None)
-    return results
+    try:
+        return run_symbol(symbol, timeframe)
+    except Exception as e:
+        logger.error(f"GPU {gpu_id} | {symbol} {timeframe} crashed: {e}")
+        return None
 
 
 def main():
@@ -785,22 +902,28 @@ Examples:
     print(f"  {_HDR}")
     print("  " + _SEP)
 
+    t_scan_start = time.time()
     results, failed, skipped = [], [], 0
 
     # Load existing results if resuming
     if completed and csv_path.exists():
         with open(csv_path, encoding="utf-8-sig") as f:
             results = list(csv.DictReader(f))
-            # Convert numeric fields back
+            # Coerce numeric fields back from strings
+            int_fields   = ["n_bars","n_models","n_folds","folds_positive",
+                            "n_trades","n_trend_trades","n_range_trades",
+                            "label_down","label_neutral","label_up","max_consec_losses"]
+            float_fields = ["win_rate","net_return","ann_return","ann_std",
+                            "sharpe","sortino","calmar","max_drawdown",
+                            "profit_factor","recovery_factor","payoff_ratio",
+                            "avg_win","avg_loss","trend_wr","range_wr",
+                            "quality_score","wilcox_p","kelly_pct","elapsed_s"]
             for r in results:
-                for k in ["n_bars","n_train","n_val","n_test","n_trades",
-                          "n_buy","n_sell","n_models",
-                          "label_down","label_neutral","label_up"]:
-                    if k in r:
-                        r[k] = int(r[k])
-                for k in ["win_rate","net_return","sharpe","max_drawdown",
-                          "mean_conf","elapsed_s"]:
-                    if k in r:
+                for k in int_fields:
+                    if k in r and r[k] != "":
+                        r[k] = int(float(r[k]))
+                for k in float_fields:
+                    if k in r and r[k] != "":
                         r[k] = float(r[k])
 
     # Build work queue — filter already-completed combos
@@ -819,48 +942,38 @@ Examples:
         f"across {args.gpus} GPU(s)"
     )
 
-    # Thread lock for safe CSV writes from multiple workers
-    csv_lock = threading.Lock()
-    done_count = [0]  # mutable counter accessible in closure
+    # Assign each combo a GPU round-robin — on DirectML this has no effect.
+    combo_gpu = {(sym, tf): i % args.gpus for i, (sym, tf) in enumerate(work)}
 
-    # Partition work evenly across workers.
-    # Each worker sets CUDA_VISIBLE_DEVICES = gpu_id % args.gpus so work
-    # is spread evenly across available GPUs.
-    # On AMD/DirectML, CUDA_VISIBLE_DEVICES has no effect — use --workers 1.
-    gpu_work = [[] for _ in range(n_workers)]
-    for i, item in enumerate(work):
-        gpu_work[i % n_workers].append(item)
+    done_count = 0
 
-    # Map each worker to a GPU (round-robin)
-    worker_gpu = {w: w % args.gpus for w in range(n_workers)}
-
+    # One future per combo — as_completed() fires after every single result so
+    # the CSV and dashboard update in real time, not in one burst at the end.
     with ProcessPoolExecutor(max_workers=n_workers) as executor:
         futures = {
-            executor.submit(_run_gpu_partition, worker_gpu[worker_id], items): worker_id
-            for worker_id, items in enumerate(gpu_work) if items
+            executor.submit(_run_single, combo_gpu[(sym, tf)], sym, tf): (sym, tf)
+            for sym, tf in work
         }
 
         for future in as_completed(futures):
-            worker_id = futures[future]
-            gpu_id    = worker_gpu[worker_id]
+            sym, tf = futures[future]
+            done_count += 1
             try:
-                gpu_results = future.result()
+                r = future.result()
             except Exception as e:
-                logger.error(f"Worker {worker_id} (GPU {gpu_id}) partition crashed: {e}")
+                logger.error(f"{sym} {tf} crashed: {e}")
+                failed.append(f"{sym}_{tf}")
                 continue
 
-            for r in gpu_results:
-                done_count[0] += 1
-                if r is None:
-                    failed.append(f"W{worker_id}-unknown")
-                    logger.warning(f"[{done_count[0]}/{total_work}] Worker {worker_id} — no result")
-                    continue
-                sym, tf = r.get("symbol", "?"), r.get("timeframe", "?")
-                with csv_lock:
-                    results.append(r)
-                    print_row(r)
-                    save_csv(results, csv_path)
-                logger.info(f"[{done_count[0]}/{total_work}] {sym} {tf} done")
+            if r is None:
+                failed.append(f"{sym}_{tf}")
+                logger.warning(f"[{done_count}/{total_work}] {sym} {tf} — no result")
+                continue
+
+            results.append(r)
+            print_row(r)
+            append_result_row(csv_path, r)   # write immediately — dashboard sees it now
+            logger.info(f"[{done_count}/{total_work}] {sym} {tf} done")
 
     print("  " + _SEP)
     print_summary(results)
@@ -870,7 +983,30 @@ Examples:
     if failed:
         print(f"  Failed/skipped ({len(failed)}): {', '.join(failed[:10])}"
               + ("..." if len(failed) > 10 else ""))
+
+    # Final rewrite — sorts by quality_score desc so the CSV opens cleanly
+    # in the dashboard. Rows were already written incrementally during the run.
+    results_valid = [r for r in results if isinstance(r, dict)]
+    results_valid.sort(key=lambda r: float(r.get("quality_score", 0)), reverse=True)
+    save_csv(results_valid, csv_path)
     print(f"  Results saved -> {csv_path}\n")
+
+    # ── Telegram completion notification ─────────────────────────────────────
+    try:
+        import sys as _sys
+        _sys.path.insert(0, str(Path(__file__).parent / "paper_trader"))
+        from src.notifier import send as _tg_send
+        elapsed_h = (time.time() - t_scan_start) / 3600
+        strong = sum(1 for r in results if "STRONG" in str(r.get("status", "")))
+        good   = sum(1 for r in results if str(r.get("status", "")) == "* GOOD")
+        _tg_send(
+            f"✅ <b>Scan Complete</b> ({elapsed_h:.1f}h)\n"
+            f"Combos: {total} | Failed: {len(failed)} | Skipped: {skipped}\n"
+            f"<b>Strong: {strong}</b> | Good: {good}\n"
+            f"Output: {csv_path.name}"
+        )
+    except Exception:
+        pass   # Telegram is optional
 
 
 if __name__ == "__main__":

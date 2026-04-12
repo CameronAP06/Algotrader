@@ -26,6 +26,7 @@ from config.settings import (
     RESULTS_DIR,
     ATR_STOP_MULT, ATR_TP_MULT,       # ATR stop/TP multipliers — editable in settings
     KELLY_MAX_PCT, KELLY_REGIME_ADX,   # Kelly caps — editable in settings
+    MAX_HOLD_BARS,                     # max bars before forced close
 )
 
 # ── Kelly constants ────────────────────────────────────────────────────────────
@@ -66,6 +67,7 @@ class BacktestEngine:
         self.trades        = []
         self.equity_curve  = []
         self._timeframe    = "4h"
+        self._hold_bars    = 0    # bars since current position was opened
 
     # ── Kelly sizing ───────────────────────────────────────────────────────────
 
@@ -78,19 +80,32 @@ class BacktestEngine:
         if adx < KELLY_REGIME_ADX:
             kelly *= 0.5   # halve in choppy markets
         kelly *= KELLY_FRACTION
+        # Confidence tiering — scale allocation by signal certainty
+        #   Low  (< 0.40): 50% of Kelly — near-random, stay small
+        #   Mid  (< 0.50): 75% of Kelly — moderate edge
+        #   High (≥ 0.50): full Kelly
+        if confidence < 0.40:
+            kelly *= 0.50
+        elif confidence < 0.50:
+            kelly *= 0.75
         return float(np.clip(kelly, KELLY_MIN_PCT, KELLY_MAX_PCT))
 
-    def _compute_atr(self, highs, lows, closes, idx) -> float:
-        start = max(0, idx - ATR_WINDOW)
-        h = highs[start:idx + 1]
-        l = lows[start:idx + 1]
-        c = closes[start:idx + 1]
-        if len(h) < 2:
-            return closes[idx] * 0.02
-        prev_c = c[:-1]
-        trs = np.maximum(h[1:] - l[1:],
-               np.maximum(np.abs(h[1:] - prev_c), np.abs(l[1:] - prev_c)))
-        return float(np.mean(trs))
+    def _precompute_atr(self, highs, lows, closes) -> np.ndarray:
+        """
+        Vectorised ATR over the full price series — O(n) not O(n²).
+
+        Replaces the old per-bar _compute_atr which was called n times inside
+        the main loop, each time slicing and averaging ATR_WINDOW elements.
+        With 5000 bars that was ~70 000 redundant inner operations per backtest.
+        """
+        h = np.asarray(highs,  dtype=np.float64)
+        l = np.asarray(lows,   dtype=np.float64)
+        c = np.asarray(closes, dtype=np.float64)
+        prev_c = np.empty_like(c); prev_c[0] = c[0]; prev_c[1:] = c[:-1]
+        tr     = np.maximum(h - l,
+                 np.maximum(np.abs(h - prev_c), np.abs(l - prev_c)))
+        atr    = pd.Series(tr).rolling(ATR_WINDOW, min_periods=1).mean().values
+        return atr.astype(np.float32)
 
     # ── Position management ────────────────────────────────────────────────────
 
@@ -119,6 +134,7 @@ class BacktestEngine:
         self._entry_confidence = confidence
         self._entry_atr        = atr
         self._entry_adx        = adx
+        self._hold_bars        = 0
 
     def _open_short(self, price, idx, confidence, win_rate_est, payoff_ratio, adx, atr):
         exec_price = self._apply_slippage(price, "SELL")
@@ -141,6 +157,7 @@ class BacktestEngine:
         self._entry_confidence = confidence
         self._entry_atr        = atr
         self._entry_adx        = adx
+        self._hold_bars        = 0
 
     def _close_position(self, price, idx, reason):
         if self.position > 0:
@@ -191,6 +208,9 @@ class BacktestEngine:
         payoff_ratio = 2.0
         wins, losses = [], []
 
+        # Precompute ATR for entire series — O(n) instead of O(n²)
+        atr_arr = self._precompute_atr(highs, lows, prices)
+
         # Daily drawdown guard — block new entries if daily loss >= MAX_DAILY_DRAWDOWN
         bars_per_day = max(1, round(self._BARS_PER_YEAR.get(timeframe, 2190) / 365))
         day_start_eq  = float(self.initial_capital)
@@ -199,7 +219,7 @@ class BacktestEngine:
         for i in range(n):
             price = prices[i]
             adx   = float(adx_arr[i])
-            atr   = self._compute_atr(highs, lows, prices, i)
+            atr   = float(atr_arr[i])
 
             equity = (self.cash + self.position * price if self.position >= 0
                       else self.cash - abs(self.position) * price)
@@ -218,6 +238,16 @@ class BacktestEngine:
                     f"{daily_loss_pct:.2%} >= {MAX_DAILY_DRAWDOWN:.2%}"
                 )
                 daily_blocked = True
+
+            # Track hold duration and force-close stale positions
+            if self.position != 0:
+                self._hold_bars += 1
+                if self._hold_bars >= MAX_HOLD_BARS:
+                    self._close_position(price, i, "MAX_HOLD")
+                    t = self.trades[-1]
+                    (wins if t["pnl"] > 0 else losses).append(abs(t["pnl"]))
+                    win_rate_est, payoff_ratio = _recalc_kelly(wins, losses)
+                    continue
 
             # Stop / TP checks — always allowed regardless of daily block
             if self.position > 0 and self.stop_price is not None:

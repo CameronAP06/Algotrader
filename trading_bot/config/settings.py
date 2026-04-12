@@ -124,6 +124,13 @@ KELLY_MAX_PCT    = 0.25   # was 0.40 hardcoded in engine.py
 # use the same boundary. engine.py imports KELLY_REGIME_ADX from here.
 KELLY_REGIME_ADX = 18.0   # was 20.0 hardcoded in engine.py
 
+# Max bars to hold a position before forcing close (prevents dead-capital lockup)
+# Set per timeframe: at 4h that's 5 days; at 1h that's ~2 days
+MAX_HOLD_BARS    = 30     # bars; override per TF in engine if needed
+
+# Amihud illiquidity filter threshold percentile (top X% most illiquid bars suppressed)
+AMIHUD_FILTER_PCT = 0.80  # block signals in the top 20% most illiquid bars
+
 # ── Signal Filters ────────────────────────────────────────────────────────────
 # Each filter can be independently toggled.
 # See backtest/filters.py for per-timeframe automatic relaxation via TF_RELAX.

@@ -41,9 +41,63 @@ TRADES_HEADER = [
     "hold_bars", "reason"
 ]
 
+# ── Correlation cap ────────────────────────────────────────────────────────────
+CORR_WINDOW    = 168   # bars used for rolling correlation (~1 week at 4h)
+CORR_THRESHOLD = 0.70  # block new position if r > this with an open same-direction pos
+
 
 def safe_name(symbol: str) -> str:
     return symbol.replace("/", "_").lower()
+
+
+def _check_correlation_cap(symbol: str, new_position: str,
+                            all_candles: dict, all_states: dict) -> bool:
+    """
+    Returns True if it's safe to open `new_position` on `symbol`.
+    Returns False if a same-direction position is already open in a
+    highly-correlated asset (|r| > CORR_THRESHOLD).
+
+    Uses the last CORR_WINDOW bars of close-price returns for correlation.
+    Skips the check gracefully if candles are missing or too short.
+    """
+    if symbol not in all_candles:
+        return True
+
+    try:
+        new_ret = (all_candles[symbol]["close"]
+                   .pct_change()
+                   .tail(CORR_WINDOW)
+                   .reset_index(drop=True))
+    except Exception:
+        return True
+
+    for other_sym, state in all_states.items():
+        if other_sym == symbol or not state.get("position"):
+            continue
+        other_pos = state["position"]
+        # Only block if same direction (both LONG or both SHORT)
+        if (new_position == "LONG" and other_pos != "LONG") or \
+           (new_position == "SHORT" and other_pos != "SHORT"):
+            continue
+        if other_sym not in all_candles:
+            continue
+        try:
+            other_ret = (all_candles[other_sym]["close"]
+                         .pct_change()
+                         .tail(CORR_WINDOW)
+                         .reset_index(drop=True))
+            combined  = pd.concat([new_ret, other_ret], axis=1).dropna()
+            if len(combined) < 20:
+                continue
+            corr = combined.iloc[:, 0].corr(combined.iloc[:, 1])
+            if abs(corr) > CORR_THRESHOLD:
+                logger.info(f"Correlation cap: {symbol} {new_position} blocked by "
+                            f"{other_sym} {other_pos} (r={corr:.2f})")
+                return False
+        except Exception:
+            continue
+
+    return True
 
 
 # ── Model Architectures (must match train_and_backtest.py exactly) ────────────
@@ -292,8 +346,10 @@ def log_trade(row: dict):
 
 # ── Core ──────────────────────────────────────────────────────────────────────
 
-def run_symbol(symbol: str) -> dict | None:
-    df                                              = fetch_candles(symbol)
+def run_symbol(symbol: str,
+               all_candles: dict = None,
+               all_states: dict = None) -> dict | None:
+    df    = all_candles[symbol] if all_candles and symbol in all_candles else fetch_candles(symbol)
     cat_model, cnn_model, lstm_model, scaler, device, weights = load_ensemble(symbol)
     sig = get_signal(cat_model, cnn_model, lstm_model, scaler, device, weights, df)
     state          = load_state(symbol)
@@ -357,6 +413,13 @@ def run_symbol(symbol: str) -> dict | None:
     # Open new position
     if state["position"] is None and signal in ("BUY", "SELL"):
         pos_type = "LONG" if signal == "BUY" else "SHORT"
+        # Correlation cap: don't open if a same-direction correlated trade is open
+        _states_for_corr = all_states if all_states else {symbol: state}
+        _candles_for_corr = all_candles if all_candles else {symbol: df}
+        if not _check_correlation_cap(symbol, pos_type, _candles_for_corr, _states_for_corr):
+            _log("HOLD", reason="Correlation cap — same-direction position open in correlated asset")
+            save_state(symbol, state)
+            return None
         state.update({"position": pos_type, "entry_price": current_price,
                       "entry_time": now, "hold_bars": 0})
         _log(f"OPEN_{pos_type}", reason=f"{signal} conf={sig['confidence']:.3f}")
@@ -373,14 +436,38 @@ def run_symbol(symbol: str) -> dict | None:
 
 
 def run_paper_trade() -> list:
-    """Run one cycle for all symbols. Returns list of events (may be empty)."""
+    """
+    Run one cycle for all symbols. Returns list of events (may be empty).
+
+    Fetches all candles upfront so the correlation cap can compare open
+    positions across symbols without additional network calls.
+    """
     DATA_DIR.mkdir(exist_ok=True)
-    events = []
+
+    # Phase 1: fetch all candles (so correlation cap has all price series)
+    all_candles: dict = {}
     for symbol in SYMBOLS:
         try:
-            event = run_symbol(symbol)
+            all_candles[symbol] = fetch_candles(symbol)
+        except Exception as e:
+            logger.error(f"{symbol} candle fetch failed: {e}")
+
+    # Phase 2: load all current states
+    all_states: dict = {sym: load_state(sym) for sym in SYMBOLS}
+
+    # Phase 3: run each symbol with shared context
+    events = []
+    for symbol in SYMBOLS:
+        if symbol not in all_candles:
+            events.append({"type": "ERROR", "symbol": symbol,
+                           "error": "Candle fetch failed"})
+            continue
+        try:
+            event = run_symbol(symbol, all_candles=all_candles, all_states=all_states)
             if event:
                 events.append(event)
+            # Refresh state so the next symbol sees any position we just opened
+            all_states[symbol] = load_state(symbol)
         except Exception as e:
             logger.error(f"{symbol} cycle failed: {e}")
             events.append({"type": "ERROR", "symbol": symbol, "error": str(e)})

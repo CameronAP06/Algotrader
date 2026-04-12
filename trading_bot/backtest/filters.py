@@ -21,6 +21,7 @@ from config.settings import (
     USE_VOLUME_FILTER,    VOLUME_FILTER_PCT,
     USE_VOLATILITY_FILTER,VOLATILITY_FILTER_PCT,
     USE_TREND_FILTER,     USE_FUNDING_FILTER,
+    AMIHUD_FILTER_PCT,
 )
 
 # Longer timeframes get looser thresholds — fewer bars, coarser signal
@@ -41,7 +42,7 @@ def apply_filters(df: pd.DataFrame, signals: dict,
     n          = len(signal_arr)
     df_aligned = df.tail(n).reset_index(drop=True)
     filtered_count = {"trend": 0, "volatility": 0, "volume": 0,
-                      "funding": 0, "regime": 0, "choppiness": 0}
+                      "funding": 0, "regime": 0, "choppiness": 0, "amihud": 0}
 
     relax = TF_RELAX.get(timeframe, 1.0)
 
@@ -55,6 +56,12 @@ def apply_filters(df: pd.DataFrame, signals: dict,
     vol_col     = df_aligned.get("volume",     pd.Series(np.ones(n)))
     vol_sma_col = df_aligned.get("vol_sma_14", pd.Series(np.ones(n)))
     volume_pct  = VOLUME_FILTER_PCT * relax
+
+    # Amihud illiquidity ratio = |pct_change| / volume — high values = illiquid bars
+    # Block signals in the top (1 - AMIHUD_FILTER_PCT) most illiquid bars
+    pct_changes   = close_col.pct_change().abs().fillna(0)
+    amihud_series = pct_changes / (vol_col.replace(0, np.nan).fillna(1))
+    amihud_threshold = float(amihud_series.quantile(AMIHUD_FILTER_PCT))
 
     has_funding = "funding_rate" in df_aligned.columns and USE_FUNDING_FILTER
     funding_col = df_aligned["funding_rate"] if has_funding else pd.Series(np.zeros(n))
@@ -127,6 +134,11 @@ def apply_filters(df: pd.DataFrame, signals: dict,
             if er < 0.10:   # less than 10% efficient — pure random walk
                 signal_arr[i] = "HOLD"; filtered_count["regime"] += 1; continue
 
+        # Filter 8: Amihud illiquidity — skip very thin bars (wide effective spread)
+        # Top (1-AMIHUD_FILTER_PCT) most illiquid bars are suppressed.
+        if amihud_series.iloc[i] > amihud_threshold:
+            signal_arr[i] = "HOLD"; filtered_count["amihud"] += 1; continue
+
     total_filtered   = sum(filtered_count.values())
     original_signals = int((np.array(signals["signal"]) != "HOLD").sum())
     surviving        = original_signals - total_filtered
@@ -139,7 +151,8 @@ def apply_filters(df: pd.DataFrame, signals: dict,
         f"vol={filtered_count['volatility']} "
         f"volume={filtered_count['volume']} "
         f"funding={filtered_count['funding']} "
-        f"regime={filtered_count['regime']}"
+        f"regime={filtered_count['regime']} "
+        f"amihud={filtered_count['amihud']}"
     )
 
     return {

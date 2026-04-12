@@ -150,6 +150,27 @@ def _grid_search_weights(p1, p2, p3, y_true):
     return best_w
 
 
+def compute_signal_threshold(proba: np.ndarray, top_pct: float = 0.15,
+                             floor: float = 0.34) -> float:
+    """
+    Compute the percentile-based signal threshold from a probability array.
+
+    Call this on the VALIDATION set and pass the result as `threshold` to
+    generate_signals on the TEST set (use_percentile=False).  This eliminates
+    the hindsight bias introduced when the threshold is computed from the same
+    bars being evaluated.
+
+    Returns a fixed float threshold, not a per-bar adaptive value.
+    """
+    up_prob   = proba[:, 2]
+    down_prob = proba[:, 0]
+    best_prob = np.maximum(up_prob, down_prob)
+    candidates = best_prob[best_prob > floor]
+    if len(candidates) >= 5:
+        return float(max(np.percentile(candidates, (1 - top_pct) * 100), floor))
+    return 0.40   # fallback when val set has very few confident bars
+
+
 def generate_signals(blended_proba, threshold=SIGNAL_THRESHOLD, symbol=None,
                      use_percentile: bool = True, top_pct: float = 0.15):
     """
