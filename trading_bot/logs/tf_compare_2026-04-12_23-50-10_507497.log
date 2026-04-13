@@ -1,0 +1,81 @@
+2026-04-12 23:50:10.510 | INFO     | __main__:main:886 - Tiers [original]: 38 symbols selected
+2026-04-12 23:50:10.512 | INFO     | __main__:main:902 - Resuming from backtest\results\expanded_scan_20260412_230755.csv — 2 combos already done
+2026-04-12 23:50:10.513 | INFO     | __main__:main:950 - Running 74 combos with 1 parallel worker(s) across 1 GPU(s)
+2026-04-13 00:04:39.967 | INFO     | __main__:main:986 - [1/74] BTC/USD 4h done
+2026-04-13 00:10:26.830 | INFO     | __main__:main:986 - [2/74] BTC/USD 1d done
+2026-04-13 00:26:19.809 | INFO     | __main__:main:986 - [3/74] ETH/USD 4h done
+2026-04-13 00:33:33.149 | INFO     | __main__:main:986 - [4/74] ETH/USD 1d done
+2026-04-13 00:40:11.645 | INFO     | __main__:main:986 - [5/74] SOL/USD 1d done
+2026-04-13 00:59:21.391 | INFO     | __main__:main:986 - [6/74] XRP/USD 4h done
+2026-04-13 01:07:09.600 | INFO     | __main__:main:986 - [7/74] XRP/USD 1d done
+2026-04-13 01:25:37.174 | INFO     | __main__:main:986 - [8/74] ADA/USD 4h done
+2026-04-13 01:33:33.672 | INFO     | __main__:main:986 - [9/74] ADA/USD 1d done
+2026-04-13 01:52:34.171 | INFO     | __main__:main:986 - [10/74] AVAX/USD 4h done
+2026-04-13 01:59:17.565 | INFO     | __main__:main:986 - [11/74] AVAX/USD 1d done
+2026-04-13 02:18:26.722 | INFO     | __main__:main:986 - [12/74] DOT/USD 4h done
+2026-04-13 02:25:44.998 | INFO     | __main__:main:986 - [13/74] DOT/USD 1d done
+2026-04-13 02:39:37.050 | INFO     | __main__:main:986 - [14/74] POL/USD 4h done
+2026-04-13 02:42:44.145 | INFO     | __main__:main:986 - [15/74] POL/USD 1d done
+2026-04-13 02:56:21.936 | INFO     | __main__:main:986 - [16/74] LTC/USD 4h done
+2026-04-13 03:02:30.987 | INFO     | __main__:main:986 - [17/74] LTC/USD 1d done
+2026-04-13 03:20:15.537 | INFO     | __main__:main:986 - [18/74] BCH/USD 4h done
+2026-04-13 03:28:20.481 | INFO     | __main__:main:986 - [19/74] BCH/USD 1d done
+2026-04-13 03:46:49.769 | INFO     | __main__:main:986 - [20/74] LINK/USD 4h done
+2026-04-13 03:54:42.331 | INFO     | __main__:main:986 - [21/74] LINK/USD 1d done
+2026-04-13 04:12:31.463 | INFO     | __main__:main:986 - [22/74] DOGE/USD 4h done
+2026-04-13 04:20:37.327 | INFO     | __main__:main:986 - [23/74] DOGE/USD 1d done
+2026-04-13 04:39:17.193 | INFO     | __main__:main:986 - [24/74] ETC/USD 4h done
+2026-04-13 04:46:38.156 | INFO     | __main__:main:986 - [25/74] ETC/USD 1d done
+2026-04-13 05:05:17.723 | INFO     | __main__:main:986 - [26/74] XLM/USD 4h done
+2026-04-13 05:12:59.764 | INFO     | __main__:main:986 - [27/74] XLM/USD 1d done
+2026-04-13 05:31:12.560 | INFO     | __main__:main:986 - [28/74] ATOM/USD 4h done
+2026-04-13 05:38:37.997 | INFO     | __main__:main:986 - [29/74] ATOM/USD 1d done
+2026-04-13 05:56:40.976 | INFO     | __main__:main:986 - [30/74] ALGO/USD 4h done
+2026-04-13 06:04:15.538 | INFO     | __main__:main:986 - [31/74] ALGO/USD 1d done
+2026-04-13 06:22:03.794 | INFO     | __main__:main:986 - [32/74] NEAR/USD 4h done
+2026-04-13 06:27:28.351 | INFO     | __main__:main:986 - [33/74] NEAR/USD 1d done
+2026-04-13 06:33:52.530 | INFO     | __main__:main:986 - [34/74] S/USD 4h done
+2026-04-13 06:33:58.712 | WARNING  | __main__:main:980 - [35/74] S/USD 1d — no result
+2026-04-13 06:53:26.772 | INFO     | __main__:main:986 - [36/74] XTZ/USD 4h done
+2026-04-13 07:01:33.183 | INFO     | __main__:main:986 - [37/74] XTZ/USD 1d done
+2026-04-13 07:13:17.938 | INFO     | __main__:main:986 - [38/74] EOS/USD 4h done
+2026-04-13 07:19:49.013 | INFO     | __main__:main:986 - [39/74] EOS/USD 1d done
+2026-04-13 07:37:31.448 | INFO     | __main__:main:986 - [40/74] UNI/USD 4h done
+2026-04-13 07:44:57.831 | INFO     | __main__:main:986 - [41/74] UNI/USD 1d done
+2026-04-13 08:05:00.605 | INFO     | __main__:main:986 - [42/74] AAVE/USD 4h done
+2026-04-13 08:12:48.917 | INFO     | __main__:main:986 - [43/74] AAVE/USD 1d done
+2026-04-13 08:25:32.269 | INFO     | __main__:main:986 - [44/74] MKR/USD 4h done
+2026-04-13 08:31:32.165 | INFO     | __main__:main:986 - [45/74] MKR/USD 1d done
+2026-04-13 08:50:54.224 | INFO     | __main__:main:986 - [46/74] COMP/USD 4h done
+2026-04-13 08:58:16.931 | INFO     | __main__:main:986 - [47/74] COMP/USD 1d done
+2026-04-13 09:16:51.027 | INFO     | __main__:main:986 - [48/74] SNX/USD 4h done
+2026-04-13 09:24:31.883 | INFO     | __main__:main:986 - [49/74] SNX/USD 1d done
+2026-04-13 09:42:03.773 | INFO     | __main__:main:986 - [50/74] CRV/USD 4h done
+2026-04-13 09:49:25.836 | INFO     | __main__:main:986 - [51/74] CRV/USD 1d done
+2026-04-13 10:08:53.757 | INFO     | __main__:main:986 - [52/74] GRT/USD 4h done
+2026-04-13 10:16:08.848 | INFO     | __main__:main:986 - [53/74] GRT/USD 1d done
+2026-04-13 10:21:44.715 | INFO     | __main__:main:986 - [54/74] INJ/USD 1d done
+2026-04-13 10:40:18.222 | INFO     | __main__:main:986 - [55/74] ARB/USD 4h done
+2026-04-13 10:45:18.287 | INFO     | __main__:main:986 - [56/74] ARB/USD 1d done
+2026-04-13 11:04:46.581 | INFO     | __main__:main:986 - [57/74] OP/USD 4h done
+2026-04-13 11:08:51.431 | INFO     | __main__:main:986 - [58/74] OP/USD 1d done
+2026-04-13 11:27:36.300 | INFO     | __main__:main:986 - [59/74] RUNE/USD 4h done
+2026-04-13 11:32:47.666 | INFO     | __main__:main:986 - [60/74] RUNE/USD 1d done
+2026-04-13 11:48:05.938 | INFO     | __main__:main:986 - [61/74] FIL/USD 4h done
+2026-04-13 11:54:24.432 | INFO     | __main__:main:986 - [62/74] FIL/USD 1d done
+2026-04-13 12:07:54.773 | INFO     | __main__:main:986 - [63/74] XMR/USD 4h done
+2026-04-13 12:13:47.188 | INFO     | __main__:main:986 - [64/74] XMR/USD 1d done
+2026-04-13 12:27:08.821 | INFO     | __main__:main:986 - [65/74] ZEC/USD 4h done
+2026-04-13 12:34:27.992 | INFO     | __main__:main:986 - [66/74] ZEC/USD 1d done
+2026-04-13 12:51:30.422 | INFO     | __main__:main:986 - [67/74] DASH/USD 4h done
+2026-04-13 12:57:43.546 | INFO     | __main__:main:986 - [68/74] DASH/USD 1d done
+2026-04-13 13:09:50.186 | INFO     | __main__:main:986 - [69/74] EUR/USD 4h done
+2026-04-13 13:14:39.833 | INFO     | __main__:main:986 - [70/74] EUR/USD 1d done
+2026-04-13 13:27:21.150 | INFO     | __main__:main:986 - [71/74] GBP/USD 4h done
+2026-04-13 13:33:20.447 | INFO     | __main__:main:986 - [72/74] GBP/USD 1d done
+2026-04-13 13:48:21.007 | INFO     | __main__:main:986 - [73/74] AUD/USD 4h done
+2026-04-13 13:54:29.552 | INFO     | __main__:main:986 - [74/74] AUD/USD 1d done
+2026-04-13 13:54:30.664 | INFO     | src.notifier:send:15 - [Telegram disabled] ✅ <b>Scan Complete</b> (14.1h)
+Combos: 76 | Failed: 1 | Skipped: 2
+<b>Strong: 0</b> | Good: 0
+Output: expanded_scan_20260412_230755.csv

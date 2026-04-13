@@ -160,7 +160,9 @@ AMIHUD_FILTER_PCT = 0.85  # block top 15% most illiquid bars (was 0.80 / top 20%
 # DIAGNOSIS: filters were removing 95.4% of signals (avg 3.8 trades/fold).
 # Loosened defaults target 15-30 trades/fold at 1h, 8-20 at 4h.
 
-USE_TREND_FILTER      = False   # SMA alignment — disabled: hurts at longer TFs
+USE_TREND_FILTER      = True    # SMA alignment — re-enabled with SMA200 (was SMA21 = only 3 days at 4h, useless)
+                                # SMA200 at 4h = ~33 days: meaningful long-term regime gate.
+                                # Prevents BUY entries in sustained downtrends and SELL entries in uptrends.
 USE_VOLATILITY_FILTER = True    # Skip very low ATR bars (bottom VOLATILITY_FILTER_PCT)
 USE_VOLUME_FILTER     = True    # Require minimum volume (VOLUME_FILTER_PCT × avg)
 USE_FUNDING_FILTER    = False   # Funding rate extremes (Kraken perp only)
@@ -168,6 +170,11 @@ USE_REGIME_FILTER     = False   # ADX momentum gate (Filter 5) — disabled: Kel
 USE_CHOPPINESS_FILTER = False   # Choppiness Index gate (Filter 6) — killed 293 signals (53% of all kills); disabled
 USE_EFFICIENCY_FILTER = False   # Market Efficiency Ratio gate (Filter 7) — redundant with choppiness; disabled
 USE_AMIHUD_FILTER     = True    # Amihud illiquidity gate (Filter 8) — blocks top 20% most illiquid bars
+
+# Trend filter SMA window — which sma_N column to use as the trend baseline.
+# 200 bars at 4h = ~33 days (meaningful long-term trend indicator).
+# 50 bars at 4h  = ~8 days  (short-term trend — noisier but reacts faster).
+TREND_FILTER_SMA = 200
 
 # Volatility filter: skip bars in bottom X% of ATR distribution
 # Was 0.20 (bottom 20%) — lowered to bottom 10%

@@ -29,6 +29,7 @@ from config.settings import (
     USE_TREND_FILTER,      USE_FUNDING_FILTER,
     USE_CHOPPINESS_FILTER, USE_EFFICIENCY_FILTER,
     USE_AMIHUD_FILTER,     AMIHUD_FILTER_PCT,
+    TREND_FILTER_SMA,
 )
 
 # Longer timeframes get looser thresholds — fewer bars, coarser signal
@@ -55,10 +56,13 @@ def apply_filters(df: pd.DataFrame, signals: dict,
     relax = TF_RELAX.get(timeframe, 1.0)
 
     close_col = df_aligned["close"]
-    # FEATURE_WINDOW_SIZES=[7,14,21,50,200] generates sma_21, not sma_20
-    sma_col   = (df_aligned["sma_21"] if "sma_21" in df_aligned.columns
-                 else df_aligned["sma_20"] if "sma_20" in df_aligned.columns
-                 else close_col)
+    # Use configured SMA window (default 200 bars = ~33 days at 4h).
+    # Fallback chain: sma_N → sma_50 → sma_21 → close (always-pass).
+    _sma_key = f"sma_{TREND_FILTER_SMA}"
+    sma_col  = (df_aligned[_sma_key]      if _sma_key     in df_aligned.columns
+                else df_aligned["sma_50"] if "sma_50"     in df_aligned.columns
+                else df_aligned["sma_21"] if "sma_21"     in df_aligned.columns
+                else close_col)
 
     atr_col       = df_aligned.get("atr_14", pd.Series(np.ones(n)))
     atr_pct       = max(VOLATILITY_FILTER_PCT * relax, 0.05)
