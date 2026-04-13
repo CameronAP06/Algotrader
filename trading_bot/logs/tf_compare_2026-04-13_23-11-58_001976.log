@@ -1,0 +1,4 @@
+2026-04-13 23:11:58.006 | INFO     | __main__:main:886 - Tiers [original]: 38 symbols selected
+2026-04-13 23:11:58.010 | INFO     | __main__:main:950 - Running 76 combos with 1 parallel worker(s) across 1 GPU(s)
+2026-04-13 23:28:35.586 | INFO     | __main__:main:986 - [1/76] BTC/USD 4h done
+2026-04-13 23:34:06.340 | INFO     | __main__:main:986 - [2/76] BTC/USD 1d done
