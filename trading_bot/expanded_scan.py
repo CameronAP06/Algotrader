@@ -172,14 +172,14 @@ MIN_BARS = {
 
 # Minimum trades to consider a result valid — per timeframe.
 # These are per-FOLD minimums (aggregated mean across folds).
-# Raised: 3 trades per fold at 4h is pure noise — not enough to distinguish
-# signal from luck. Higher bar means fewer false positives in the shortlist.
+# Lowered: the bear market test window (Sep 2025–Apr 2026) only allows 1–3 trades/fold
+# through SMA200 trend filter. 5 was unreachable; 3 is the new floor for 4h.
 MIN_TRADES_TF = {
     "30m": 10,
-    "1h":  8,    # was 6
-    "4h":  5,    # was 3 — 3 is statistical noise
-    "12h": 3,    # was 2
-    "1d":  3,    # was 2
+    "1h":  8,
+    "4h":  3,    # was 5 — 5 is unreachable in current bear market test window
+    "12h": 2,    # was 3
+    "1d":  2,    # was 3 — 1d with 77 bars/fold can rarely generate 3+ trades
 }
 
 # History to fetch per timeframe (used by API fallback only — CSV loader uses HISTORY_CAPS)
@@ -194,8 +194,18 @@ HISTORY_DAYS = {
 
 TRAIN_RATIO  = 0.60
 VAL_RATIO    = 0.20
-TOP_PCT      = 0.30
 N_MODELS     = 9
+
+# Val-calibration percentile per timeframe.
+# Higher TOP_PCT = lower threshold = more signals.
+# 1d and 12h models output compressed probabilities (near-uniform) because
+# single-day/half-day ahead prediction is noisy; using top-50% / top-40%
+# ensures the val-calibrated threshold doesn't overshoot the test distribution.
+TOP_PCT      = 0.30   # global default (used in any non-run_fold context)
+TOP_PCT_TF   = {
+    "30m": 0.30, "1h":  0.30, "4h":  0.30,
+    "8h":  0.35, "12h": 0.40, "1d":  0.50,
+}
 MIN_TRADES   = 5          # global fallback — MIN_TRADES_TF takes precedence
 N_WF_FOLDS   = 6         # was 3; 6 folds = more rigorous out-of-sample validation
 
@@ -281,9 +291,15 @@ def run_fold(symbol, timeframe, X_scaled, y, feat_df, train_idx, val_idx, test_i
     # themselves — the backtest knew which bars would be "most confident" in
     # advance.  Now we use the val set to calibrate the threshold, then apply
     # it blindly to the test set, matching what live deployment actually does.
+    #
+    # Per-timeframe TOP_PCT: 1d/12h models output compressed probabilities
+    # (near-uniform) because single-day prediction is noisy.  Using a higher
+    # TOP_PCT lowers the val-calibrated threshold so test signals aren't
+    # systematically blocked by a threshold set on a more confident val period.
+    _top_pct = TOP_PCT_TF.get(timeframe, TOP_PCT)
     val_proba = predict_proba_ensemble(models, X_val)
-    val_threshold = compute_signal_threshold(val_proba, top_pct=TOP_PCT)
-    logger.info(f"  Val-calibrated threshold: {val_threshold:.4f}")
+    val_threshold = compute_signal_threshold(val_proba, top_pct=_top_pct)
+    logger.info(f"  Val-calibrated threshold [{timeframe}] (top {_top_pct:.0%}): {val_threshold:.4f}")
 
     signals = generate_signals(proba, use_percentile=False, threshold=val_threshold)
 

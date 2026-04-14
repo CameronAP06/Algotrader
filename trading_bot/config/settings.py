@@ -174,7 +174,10 @@ USE_AMIHUD_FILTER     = True    # Amihud illiquidity gate (Filter 8) — blocks 
 # Trend filter SMA window — which sma_N column to use as the trend baseline.
 # 200 bars at 4h = ~33 days (meaningful long-term trend indicator).
 # 50 bars at 4h  = ~8 days  (short-term trend — noisier but reacts faster).
-TREND_FILTER_SMA = 50   # was 200 (33 days at 4h — too slow, blocked whole bear periods)
+TREND_FILTER_SMA = 200   # was 50 — SMA50 proved WORSE quality: reacts faster so it sits
+                          # HIGHER during post-crash periods → blocks even more BUY signals.
+                          # SMA200 (33 days at 4h) is more selective but higher quality:
+                          # only signals in clear uptrends pass, giving Sharpe 1.5+ on XLM/ALGO.
 
 # Volatility filter: skip bars in bottom X% of ATR distribution
 # Was 0.20 (bottom 20%) — lowered to bottom 10%

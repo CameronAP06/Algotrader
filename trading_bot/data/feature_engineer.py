@@ -52,6 +52,13 @@ def get_label_params(timeframe: str = "1h") -> tuple:
     bph   = _BARS_PER_HOUR.get(timeframe, 1.0)
     horizon = max(1, round(24 * bph))   # 24h ahead in bars
 
+    # 1d override: predicting 1 day ahead is too noisy (1 bar = too much variance).
+    # Use 5 bars (5 days) so the model learns smoother medium-term trends.
+    # With max-forward labelling, a bar is UP if price rises 3.5%+ at ANY point
+    # in the next 5 days — much more predictable than "exactly tomorrow."
+    if timeframe == "1d":
+        horizon = 5
+
     thresholds = {
         "15m": 0.006,   # 0.6%  — covers fees+slippage, targets clean intraday scalp
         "30m": 0.008,   # 0.8%  — slightly larger move required at 30m
@@ -62,6 +69,7 @@ def get_label_params(timeframe: str = "1h") -> tuple:
         "12h": 0.045,   # 4.5%  — between 8h and 1d
         "1d":  0.035,   # 3.5%  — was 6.0% (too high → 90%+ neutral). Daily crypto
                         #          routinely moves 3-5%; 3.5% gives ~25% UP/DOWN split
+                        #          NOTE: 1d uses horizon=5 bars (5 days) set below
         "1w":  0.080,   # 8.0%  — was 12%; weekly with real conviction
         "2w":  0.120,   # 12.0% — was 18%
     }
