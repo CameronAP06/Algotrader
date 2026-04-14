@@ -329,7 +329,11 @@ def fetch_ohlcv_full(
     if cache_path.exists():
         df_cached = pd.read_csv(cache_path, parse_dates=["timestamp"])
         latest    = df_cached["timestamp"].max()
-        max_age   = timedelta(hours=4 if timeframe in ("1h", "4h", "8h") else 24)
+        # 48h cache window — for backtesting, a few extra hours of stale data is
+        # irrelevant (fold windows are months ago).  This ensures back-to-back
+        # overnight runs reuse the same combined CSV and hit the model cache
+        # instead of retraining from scratch (15h → ~1h).
+        max_age   = timedelta(hours=48)
         if pd.Timestamp.utcnow().tz_localize(None) - latest.replace(tzinfo=None) < max_age:
             logger.info(f"Loaded {symbol} {timeframe} from cache ({len(df_cached)} rows)")
             return df_cached
