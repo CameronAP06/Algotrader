@@ -198,7 +198,8 @@ AMIHUD_FILTER_PCT = 0.85  # block top 15% most illiquid bars (was 0.80 / top 20%
 # DIAGNOSIS: filters were removing 95.4% of signals (avg 3.8 trades/fold).
 # Loosened defaults target 15-30 trades/fold at 1h, 8-20 at 4h.
 
-USE_TREND_FILTER      = True    # SMA alignment — re-enabled with SMA200 (was SMA21 = only 3 days at 4h, useless)
+USE_TREND_FILTER      = False   # DIAGNOSTIC: disabled to test raw signal quality without SMA200 gate
+                                # Re-enable (True) after diagnosing how many signals survive vs get blocked
                                 # SMA200 at 4h = ~33 days: meaningful long-term regime gate.
                                 # Prevents BUY entries in sustained downtrends and SELL entries in uptrends.
 USE_VOLATILITY_FILTER = True    # Skip very low ATR bars (bottom VOLATILITY_FILTER_PCT)
