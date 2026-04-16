@@ -1,0 +1,12 @@
+2026-04-16 17:23:44.885 | INFO     | __main__:main:884 - Using explicit symbol list: 6 symbols
+2026-04-16 17:23:44.886 | INFO     | __main__:main:984 - Running 6 combos with 1 parallel worker(s) across 1 GPU(s)
+2026-04-16 17:48:04.434 | INFO     | __main__:main:1020 - [1/6] RUNE/USD 4h done
+2026-04-16 18:14:13.079 | INFO     | __main__:main:1020 - [2/6] ALGO/USD 4h done
+2026-04-16 18:38:53.150 | INFO     | __main__:main:1020 - [3/6] DOGE/USD 4h done
+2026-04-16 18:59:28.910 | INFO     | __main__:main:1020 - [4/6] DASH/USD 4h done
+2026-04-16 19:21:19.868 | INFO     | __main__:main:1020 - [5/6] BTC/USD 4h done
+2026-04-16 19:44:57.700 | INFO     | __main__:main:1020 - [6/6] CRV/USD 4h done
+2026-04-16 19:44:58.501 | INFO     | src.notifier:send:15 - [Telegram disabled] ✅ <b>Scan Complete</b> (2.4h)
+Combos: 6 | Failed: 0 | Skipped: 0
+<b>Strong: 0</b> | Good: 0
+Output: expanded_scan_20260416_172344.csv
