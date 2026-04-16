@@ -189,7 +189,7 @@ HISTORY_DAYS = {
     "1h":  730,    # was 365; raised for 6-fold WF
     "4h":  1095,   # was 730
     "12h": 1095,   # was 730
-    "1d":  1825,   # was 1095
+    "1d":  3650,   # was 1825; matches HISTORY_CAPS in kraken_history.py
 }
 
 TRAIN_RATIO  = 0.60

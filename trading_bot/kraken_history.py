@@ -136,7 +136,7 @@ HISTORY_CAPS = {
     "1h":  730,    # 2 years — was 365; raised for 6-fold WF to get 17k+ bars
     "4h":  1095,   # 3 years — was 730; more folds need more data
     "12h": 1095,   # 3 years
-    "1d":  1825,   # 5 years — was 1095; 1d needs many more bars for label diversity
+    "1d":  3650,   # 10 years — was 1825; BTC/ETH data goes back to 2013/2015, covers 2022 bear
 }
 
 
