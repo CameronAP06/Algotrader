@@ -227,6 +227,120 @@ def generate_signals(blended_proba, threshold=SIGNAL_THRESHOLD, symbol=None,
     }
 
 
+def blend_ensemble_trio(lstm_p: np.ndarray, xgb_p: np.ndarray,
+                        cat_p: np.ndarray, weights: list) -> np.ndarray:
+    """
+    Weighted blend of three (n, 3) probability arrays: LSTM + XGB + CatBoost.
+
+    LSTM has sequence padding (first seq_len-1 bars = [0,1,0]) while XGB and
+    CatBoost cover all bars.  We align all arrays to the same tail length so
+    the weighted sum is always valid.
+
+    Args:
+        lstm_p  : (n, 3) LSTM ensemble mean probabilities
+        xgb_p   : (n, 3) XGBoost probabilities
+        cat_p   : (n, 3) CatBoost probabilities
+        weights : [w_lstm, w_xgb, w_catboost] — should sum to 1.0
+
+    Returns:
+        blended : (n, 3) float32 probability array
+    """
+    n = min(len(lstm_p), len(xgb_p), len(cat_p))
+    lstm_p = lstm_p[-n:]
+    xgb_p  = xgb_p[-n:]
+    cat_p  = cat_p[-n:]
+    w = np.array(weights, dtype=np.float32)
+    w = w / w.sum()   # normalise to 1 in case weights don't perfectly sum
+    return (w[0] * lstm_p + w[1] * xgb_p + w[2] * cat_p).astype(np.float32)
+
+
+def optimise_trio_weights(lstm_val_p: np.ndarray, xgb_val_p: np.ndarray,
+                          cat_val_p: np.ndarray, y_val: np.ndarray) -> list:
+    """
+    Find weights [w_lstm, w_xgb, w_catboost] that maximise macro-F1 on the
+    validation set, using Differential Evolution.
+
+    The threshold used during optimisation is the 85th percentile of the
+    blended confidence (matching expanded_scan's default TOP_PCT behaviour),
+    so the weights are jointly optimised with the signalling threshold.
+
+    Falls back to equal weights [1/3, 1/3, 1/3] on failure.
+
+    Args:
+        lstm_val_p : (n_val, 3) LSTM val probabilities (with padding on head)
+        xgb_val_p  : (n_val, 3) XGB val probabilities
+        cat_val_p  : (n_val, 3) CatBoost val probabilities
+        y_val      : (n_val,) integer labels
+
+    Returns:
+        weights : [w_lstm, w_xgb, w_catboost] normalised to sum to 1
+    """
+    from scipy.optimize import differential_evolution
+    from sklearn.metrics import f1_score
+
+    n = min(len(lstm_val_p), len(xgb_val_p), len(cat_val_p))
+    lp = lstm_val_p[-n:]
+    xp = xgb_val_p[-n:]
+    cp = cat_val_p[-n:]
+    yt = np.array(y_val[-n:])
+
+    def neg_f1(params):
+        w0, w1, w2 = params
+        total = w0 + w1 + w2 + 1e-9
+        w = np.array([w0, w1, w2]) / total
+        blended   = w[0]*lp + w[1]*xp + w[2]*cp
+        up_prob   = blended[:, 2]
+        down_prob = blended[:, 0]
+        best_prob = np.maximum(up_prob, down_prob)
+
+        candidates = best_prob[best_prob > 0.34]
+        if len(candidates) >= 5:
+            threshold = max(float(np.percentile(candidates, 85.0)), 0.34)
+        else:
+            threshold = 0.40
+
+        signals = np.ones(len(blended), dtype=int)
+        signals[up_prob   >= threshold] = 2
+        signals[down_prob >= threshold] = 0
+        conflict = (up_prob >= threshold) & (down_prob >= threshold)
+        signals[conflict] = 1
+
+        # Penalise degenerate solutions that fire on < 2% of bars
+        active_pct = (signals != 1).mean()
+        if active_pct < 0.02:
+            return 1.0
+
+        return -f1_score(yt, signals, average="macro", zero_division=0)
+
+    bounds = [(0.0, 1.0), (0.0, 1.0), (0.0, 1.0)]
+
+    try:
+        result = differential_evolution(
+            neg_f1,
+            bounds,
+            seed=42,
+            maxiter=100,
+            popsize=12,
+            tol=1e-5,
+            mutation=(0.5, 1.0),
+            recombination=0.7,
+            polish=True,
+            workers=1,
+        )
+        w0, w1, w2 = result.x
+        total = w0 + w1 + w2 + 1e-9
+        best_w = [w0/total, w1/total, w2/total]
+        best_f1 = -result.fun
+        logger.success(
+            f"Trio DE-optimised weights: lstm={best_w[0]:.3f} xgb={best_w[1]:.3f} "
+            f"catboost={best_w[2]:.3f} | macro-F1={best_f1:.4f}"
+        )
+        return best_w
+    except Exception as e:
+        logger.warning(f"Trio weight optimisation failed ({e}), using equal weights")
+        return [1/3, 1/3, 1/3]
+
+
 def save_weights(weights, symbol):
     os.makedirs(MODEL_DIR, exist_ok=True)
     path = Path(MODEL_DIR) / f"{symbol.replace('/','_')}_ensemble_weights.pkl"

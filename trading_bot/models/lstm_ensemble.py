@@ -55,7 +55,87 @@ CACHE_DIR = Path(MODEL_DIR) / "fold_cache"   # cached trained models keyed by da
 
 # Architecture version tag — bump this to invalidate all cached models when
 # the architecture changes (e.g. after adding attention or changing focal gamma)
-_ARCH_TAG = b"arch_v7_reduce_lr_on_plateau"
+_ARCH_TAG = b"arch_v8_multistream_xgb_catboost"
+
+
+# ── Feature group definitions ─────────────────────────────────────────────────
+# Each entry maps a group name to a list of column-name substrings.
+# A feature column is assigned to the FIRST group whose any substring matches
+# (case-insensitive prefix/contains check).  Unmatched columns go into a
+# catch-all "other" group that is merged with the last defined group or kept
+# separate if large enough.
+#
+# Group design rationale:
+#   trend      — SMA/EMA/close_vs_sma: directional bias over different horizons
+#   momentum   — RSI/ROC/MACD/stoch: rate-of-change and overbought/oversold
+#   volatility — ATR/BB/choppiness/hurst: how much prices are moving
+#   volume     — vol_sma/vol_ratio/OBV/VWAP/funding: liquidity and flow
+#   structure  — body_pct/shadows/return_lag/raw_open etc: candle shape + lags
+#   regime     — ADX/btc_/hour_/dow_/regime: market state and cross-asset
+#
+# Processing each group through its own LSTM branch forces specialisation:
+# the trend branch cannot shortcut through volume features, for example.
+
+FEATURE_GROUP_PATTERNS = {
+    # Check volume BEFORE trend — vol_sma_* contains "sma_" and would
+    # otherwise match the trend group incorrectly.
+    "volume":     ["vol_sma", "vol_ratio", "obv", "vwap", "funding", "volume"],
+    # Check structure before trend — raw_close etc. contain close but are lags
+    "structure":  ["body_pct", "shadow", "return_lag", "raw_open", "raw_high",
+                   "raw_low", "raw_close", "raw_volume", "log_return", "pct_change"],
+    "trend":      ["sma_", "ema_", "close_vs_sma", "close_vs_ema"],
+    "momentum":   ["rsi", "roc_", "macd", "stoch", "cci", "williams", "tsi"],
+    "volatility": ["atr_", "bb_", "choppiness", "hurst", "keltner", "natr"],
+    "regime":     ["adx", "btc_", "hour_", "dow_", "regime", "market", "dominance"],
+}
+
+
+def build_feature_groups(feature_cols: list) -> list:
+    """
+    Assign each feature column to a group and return a list of index arrays.
+
+    Args:
+        feature_cols : ordered list of column names matching X[:,i]
+
+    Returns:
+        group_indices : list of np.ndarray, each containing column indices
+                        for one group.  Groups with 0 columns are dropped.
+                        Any unassigned column goes into the last (regime) group.
+    """
+    groups = {name: [] for name in FEATURE_GROUP_PATTERNS}
+    unassigned = []
+
+    for i, col in enumerate(feature_cols):
+        col_lower = col.lower()
+        assigned = False
+        for gname, patterns in FEATURE_GROUP_PATTERNS.items():
+            if any(pat in col_lower for pat in patterns):
+                groups[gname].append(i)
+                assigned = True
+                break
+        if not assigned:
+            unassigned.append(i)
+
+    # Distribute unassigned columns into the "regime" catch-all
+    groups["regime"].extend(unassigned)
+
+    # Convert to arrays and drop empty groups
+    result = []
+    for gname, idxs in groups.items():
+        if idxs:
+            result.append(np.array(idxs, dtype=np.int64))
+
+    n_total = len(feature_cols)
+    n_covered = sum(len(g) for g in result)
+    logger.info(
+        f"build_feature_groups: {n_total} features → {len(result)} groups "
+        f"({n_covered} assigned)"
+    )
+    for gname, idxs in groups.items():
+        if idxs:
+            logger.debug(f"  {gname}: {len(idxs)} features")
+
+    return result
 
 
 # ── Architecture ──────────────────────────────────────────────────────────────
@@ -173,6 +253,98 @@ class LSTMClassifier(nn.Module):
         return self.fc(self.dropout(self.norm(ctx)))
 
 
+class MultiStreamLSTMClassifier(nn.Module):
+    """
+    Multi-stream LSTM: one independent LSTM branch per feature group.
+
+    Each branch processes only its own feature subset through a dedicated LSTM
+    (stream_hidden units), then all branch outputs are concatenated and passed
+    through multi-head attention before the final classifier head.
+
+    Why separate branches instead of one wide LSTM?
+      - A single wide LSTM must simultaneously learn trend, momentum, volume,
+        and regime patterns.  Each feature family has a different temporal
+        scale (momentum: 2-5 bars; trend: 14-200 bars) and a different noise
+        profile.  Mixing them in one hidden state forces the model to learn
+        a shared representation that can't specialise.
+      - Separate branches allow each LSTM to develop specialised hidden states.
+        The attention layer then learns WHICH branches to trust for EACH bar.
+      - Total capacity: n_groups × stream_hidden (e.g. 6 × 48 = 288 > 192
+        single-stream), so the model is strictly more expressive while keeping
+        each branch focused.
+
+    Architecture:
+        Input (batch, seq, n_features)
+            ↓ split by feature group
+        [Branch_0(batch, seq, g0_size) → LSTM → (batch, stream_hidden)]
+        [Branch_1(batch, seq, g1_size) → LSTM → (batch, stream_hidden)]
+        ...
+        [Branch_K(batch, seq, gK_size) → LSTM → (batch, stream_hidden)]
+            ↓ concatenate along feature dim
+        (batch, seq, K × stream_hidden)
+            ↓ MultiHeadTemporalAttention
+        (batch, K × stream_hidden)
+            ↓ LayerNorm + Dropout + Linear
+        (batch, num_classes)
+    """
+    def __init__(self, group_indices: list, stream_hidden: int,
+                 num_layers: int, num_classes: int, dropout: float):
+        super().__init__()
+        self.group_indices = group_indices
+        self.stream_hidden = stream_hidden
+        n_groups     = len(group_indices)
+        merged_size  = n_groups * stream_hidden
+
+        # One LSTM per group — no shared weights
+        inter_dropout = dropout if (USE_AMP and num_layers > 1) else 0.0
+        self.branch_lstms = nn.ModuleList([
+            nn.LSTM(
+                input_size  = len(idxs),
+                hidden_size = stream_hidden,
+                num_layers  = num_layers,
+                batch_first = True,
+                dropout     = inter_dropout,
+            )
+            for idxs in group_indices
+        ])
+
+        # Attention operates on the merged sequence (all branches concatenated).
+        # num_heads must divide merged_size — find the largest valid value ≤ target.
+        _target_heads = max(1, n_groups // 2)
+        _num_heads    = next(
+            (h for h in range(_target_heads, 0, -1) if merged_size % h == 0), 1
+        )
+        self.attention = MultiHeadTemporalAttention(
+            hidden_size = merged_size,
+            num_heads   = _num_heads,
+            dropout     = 0.1,
+        )
+        self.norm    = MIOpenSafeLayerNorm(merged_size)
+        self.dropout = nn.Dropout(dropout)
+        self.fc      = nn.Linear(merged_size, num_classes)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        x: (batch, seq_len, n_features)
+        returns: (batch, num_classes) logits
+        """
+        branch_outs = []
+        for idxs, lstm in zip(self.group_indices, self.branch_lstms):
+            # Select this group's features: (batch, seq_len, group_size)
+            # idxs is a numpy int64 array — convert to list for safe indexing
+            x_group = x[:, :, idxs.tolist()]
+            out, _ = lstm(x_group)   # (batch, seq_len, stream_hidden)
+            branch_outs.append(out)
+
+        # Concatenate all branches along feature dim: (batch, seq_len, merged_size)
+        merged = torch.cat(branch_outs, dim=-1)
+
+        # Multi-head attention selects which timesteps matter: (batch, merged_size)
+        ctx = self.attention(merged)
+
+        return self.fc(self.dropout(self.norm(ctx)))
+
+
 class SequenceDataset(Dataset):
     """
     Sliding-window sequence dataset with configurable stride.
@@ -206,13 +378,17 @@ class SequenceDataset(Dataset):
 
 # ── Model cache ───────────────────────────────────────────────────────────────
 
-def _cache_key(X_train: np.ndarray, y_train: np.ndarray, seed: int) -> str:
+def _cache_key(X_train: np.ndarray, y_train: np.ndarray, seed: int,
+               feature_cols: list = None) -> str:
     """
     Stable MD5 hash of training data + LSTM_PARAMS + seed + architecture version.
 
     Sampling every Nth row for speed — enough to detect data changes without
     hashing 100k+ floats on every call.  The architecture tag ensures that
     cached models from old versions are never loaded by a new architecture.
+
+    feature_cols is included so that adding/removing features correctly
+    invalidates the cache (different group assignments → different model).
     """
     h = hashlib.md5()
     h.update(str(X_train.shape).encode())
@@ -222,11 +398,13 @@ def _cache_key(X_train: np.ndarray, y_train: np.ndarray, seed: int) -> str:
     h.update(y_train[::max(1, len(y_train) // 100)].tobytes())
     h.update(str(sorted(LSTM_PARAMS.items())).encode())
     h.update(str(seed).encode())
+    if feature_cols is not None:
+        h.update(str(feature_cols).encode())
     h.update(_ARCH_TAG)
     return h.hexdigest()[:20]
 
 
-def _try_load_cache(key: str, model: LSTMClassifier) -> bool:
+def _try_load_cache(key: str, model) -> bool:
     """
     Try to load a cached model state into `model` in-place.
     Returns True on success, False if cache miss or corrupt.
@@ -251,7 +429,7 @@ def _save_cache(model: LSTMClassifier, key: str):
 
 # ── Temperature scaling ───────────────────────────────────────────────────────
 
-def _fit_temperature(model: LSTMClassifier,
+def _fit_temperature(model,
                      X_val: np.ndarray, y_val: np.ndarray,
                      seq_len: int) -> float:
     """
@@ -305,31 +483,51 @@ def _fit_temperature(model: LSTMClassifier,
 # ── Single model training ─────────────────────────────────────────────────────
 
 def _train_one(X_train, y_train, X_val, y_val,
-               seed: int, symbol: str, model_idx: int) -> LSTMClassifier:
+               seed: int, symbol: str, model_idx: int,
+               group_indices: list = None,
+               feature_cols: list = None):
     """
     Train one LSTM with a fixed seed.
 
+    When group_indices is provided (from build_feature_groups), uses
+    MultiStreamLSTMClassifier (one branch per feature group).  Falls back
+    to the single-stream LSTMClassifier when group_indices is None.
+
     Cache check: if a model with the same data hash + seed + params already
-    exists on disk, load and return it immediately.  This makes repeated runs
-    (e.g. after a crash) nearly instant for unchanged folds.
+    exists on disk, load and return it immediately.
 
     On CUDA: uses automatic mixed precision (FP16 forward / FP32 gradient
     accumulation) for ~1.5-2x training speedup.
     On DirectML: AMP is disabled (not supported by the DirectML backend).
     """
-    key = _cache_key(X_train, y_train, seed)
+    key = _cache_key(X_train, y_train, seed, feature_cols)
 
-    p          = LSTM_PARAMS
-    seq_len    = p["sequence_length"]
-    input_size = X_train.shape[1]
+    p           = LSTM_PARAMS
+    seq_len     = p["sequence_length"]
+    input_size  = X_train.shape[1]
+    use_multi   = group_indices is not None and len(group_indices) >= 2
 
-    model = LSTMClassifier(
-        input_size  = input_size,
-        hidden_size = p["hidden_size"],
-        num_layers  = p["num_layers"],
-        num_classes = 3,
-        dropout     = p["dropout"],
-    ).to(DEVICE)
+    if use_multi:
+        stream_hidden = p.get("stream_hidden", 48)
+        model = MultiStreamLSTMClassifier(
+            group_indices = group_indices,
+            stream_hidden = stream_hidden,
+            num_layers    = p["num_layers"],
+            num_classes   = 3,
+            dropout       = p["dropout"],
+        ).to(DEVICE)
+        logger.info(
+            f"  [{model_idx+1}/{N_MODELS}] MultiStream: {len(group_indices)} groups × "
+            f"{stream_hidden} hidden = {len(group_indices) * stream_hidden} merged"
+        )
+    else:
+        model = LSTMClassifier(
+            input_size  = input_size,
+            hidden_size = p["hidden_size"],
+            num_layers  = p["num_layers"],
+            num_classes = 3,
+            dropout     = p["dropout"],
+        ).to(DEVICE)
 
     # ── Cache HIT ─────────────────────────────────────────────────────────────
     if _try_load_cache(key, model):
@@ -518,10 +716,15 @@ class _null_ctx:
 def train_ensemble(X_train: np.ndarray, y_train: np.ndarray,
                    X_val:   np.ndarray, y_val:   np.ndarray,
                    symbol:  str = "model",
-                   n_models: int = N_MODELS) -> list:
+                   n_models: int = N_MODELS,
+                   feature_cols: list = None) -> list:
     """
     Train N independent LSTMs with different random seeds.
-    Returns a list of trained LSTMClassifier models.
+    Returns a list of trained models (MultiStreamLSTMClassifier or LSTMClassifier).
+
+    When feature_cols is provided, uses MultiStreamLSTMClassifier with one
+    branch per feature group.  Falls back to single-stream LSTMClassifier
+    when feature_cols is None (backwards-compatible).
 
     On repeated runs with unchanged data, cached models are returned
     immediately — no retraining occurs.
@@ -530,13 +733,20 @@ def train_ensemble(X_train: np.ndarray, y_train: np.ndarray,
     logger.info(f"  Train: {len(X_train)} | Val: {len(X_val)} | "
                 f"Features: {X_train.shape[1]}")
 
+    group_indices = None
+    if feature_cols is not None:
+        group_indices = build_feature_groups(feature_cols)
+        logger.info(f"  Multi-stream: {len(group_indices)} groups")
+
     seeds  = [42 + i * 137 for i in range(n_models)]
     models = []
     val_losses = []
 
     for i, seed in enumerate(seeds):
         m = _train_one(X_train, y_train, X_val, y_val,
-                       seed=seed, symbol=symbol, model_idx=i)
+                       seed=seed, symbol=symbol, model_idx=i,
+                       group_indices=group_indices,
+                       feature_cols=feature_cols)
         models.append(m)
 
         # Quick val loss check
@@ -648,8 +858,13 @@ def predict_proba_ensemble(models: list, X: np.ndarray,
 
 # ── Save / Load ───────────────────────────────────────────────────────────────
 
-def save_ensemble(models: list, symbol: str):
-    """Save all ensemble models to disk."""
+def save_ensemble(models: list, symbol: str, feature_cols: list = None):
+    """
+    Save all ensemble models to disk.
+
+    Saves group_indices alongside the weights so load_ensemble can
+    reconstruct the correct architecture (multi-stream vs single-stream).
+    """
     import joblib
     os.makedirs(MODEL_DIR, exist_ok=True)
     safe = symbol.replace("/", "_")
@@ -659,18 +874,27 @@ def save_ensemble(models: list, symbol: str):
         torch.save(model.state_dict(), path)
 
     m = models[0]
-    joblib.dump({
-        "input_size":  m.lstm.input_size,
-        "hidden_size": m.lstm.hidden_size,
-        "num_layers":  m.lstm.num_layers,
+    is_multi = isinstance(m, MultiStreamLSTMClassifier)
+    info = {
         "n_models":    len(models),
-    }, Path(MODEL_DIR) / f"{safe}_lstm_ensemble_info.pkl")
+        "arch":        "multistream" if is_multi else "single",
+        "num_layers":  LSTM_PARAMS["num_layers"],
+        "dropout":     LSTM_PARAMS["dropout"],
+    }
+    if is_multi:
+        info["group_indices"]  = [g.tolist() for g in m.group_indices]
+        info["stream_hidden"]  = m.stream_hidden
+    else:
+        info["input_size"]  = m.lstm.input_size
+        info["hidden_size"] = m.lstm.hidden_size
+        info["num_layers"]  = m.lstm.num_layers
 
-    logger.success(f"Saved {len(models)}-model ensemble for {symbol} → {MODEL_DIR}")
+    joblib.dump(info, Path(MODEL_DIR) / f"{safe}_lstm_ensemble_info.pkl")
+    logger.success(f"Saved {len(models)}-model {info['arch']} ensemble for {symbol} → {MODEL_DIR}")
 
 
 def load_ensemble(symbol: str) -> list:
-    """Load all ensemble models from disk."""
+    """Load all ensemble models from disk, reconstructing the correct architecture."""
     import joblib
     safe = symbol.replace("/", "_")
     info = joblib.load(Path(MODEL_DIR) / f"{safe}_lstm_ensemble_info.pkl")
@@ -678,17 +902,28 @@ def load_ensemble(symbol: str) -> list:
 
     models = []
     for i in range(info["n_models"]):
-        model = LSTMClassifier(
-            input_size  = info["input_size"],
-            hidden_size = info["hidden_size"],
-            num_layers  = info["num_layers"],
-            num_classes = 3,
-            dropout     = p["dropout"],
-        ).to(DEVICE)
+        if info.get("arch") == "multistream":
+            group_indices = [np.array(g, dtype=np.int64) for g in info["group_indices"]]
+            model = MultiStreamLSTMClassifier(
+                group_indices = group_indices,
+                stream_hidden = info["stream_hidden"],
+                num_layers    = info.get("num_layers", p["num_layers"]),
+                num_classes   = 3,
+                dropout       = info.get("dropout",    p["dropout"]),
+            ).to(DEVICE)
+        else:
+            model = LSTMClassifier(
+                input_size  = info["input_size"],
+                hidden_size = info["hidden_size"],
+                num_layers  = info["num_layers"],
+                num_classes = 3,
+                dropout     = p["dropout"],
+            ).to(DEVICE)
         path = Path(MODEL_DIR) / f"{safe}_lstm_ensemble_{i}.pt"
         model.load_state_dict(torch.load(path, map_location=DEVICE, weights_only=True))
         model.eval()
         models.append(model)
 
-    logger.info(f"Loaded {len(models)}-model ensemble for {symbol}")
+    arch = info.get("arch", "single")
+    logger.info(f"Loaded {len(models)}-model {arch} ensemble for {symbol}")
     return models

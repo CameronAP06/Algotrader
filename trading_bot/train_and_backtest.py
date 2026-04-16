@@ -6,10 +6,10 @@ MAIN ENTRY POINT — Phase 1
 
 Steps:
   1. Fetch historical OHLCV data from Kraken (no API key needed)
-  2. Engineer 80+ features
-  3. Train CatBoost + 1D CNN + LSTM ensemble
-  4. Optimise ensemble weights on validation set
-  5. Generate trading signals on test set
+  2. Engineer 120+ features
+  3. Train XGBoost + CatBoost + 9-model multi-stream LSTM ensemble
+  4. Optimise trio blend weights on validation set (Differential Evolution)
+  5. Generate trading signals on test set using val-calibrated threshold
   6. Run backtest with realistic fees and risk management
   7. Print + save performance metrics
 
@@ -31,10 +31,12 @@ from config.settings import TRADING_PAIRS, LOG_DIR, TIMEFRAME
 from data.kraken_fetcher import fetch_all_pairs
 from data.feature_engineer import build_features, get_feature_columns
 from utils.splitter import time_split, save_scaler
-from models import catboost_model, cnn_model, lstm_model
+from models.xgb_model import train_xgb_model, predict_proba_xgb
+from models.catboost_model import train_catboost_model, predict_proba_catboost
+from models.lstm_ensemble import train_ensemble, predict_proba_ensemble
 from models.ensemble import (
-    weighted_ensemble, optimise_weights,
-    generate_signals, save_weights
+    blend_ensemble_trio, optimise_trio_weights,
+    compute_signal_threshold, generate_signals, save_weights
 )
 from backtest.engine import BacktestEngine
 from backtest.filters import apply_filters
@@ -58,7 +60,7 @@ def run_pipeline(symbol: str, raw_df: pd.DataFrame,
     logger.info(f"\n{'='*60}\nProcessing: {symbol}\n{'='*60}")
 
     # 1. Feature Engineering (uses cache when available)
-    feat_df = build_features(raw_df, symbol, timeframe=timeframe)
+    feat_df      = build_features(raw_df, symbol, timeframe=timeframe)
     feature_cols = get_feature_columns(feat_df)
     logger.info(f"Features: {len(feature_cols)} columns")
 
@@ -66,32 +68,34 @@ def run_pipeline(symbol: str, raw_df: pd.DataFrame,
     X_train, X_val, X_test, y_train, y_val, y_test, scaler = time_split(feat_df, feature_cols)
     save_scaler(scaler, symbol)
 
-    # 3. Train Individual Models
-    cat = catboost_model.train(X_train, y_train, X_val, y_val, symbol)
-    catboost_model.save(cat, symbol)
-
-    cnn = cnn_model.train(X_train, y_train, X_val, y_val, symbol)
-    cnn_model.save(cnn, symbol)
-
-    lstm = lstm_model.train(X_train, y_train, X_val, y_val, symbol)
-    lstm_model.save(lstm, symbol)
+    # 3. Train Trio Ensemble
+    lstm_models = train_ensemble(X_train, y_train, X_val, y_val,
+                                  symbol=symbol, feature_cols=feature_cols)
+    xgb_model   = train_xgb_model(X_train, y_train, X_val, y_val, symbol=symbol)
+    cat_model   = train_catboost_model(X_train, y_train, X_val, y_val, symbol=symbol)
 
     # 4. Validation Probabilities
-    cat_val_p  = catboost_model.predict_proba(cat, X_val)
-    cnn_val_p  = cnn_model.predict_proba(cnn,  X_val)
-    lstm_val_p = lstm_model.predict_proba(lstm, X_val)
+    lstm_val_p = predict_proba_ensemble(lstm_models, X_val)
+    xgb_val_p  = predict_proba_xgb(xgb_model, X_val)
+    cat_val_p  = predict_proba_catboost(cat_model, X_val)
 
-    # 5. Optimise Ensemble Weights on Validation Set
-    best_weights = optimise_weights(cat_val_p, cnn_val_p, lstm_val_p, y_val)
+    # 5. Optimise Blend Weights + Val-Calibrated Threshold
+    best_weights  = optimise_trio_weights(lstm_val_p, xgb_val_p, cat_val_p, y_val)
     save_weights(best_weights, symbol)
+    val_blended   = blend_ensemble_trio(lstm_val_p, xgb_val_p, cat_val_p, best_weights)
+    val_threshold = compute_signal_threshold(val_blended, top_pct=0.30)
+    logger.info(f"Val-calibrated threshold: {val_threshold:.4f} | "
+                f"weights: lstm={best_weights[0]:.3f} xgb={best_weights[1]:.3f} "
+                f"catboost={best_weights[2]:.3f}")
 
     # 6. Test Set Predictions
-    cat_test_p  = catboost_model.predict_proba(cat, X_test)
-    cnn_test_p  = cnn_model.predict_proba(cnn,  X_test)
-    lstm_test_p = lstm_model.predict_proba(lstm, X_test)
+    lstm_test_p = predict_proba_ensemble(lstm_models, X_test)
+    xgb_test_p  = predict_proba_xgb(xgb_model, X_test)
+    cat_test_p  = predict_proba_catboost(cat_model, X_test)
 
-    blended = weighted_ensemble(cat_test_p, cnn_test_p, lstm_test_p, best_weights)
-    signals = generate_signals(blended, symbol=symbol)
+    blended = blend_ensemble_trio(lstm_test_p, xgb_test_p, cat_test_p, best_weights)
+    signals = generate_signals(blended, use_percentile=False, threshold=val_threshold,
+                                symbol=symbol)
 
     # 7. Evaluate Signal Quality
     preds       = blended.argmax(axis=1)

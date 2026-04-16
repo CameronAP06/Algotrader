@@ -235,21 +235,28 @@ def _fmt_date(ts_series) -> str:
 
 
 def run_fold(symbol, timeframe, X_scaled, y, feat_df, train_idx, val_idx, test_idx,
-             purge_bars: int = 0):
+             purge_bars: int = 0, feat_cols: list = None, fold_idx: int = 0):
     """
     Train on one fold and return backtest metrics for the test window.
+
+    Trio ensemble: LSTM (multi-stream) + XGBoost + CatBoost, with
+    val-set optimised blend weights via Differential Evolution.
 
     purge_bars: strip this many bars from the END of the training set before
     training.  Prevents label leakage: labels at bar i use future prices up to
     bar i+horizon, so the last `horizon` training labels overlap with the val
     set.  Purging removes these contaminated samples.
 
-    Disagreement filter: after ensemble inference, any bar where the 9 models
+    Disagreement filter: after ensemble inference, any bar where the LSTM models
     strongly disagree (per-class std > ENSEMBLE_DISAGREE_THRESHOLD) is forced
     to HOLD.  High disagreement = genuinely ambiguous bar = not worth trading.
     """
     from config.settings import LSTM_PARAMS, ENSEMBLE_DISAGREE_THRESHOLD
     from models.lstm_ensemble import train_ensemble, predict_proba_ensemble
+    from models.xgb_model import train_xgb_model, predict_proba_xgb
+    from models.catboost_model import train_catboost_model, predict_proba_catboost
+    from models.ensemble import (compute_signal_threshold,
+                                  blend_ensemble_trio, optimise_trio_weights)
 
     t_start, t_end = train_idx
     # Purge train tail: labels at the last `horizon` training bars use prices that
@@ -258,9 +265,6 @@ def run_fold(symbol, timeframe, X_scaled, y, feat_df, train_idx, val_idx, test_i
                        t_end - purge_bars)
 
     # Purge val tail: same contamination exists at the val/test boundary.
-    # The last `horizon` val labels use prices in the test window, so early
-    # stopping sees a tiny amount of test-window information.  Trimming the
-    # contaminated tail removes this bias.  Keep at least seq_len * 2 val bars.
     v_start, v_end = val_idx
     v_end_purged   = max(v_start + LSTM_PARAMS["sequence_length"] * 2,
                          v_end - purge_bars)
@@ -275,38 +279,49 @@ def run_fold(symbol, timeframe, X_scaled, y, feat_df, train_idx, val_idx, test_i
     if len(X_train) < LSTM_PARAMS["sequence_length"] * 3:
         return None
 
-    from models.ensemble import compute_signal_threshold
+    # ── Train trio ────────────────────────────────────────────────────────────
+    lstm_models  = train_ensemble(X_train, y_train, X_val, y_val,
+                                   symbol=f"{symbol}_{timeframe}",
+                                   n_models=N_MODELS,
+                                   feature_cols=feat_cols)
+    xgb_model    = train_xgb_model(X_train, y_train, X_val, y_val,
+                                    symbol=symbol, fold_idx=fold_idx)
+    cat_model    = train_catboost_model(X_train, y_train, X_val, y_val,
+                                         symbol=symbol, fold_idx=fold_idx)
 
-    models         = train_ensemble(X_train, y_train, X_val, y_val,
-                                    symbol=f"{symbol}_{timeframe}", n_models=N_MODELS)
-    proba, proba_std = predict_proba_ensemble(models, X_test, return_std=True)
+    # ── Val predictions — for threshold calibration and weight optimisation ──
+    lstm_val_p, proba_std_val = predict_proba_ensemble(lstm_models, X_val, return_std=True)
+    xgb_val_p  = predict_proba_xgb(xgb_model, X_val)
+    cat_val_p  = predict_proba_catboost(cat_model, X_val)
 
-    if proba is None or len(proba) == 0 or proba.shape[1] != 3:
-        logger.warning(f"  Fold skipped — predict_proba_ensemble returned empty array "
-                       f"(X_test={len(X_test)} rows)")
-        return None
+    # Optimise blend weights on val set
+    best_weights = optimise_trio_weights(lstm_val_p, xgb_val_p, cat_val_p, y_val)
+    logger.info(
+        f"  Trio weights: lstm={best_weights[0]:.3f} "
+        f"xgb={best_weights[1]:.3f} catboost={best_weights[2]:.3f}"
+    )
 
-    # Fix hindsight bias: compute threshold on val set, apply frozen to test set.
-    # Old approach computed the 85th-percentile threshold from the test bars
-    # themselves — the backtest knew which bars would be "most confident" in
-    # advance.  Now we use the val set to calibrate the threshold, then apply
-    # it blindly to the test set, matching what live deployment actually does.
-    #
-    # Per-timeframe TOP_PCT: 1d/12h models output compressed probabilities
-    # (near-uniform) because single-day prediction is noisy.  Using a higher
-    # TOP_PCT lowers the val-calibrated threshold so test signals aren't
-    # systematically blocked by a threshold set on a more confident val period.
-    _top_pct = TOP_PCT_TF.get(timeframe, TOP_PCT)
-    val_proba = predict_proba_ensemble(models, X_val)
-    val_threshold = compute_signal_threshold(val_proba, top_pct=_top_pct)
+    # Val threshold from blended val probabilities
+    val_blended   = blend_ensemble_trio(lstm_val_p, xgb_val_p, cat_val_p, best_weights)
+    _top_pct      = TOP_PCT_TF.get(timeframe, TOP_PCT)
+    val_threshold = compute_signal_threshold(val_blended, top_pct=_top_pct)
     logger.info(f"  Val-calibrated threshold [{timeframe}] (top {_top_pct:.0%}): {val_threshold:.4f}")
 
+    # ── Test predictions ──────────────────────────────────────────────────────
+    lstm_test_p, proba_std = predict_proba_ensemble(lstm_models, X_test, return_std=True)
+    xgb_test_p  = predict_proba_xgb(xgb_model, X_test)
+    cat_test_p  = predict_proba_catboost(cat_model, X_test)
+
+    if lstm_test_p is None or len(lstm_test_p) == 0 or lstm_test_p.shape[1] != 3:
+        logger.warning(f"  Fold skipped — LSTM returned empty array (X_test={len(X_test)} rows)")
+        return None
+
+    proba = blend_ensemble_trio(lstm_test_p, xgb_test_p, cat_test_p, best_weights)
     signals = generate_signals(proba, use_percentile=False, threshold=val_threshold)
 
-    # Ensemble disagreement filter — suppress signals where models disagree
+    # Ensemble disagreement filter — suppress signals where LSTM models disagree
     sig_arr = signals["signal"].copy()
     if proba_std is not None and len(proba_std) == len(sig_arr):
-        # Max std across all three classes for each bar
         max_std = proba_std.max(axis=1)
         suppressed = 0
         for i in range(len(sig_arr)):
@@ -317,6 +332,7 @@ def run_fold(symbol, timeframe, X_scaled, y, feat_df, train_idx, val_idx, test_i
             logger.info(f"  Disagreement filter: suppressed {suppressed} signals "
                         f"(std > {ENSEMBLE_DISAGREE_THRESHOLD})")
         signals["signal"] = sig_arr
+
     filtered = apply_filters(feat_test, signals, timeframe=timeframe)
     m        = BacktestEngine().run(feat_test, filtered, symbol=symbol, timeframe=timeframe)
 
@@ -456,7 +472,9 @@ def run_symbol(symbol: str, timeframe: str) -> dict | None:
                           train_idx=(0, train_end),
                           val_idx  =(train_end, val_end),
                           test_idx =(val_end, test_end),
-                          purge_bars=_horizon)
+                          purge_bars=_horizon,
+                          feat_cols=feat_cols,
+                          fold_idx=fold)
             if fr:
                 logger.info(f"  Fold {fold+1}/{effective_folds} [{fr['date_range']}]: "
                             f"net={fr['net']:+.1%} ann={fr['ann']:+.1%} "

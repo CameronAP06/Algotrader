@@ -66,29 +66,67 @@ XGB_PARAMS = {
 
 LSTM_PARAMS = {
     "sequence_length": 60,
-    "hidden_size":     192,   # was 128 → 256 → 192: larger than original but not
-                              # so large it overfits on ~700 training segments
+    "stream_hidden":   48,    # hidden units per multi-stream branch.  With ~6 feature
+                              # groups this gives 6×48=288 total merged hidden — more
+                              # capacity than the old single-stream 192 while keeping
+                              # each branch focused on one feature family.
+    "hidden_size":     192,   # fallback for single-stream mode (not used in multi-stream)
     "num_layers":      2,
     "dropout":         0.35,
-    "epochs":          200,   # high ceiling — early stopping controls actual runtime
+    "epochs":          200,
     "batch_size":      64,
-    "learning_rate":   0.001, # was 0.002 — 0.002 overshoot the minimum in 4-6 epochs
-                              # with only 3 batches/epoch (stride=15 problem)
-    "patience":        50,    # was 25 → model peaked at epoch 4-6, patience=25 forced
-                              # stop at epoch ~29. Now allows model 50 epochs to find
-                              # a better basin after each improvement stalls.
-    "training_stride": 4,     # was 15 → 187 segments (too few, caused 4-epoch overfit)
-                              # stride=4 → ~697 segments, 11 batches/epoch, model can
-                              # train meaningfully for 60-80 epochs before early stop.
-    "noise_sigma":          0.02,  # Gaussian noise added during training only
-    "lr_plateau_patience":  10,    # ReduceLROnPlateau: epochs without balanced_acc improvement
-                                   # before halving LR. Triggers at 10 / 20 / 30... epochs,
-                                   # always decreasing — never cycles back up like CosineAnnealingLR
-                                   # (which was rising after epoch 60 and corrupting late training).
-    "lr_plateau_factor":    0.5,   # LR multiplier on each plateau: 0.001→0.0005→0.00025→...
+    "learning_rate":   0.001,
+    "patience":        50,
+    "training_stride": 4,
+    "noise_sigma":          0.02,
+    "lr_plateau_patience":  10,
+    "lr_plateau_factor":    0.5,
 }
 
-ENSEMBLE_WEIGHTS = {"catboost": 0.40, "cnn": 0.35, "lstm": 0.25}
+# ── Tree model parameters (XGBoost + CatBoost) ───────────────────────────────
+# These are per-fold tabular models that complement the LSTM ensemble.
+# Key differences from the legacy XGB_PARAMS above:
+#   - More estimators with lower LR + early stopping on val set
+#   - Stronger regularisation (higher min_child_weight / l2_leaf_reg)
+#   - Conservative subsample/colsample to prevent feature memorisation
+#   - Class-weight handled explicitly in training code (not via params here)
+
+XGB_TREE_PARAMS = {
+    "objective":         "multi:softprob",
+    "num_class":         3,
+    "n_estimators":      800,   # high ceiling — early stopping fires around 200-400
+    "learning_rate":     0.02,
+    "max_depth":         5,     # shallow = less overfitting on small folds
+    "min_child_weight":  20,    # high = requires 20 samples to split (regularise)
+    "subsample":         0.7,
+    "colsample_bytree":  0.6,
+    "reg_alpha":         0.5,
+    "reg_lambda":        2.0,
+    "random_state":      42,
+    "n_jobs":            -1,
+    "verbosity":         0,
+    "eval_metric":       "mlogloss",
+    "early_stopping_rounds": 50,
+}
+
+CATBOOST_PARAMS = {
+    "loss_function":     "MultiClass",
+    "iterations":        800,
+    "learning_rate":     0.02,
+    "depth":             6,
+    "l2_leaf_reg":       5.0,
+    "auto_class_weights": "Balanced",  # handles ~50% neutral imbalance natively
+    "early_stopping_rounds": 50,
+    "verbose":           0,
+    "random_seed":       42,
+    "thread_count":      -1,
+}
+
+# Blend weights for the three-model ensemble (LSTM + XGB + CatBoost).
+# Starting point: equal weight — actual weights are optimised per fold on the
+# validation set via ensemble.optimise_trio_weights() and these are only the
+# fallback when optimisation fails or produces degenerate weights.
+ENSEMBLE_WEIGHTS = {"lstm": 0.34, "xgb": 0.33, "catboost": 0.33}
 
 # ── Backtesting ───────────────────────────────────────────────────────────────
 INITIAL_CAPITAL  = 10_000
