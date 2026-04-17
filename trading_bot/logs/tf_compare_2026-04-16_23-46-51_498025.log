@@ -1,0 +1,18 @@
+2026-04-16 23:46:51.512 | INFO     | __main__:main:884 - Using explicit symbol list: 6 symbols
+2026-04-16 23:46:51.513 | INFO     | __main__:main:984 - Running 12 combos with 1 parallel worker(s) across 1 GPU(s)
+2026-04-16 23:47:24.462 | INFO     | __main__:main:1020 - [1/12] XLM/USD 4h done
+2026-04-16 23:47:37.267 | INFO     | __main__:main:1020 - [2/12] XLM/USD 1d done
+2026-04-16 23:47:59.419 | INFO     | __main__:main:1020 - [3/12] SNX/USD 4h done
+2026-04-16 23:48:11.662 | INFO     | __main__:main:1020 - [4/12] SNX/USD 1d done
+2026-04-16 23:48:29.430 | INFO     | __main__:main:1020 - [5/12] INJ/USD 4h done
+2026-04-16 23:48:44.216 | INFO     | __main__:main:1020 - [6/12] INJ/USD 1d done
+2026-04-16 23:49:07.693 | INFO     | __main__:main:1020 - [7/12] UNI/USD 4h done
+2026-04-16 23:49:25.720 | INFO     | __main__:main:1020 - [8/12] UNI/USD 1d done
+2026-04-16 23:49:47.879 | INFO     | __main__:main:1020 - [9/12] SOL/USD 4h done
+2026-04-16 23:49:59.960 | INFO     | __main__:main:1020 - [10/12] SOL/USD 1d done
+2026-04-16 23:50:16.045 | INFO     | __main__:main:1020 - [11/12] NEAR/USD 4h done
+2026-04-16 23:50:25.557 | INFO     | __main__:main:1020 - [12/12] NEAR/USD 1d done
+2026-04-16 23:50:26.168 | INFO     | src.notifier:send:15 - [Telegram disabled] ✅ <b>Scan Complete</b> (0.1h)
+Combos: 12 | Failed: 0 | Skipped: 0
+<b>Strong: 0</b> | Good: 0
+Output: expanded_scan_20260416_234651.csv
