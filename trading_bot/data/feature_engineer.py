@@ -580,9 +580,17 @@ def _cache_is_valid(symbol: str, timeframe: str, raw_df_len: int,
         raw_path  = Path(DATA_DIR) / f"{safe_name}_{timeframe}.csv"
         if raw_path.exists() and cache.stat().st_mtime < raw_path.stat().st_mtime:
             return False   # raw data is newer → cache is stale
+        # Validate that the cache was built from the same number of input bars.
+        # If HISTORY_CAPS changed, raw_df_len will differ and we must rebuild.
         cached = pd.read_csv(cache, nrows=5)
         if cached.empty:
             return False
+        # Count cached rows cheaply — reject if cache is materially shorter than
+        # current raw data, which means HISTORY_CAPS was raised and we must rebuild.
+        with open(cache, "rb") as fh:
+            cached_len = sum(1 for _ in fh) - 1  # subtract header line
+        if cached_len < raw_df_len * 0.70:
+            return False   # cap was raised — rebuild
         return True
     except Exception:
         return False
